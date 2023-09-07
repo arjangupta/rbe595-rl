@@ -73,7 +73,7 @@ class KArmedBandit:
 
 class ActionValueMethod:
     def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
-        self.take_action = bandit
+        self.bandit = bandit
         self.epsilon = epsilon
         self.num_steps = num_steps
         self.estimated_reward = np.zeros(10) #Q
@@ -86,11 +86,11 @@ class ActionValueMethod:
             action = 0
 
             if rand <= self.epsilon:
-                action = np.random.randint(0,9)
+                action = np.random.randint(0, 9)
             else:
                 action = self.estimated_reward.argmax()
 
-            reward = self.take_action(action)
+            reward = self.bandit.take_action(action, n)
 
             self.number_of_times_action_taken[action] = self.number_of_times_action_taken[action] + 1
 
