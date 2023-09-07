@@ -45,10 +45,22 @@ class KArmedBandit:
             self.distributions[i] += textbook_shifts[i]
 
     def plot_distributions(self):
-        """Plot the distributions of each bandit"""
+        """Plot the distributions of each bandit:
+           - Plot each bandit's distribution in a subplot
+           - Label each subplot with the bandit's number
+           - Mark the mean of each distribution with a red vertical line
+           """
+        fig, axs = plt.subplots(2, 5, figsize=(15, 8))
+        fig.suptitle("Figure 2.2: Ten-armed testbed")
         for i in range(self.num_arms):
-            plt.hist(self.distributions[i], bins=100)
-            plt.show()
+            row = i // 5
+            col = i % 5
+            axs[row, col].hist(self.distributions[i][0], bins=50)
+            axs[row, col].axvline(np.mean(self.distributions[i]), color='r')
+            axs[row, col].set_title(f"Bandit {i+1}")
+            axs[row, col].set_xlabel("Reward distribution")
+            axs[row, col].set_ylabel("Frequency")
+        plt.show()
 
 if __name__ == "__main__":
     # Create a 10-armed bandit
