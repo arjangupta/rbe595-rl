@@ -102,12 +102,18 @@ class ActionValueMethod:
             # Record the current running average
             self.running_average[n] = np.average(self.estimated_reward)
 
-    def plot(self):
-        plt.plot(self.running_average)
-        plt.xlabel("Steps")
-        plt.ylabel("Estimated Reward")
-        plt.title("Estimated Reward vs Steps")
-        plt.show()
+def plot(running_average1, running_average2, running_average3):
+    """Plot three graphs with various epsilon values"""
+
+    plt.plot(running_average1)
+    plt.plot(running_average2)
+    plt.plot(running_average3)
+    plt.xlabel("Steps")
+    plt.ylabel("Estimated Reward")
+    plt.title("Estimated Reward vs Steps")
+    # Add legend
+    plt.legend(["Epsilon = 0", "Epsilon = 0.1", "Epsilon = 0.01"])
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -116,6 +122,10 @@ if __name__ == "__main__":
     # Create a 10-armed bandit
     bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
     # Run the action-value method with epsilon = 0 (greedy only)
-    action_value_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
-    action_value_method.run()
-    action_value_method.plot()
+    greedy_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
+    greedy_method.run()
+    epsilon_greedy1 = ActionValueMethod(bandit, epsilon=0.1, num_steps=num_steps)
+    epsilon_greedy1.run()
+    epsilon_greedy2 = ActionValueMethod(bandit, epsilon=0.01, num_steps=num_steps)
+    epsilon_greedy2.run()
+    plot(greedy_method.running_average, epsilon_greedy1.running_average, epsilon_greedy2.running_average)
