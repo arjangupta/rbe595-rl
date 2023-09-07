@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 class KArmedBandit:
     def __init__(self, num_arms=10, show_plots=True, num_steps=1000):
@@ -68,11 +69,32 @@ class KArmedBandit:
 
 class ActionValueMethod:
     def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
-        self.bandit = bandit
+        self.take_action = bandit
         self.epsilon = epsilon
         self.num_steps = num_steps
-    def run():
-        pass
+        self.estimated_reward = np.zeros(10) #Q
+        self.number_of_times_action_taken = np.zeros(10) #N
+
+    def run(self):
+
+        for n in range(num_steps):
+            rand = np.random.uniform(0, 1)
+            action = 0
+
+            if rand <= self.epsilon:
+                action = np.random.randint(0,9)
+            else:
+                action = self.estimated_reward.argmax()
+
+            reward = self.take_action(action)
+
+            self.number_of_times_action_taken[action] = self.number_of_times_action_taken[action] + 1
+
+            previous_reward = self.estimated_reward[action]
+
+            self.estimated_reward[action] = previous_reward + (1/self.number_of_times_action_taken[action])*(reward - previous_reward)
+
+
 
 if __name__ == "__main__":
     # Set the total steps for each run
