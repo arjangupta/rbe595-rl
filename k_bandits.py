@@ -21,7 +21,7 @@ class KArmedBandit:
 
     def print_distributions(self):
         """Show means and variances of each bandit"""
-        print("---- True values of each action ----")
+        print("---- True values of each action/arm ----")
         for i in range(self.num_arms):
             mean = np.mean(self.distributions[i])
             mean_str = ""
@@ -33,9 +33,9 @@ class KArmedBandit:
             # Format variance to be 7 characters long
             variance_str = str(np.var(self.distributions[i]))[:7]
             if i < 9:
-                print(f"Bandit {i+1}:  Mean = {mean_str}, Variance = {variance_str}")
+                print(f"Arm {i+1}:  Mean = {mean_str}, Variance = {variance_str}")
             else:
-                print(f"Bandit {i+1}: Mean = {mean_str}, Variance = {variance_str}")
+                print(f"Arm {i+1}: Mean = {mean_str}, Variance = {variance_str}")
 
     def shift_distributions(self):
         """Shift each bandit's distribution by roughly the amounts shown in the textbook."""
@@ -51,12 +51,15 @@ class KArmedBandit:
            - Mark the mean of each distribution with a red vertical line
            """
         fig, axs = plt.subplots(2, 5, figsize=(15, 8))
-        fig.suptitle("Figure 2.2: Ten-armed testbed")
+        fig.suptitle("True distributions of each arm (red line is mean)")
         for i in range(self.num_arms):
             row = i // 5
             col = i % 5
             axs[row, col].hist(self.distributions[i][0], bins=50)
+            # Show red line and show its value in the x-axis
             axs[row, col].axvline(np.mean(self.distributions[i]), color='r')
+            axs[row, col].text(np.mean(self.distributions[i]), 0, f"{np.mean(self.distributions[i]):.2f}", color='r')
+            # Set title, x-axis label, and y-axis label
             axs[row, col].set_title(f"Bandit {i+1}")
             axs[row, col].set_xlabel("Reward distribution")
             axs[row, col].set_ylabel("Frequency")
