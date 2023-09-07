@@ -78,7 +78,8 @@ class ActionValueMethod:
         self.num_steps = num_steps
         self.estimated_reward = np.zeros(10) #Q
         self.number_of_times_action_taken = np.zeros(10) #N
-        self.running_average = np.zeros(num_steps)
+        self.average_rewards = np.zeros(num_steps)
+        self.current_reward_sum = 0
 
     def run(self):
 
@@ -99,15 +100,18 @@ class ActionValueMethod:
 
             self.estimated_reward[action] = previous_reward + (1/self.number_of_times_action_taken[action])*(reward - previous_reward)
 
-            # Record the current running average
-            self.running_average[n] = np.average(self.estimated_reward)
+            # Update the current reward sum
+            self.current_reward_sum = self.current_reward_sum + reward
 
-def plot(running_average1, running_average2, running_average3):
+            # Record the current running average
+            self.average_rewards[n] = self.current_reward_sum / (n + 1)
+
+def plot(average_rewards1, average_rewards2, average_rewards3):
     """Plot three graphs with various epsilon values"""
 
-    plt.plot(running_average1)
-    plt.plot(running_average2)
-    plt.plot(running_average3)
+    plt.plot(average_rewards1)
+    plt.plot(average_rewards2)
+    plt.plot(average_rewards3)
     plt.xlabel("Steps")
     plt.ylabel("Estimated Reward")
     plt.title("Estimated Reward vs Steps")
@@ -129,4 +133,4 @@ if __name__ == "__main__":
     epsilon_greedy1.run()
     epsilon_greedy2 = ActionValueMethod(bandit, epsilon=0.01, num_steps=num_steps)
     epsilon_greedy2.run()
-    plot(greedy_method.running_average, epsilon_greedy1.running_average, epsilon_greedy2.running_average)
+    plot(greedy_method.average_rewards, epsilon_greedy1.average_rewards, epsilon_greedy2.average_rewards)
