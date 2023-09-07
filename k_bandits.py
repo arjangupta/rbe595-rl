@@ -66,6 +66,10 @@ class KArmedBandit:
             axs[row, col].set_xlabel("Reward distribution")
             axs[row, col].set_ylabel("Frequency")
         plt.show()
+    
+    def take_action(self, action, current_step):
+        """Take an action and return a reward"""
+        return self.distributions[action][0][current_step]
 
 class ActionValueMethod:
     def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
