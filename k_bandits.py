@@ -5,15 +5,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class KArmedBandit:
-    def __init__(self, num_arms=10, show_plots=True):
+    def __init__(self, num_arms=10, show_plots=True, num_steps=1000):
         self.num_arms = num_arms
-        self.create_distributions()
+        self.create_distributions(size=num_steps)
         self.shift_distributions()
         self.print_distributions()
         if show_plots:
             self.plot_distributions()
 
-    def create_distributions(self, size=1000):
+    def create_distributions(self, size):
         """Create k (default 10) stationary probability distributions (default size 1000)
            with mean 0 and variance 1. These represent the true values of each action."""
         self.distributions = []
@@ -66,6 +66,16 @@ class KArmedBandit:
             axs[row, col].set_ylabel("Frequency")
         plt.show()
 
+class ActionValueMethod:
+    def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
+        self.bandit = bandit
+        self.epsilon = epsilon
+        self.num_steps = num_steps
+    def run():
+        pass
+
 if __name__ == "__main__":
+    # Set the total steps for each run
+    num_steps = 1000
     # Create a 10-armed bandit
-    bandit = KArmedBandit(num_arms=10, show_plots=False)
+    bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
