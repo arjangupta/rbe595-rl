@@ -78,6 +78,7 @@ class ActionValueMethod:
         self.num_steps = num_steps
         self.estimated_reward = np.zeros(10) #Q
         self.number_of_times_action_taken = np.zeros(10) #N
+        self.running_average = np.zeros(num_steps) #R
 
     def run(self):
 
@@ -98,6 +99,15 @@ class ActionValueMethod:
 
             self.estimated_reward[action] = previous_reward + (1/self.number_of_times_action_taken[action])*(reward - previous_reward)
 
+            # Record the current running average
+            self.running_average[n] = np.average(self.estimated_reward)
+
+    def plot(self):
+        plt.plot(self.running_average)
+        plt.xlabel("Steps")
+        plt.ylabel("Estimated Reward")
+        plt.title("Estimated Reward vs Steps")
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -105,3 +115,7 @@ if __name__ == "__main__":
     num_steps = 1000
     # Create a 10-armed bandit
     bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
+    # Run the action-value method with epsilon = 0 (greedy only)
+    action_value_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
+    action_value_method.run()
+    action_value_method.plot()
