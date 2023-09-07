@@ -78,7 +78,7 @@ class ActionValueMethod:
         self.num_steps = num_steps
         self.estimated_reward = np.zeros(10) #Q
         self.number_of_times_action_taken = np.zeros(10) #N
-        self.running_average = np.zeros(num_steps) #R
+        self.running_average = np.zeros(num_steps)
 
     def run(self):
 
@@ -87,7 +87,7 @@ class ActionValueMethod:
             action = 0
 
             if rand <= self.epsilon:
-                action = np.random.randint(0, 9)
+                action = np.random.randint(0, 10)
             else:
                 action = self.estimated_reward.argmax()
 
@@ -124,6 +124,7 @@ if __name__ == "__main__":
     # Run the action-value method with epsilon = 0 (greedy only)
     greedy_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
     greedy_method.run()
+    # Run the action-value method with epsilon = 0.1 and epsilon = 0.01
     epsilon_greedy1 = ActionValueMethod(bandit, epsilon=0.1, num_steps=num_steps)
     epsilon_greedy1.run()
     epsilon_greedy2 = ActionValueMethod(bandit, epsilon=0.01, num_steps=num_steps)
