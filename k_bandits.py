@@ -3,9 +3,24 @@
 
 import numpy as np
 
-# First we set up 10 probability distributions for the 10 bandits, such that
-# the mean of each distribution is a random number between 0 and 1. This must
-# be a gaussian distribution, so we use np.random.randn to generate the
-# distributions.
-bandit_means = np.random.randn(10)
-print(bandit_means)
+def bandit_distributions(k=10, size=1000):
+    # Create k (default 10) stationary probability distributions (default size 1000) with mean 0 and variance 1.
+    # These represent the true values of each action.
+    bandits = []
+    for i in range(10):
+        bandits.append(np.random.normal(0, 1, (1,size)))
+    # Show means and variances of each bandit
+    for i in range(10):
+        mean = np.mean(bandits[i])
+        mean_str = ""
+        # Format mean to be 7 characters long
+        if mean < 0:
+            mean_str = str(mean)[:8]
+        else:
+            mean_str = "+" + str(mean)[:7]
+        # Format variance to be 7 characters long
+        variance_str = str(np.var(bandits[i]))[:7]
+        print(f"Bandit {i}: Mean = {mean_str}, Variance = {variance_str}")
+
+if __name__ == "__main__":
+    bandit_distributions()
