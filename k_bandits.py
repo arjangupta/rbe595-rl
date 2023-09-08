@@ -70,6 +70,15 @@ class KArmedBandit:
     def take_action(self, action, current_step):
         """Take an action and return a reward"""
         return self.distributions[action][0][current_step]
+    
+    def is_optimal_action(self, action, current_step):
+        """Return whether the given action is the optimal action for the current step"""
+        # Find the optimal action for this step
+        optimal_action = 0
+        for i in range(self.num_arms):
+            if self.distributions[i][0][current_step] > self.distributions[optimal_action][0][current_step]:
+                optimal_action = i
+        return action == optimal_action
 
 class ActionValueMethod:
     def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
@@ -79,10 +88,12 @@ class ActionValueMethod:
         self.estimated_reward = np.zeros(10) # this is Q as described in the textbook
         self.number_of_times_action_taken = np.zeros(10) # this is N as described in the textbook
         self.average_rewards = np.zeros(num_steps)
+        self.optimal_actions = np.zeros(num_steps)
         self.current_reward_sum = 0
 
     def run(self):
-        """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook."""
+        """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook.
+           Returns the average reward for each step as well as the optimal actions for each run"""
         for n in range(self.num_steps):
             exploration_decision = np.random.uniform(0, 1)
             action = 0
@@ -109,7 +120,11 @@ class ActionValueMethod:
             # Record the current running average
             self.average_rewards[n] = self.current_reward_sum / (n + 1)
 
-        return self.average_rewards
+            # Record whether the action taken was optimal
+            is_optimal_action = self.bandit.is_optimal_action(action, n)
+            self.optimal_actions[n] = 1 if is_optimal_action else 0
+
+        return self.average_rewards, self.optimal_actions
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
     """Plot three graphs of average rewards with various epsilon values"""
@@ -123,6 +138,17 @@ def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
     plt.legend(["Epsilon = 0", "Epsilon = 0.1", "Epsilon = 0.01"])
     plt.show()
 
+def plot_graph2(optimal_actions1, optimal_actions2, optimal_actions3, num_runs):
+    """Plot three graphs of optimal actions with various epsilon values"""
+    plt.plot(optimal_actions1)
+    plt.plot(optimal_actions2)
+    plt.plot(optimal_actions3)
+    plt.xlabel("Steps")
+    plt.ylabel(f"Optimal action over {num_runs} runs")
+    plt.title("Optimal Action vs Steps")
+    # Add legend
+    plt.legend(["Epsilon = 0", "Epsilon = 0.1", "Epsilon = 0.01"])
+    plt.show()
 
 def get_graphs(num_runs = 2000):
     """Obtain the two graphs for the exercise"""
@@ -132,21 +158,37 @@ def get_graphs(num_runs = 2000):
     greedy_rewards = np.zeros(num_steps)
     epsilon_greedy_1_rewards = np.zeros(num_steps)
     epsilon_greedy_2_rewards = np.zeros(num_steps)
+    # Declare arrays to store the optimal actions for each method
+    greedy_optimal_actions = np.zeros(num_steps)
+    epsilon_greedy_1_optimal_actions = np.zeros(num_steps)
+    epsilon_greedy_2_optimal_actions = np.zeros(num_steps)
     for run in range(num_runs):
         print(f"Performing run {run+1} of {num_runs}...")
         # Create a 10-armed bandit
         bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
+
         # Run the action-value method with epsilon = 0 (greedy only)
         greedy_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
-        greedy_rewards = np.add(greedy_rewards, greedy_method.run())
-        # Run the action-value method with epsilon = 0.1 and epsilon = 0.01
+        greedy_run_results = greedy_method.run()
+        greedy_rewards = np.add(greedy_rewards, greedy_run_results[0])
+        greedy_optimal_actions = np.add(greedy_optimal_actions, greedy_run_results[1])
+
+        # Run the action-value method with epsilon = 0.1
         epsilon_greedy1 = ActionValueMethod(bandit, epsilon=0.1, num_steps=num_steps)
-        epsilon_greedy_1_rewards = np.add(epsilon_greedy_1_rewards, epsilon_greedy1.run())
+        epsilon_greedy_1_run_results = epsilon_greedy1.run()
+        epsilon_greedy_1_rewards = np.add(epsilon_greedy_1_rewards, epsilon_greedy_1_run_results[0])
+        epsilon_greedy_1_optimal_actions = np.add(epsilon_greedy_1_optimal_actions, epsilon_greedy_1_run_results[1])
+
+        # Run the action-value method with epsilon = 0.01
         epsilon_greedy2 = ActionValueMethod(bandit, epsilon=0.01, num_steps=num_steps)
-        epsilon_greedy_2_rewards = np.add(epsilon_greedy_2_rewards, epsilon_greedy2.run())
+        epsilon_greedy_2_run_results = epsilon_greedy2.run()
+        epsilon_greedy_2_rewards = np.add(epsilon_greedy_2_rewards, epsilon_greedy_2_run_results[0])
+        epsilon_greedy_2_optimal_actions = np.add(epsilon_greedy_2_optimal_actions, epsilon_greedy_2_run_results[1])
     print("Done all runs!")
     # Plot the average rewards for each method
     plot_graph1(greedy_rewards/num_runs, epsilon_greedy_1_rewards/num_runs, epsilon_greedy_2_rewards/num_runs, num_runs)
+    # Plot the optimal actions for each method
+    plot_graph2(greedy_optimal_actions/num_runs, epsilon_greedy_1_optimal_actions/num_runs, epsilon_greedy_2_optimal_actions/num_runs, num_runs)
 
 if __name__ == "__main__":
     # If user input was given, use that as the number of runs
