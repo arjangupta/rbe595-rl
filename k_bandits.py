@@ -1,5 +1,6 @@
 # Week 2 Programming Exercise
 # Write a program to generate figure 2.2 of the textbook
+# Authors: Taylor Bergeron and Arjan Gupta
 
 import numpy as np
 import matplotlib.pyplot as plt
