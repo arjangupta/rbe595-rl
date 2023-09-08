@@ -76,31 +76,34 @@ class ActionValueMethod:
         self.bandit = bandit
         self.epsilon = epsilon
         self.num_steps = num_steps
-        self.estimated_reward = np.zeros(10) #Q
-        self.number_of_times_action_taken = np.zeros(10) #N
+        self.estimated_reward = np.zeros(10) # this is Q as described in the textbook
+        self.number_of_times_action_taken = np.zeros(10) # this is N as described in the textbook
         self.average_rewards = np.zeros(num_steps)
         self.current_reward_sum = 0
 
     def run(self):
-
+        """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook."""
         for n in range(num_steps):
-            rand = np.random.uniform(0, 1)
+            exploration_decision = np.random.uniform(0, 1)
             action = 0
-
-            if rand <= self.epsilon:
+            # Based on the epsilon value, either take a random action (which is exploration)
+            # or take the action with the highest estimated reward (which is the greedy strategy)
+            if exploration_decision <= self.epsilon:
                 action = np.random.randint(0, 10)
             else:
                 action = self.estimated_reward.argmax()
 
+            # Take the action and get the reward (this is R as described in the textbook)
             reward = self.bandit.take_action(action, n)
 
+            # Increment the number of times this action was taken
             self.number_of_times_action_taken[action] = self.number_of_times_action_taken[action] + 1
 
+            # Update the estimated reward for this action
             previous_reward = self.estimated_reward[action]
-
             self.estimated_reward[action] = previous_reward + (1/self.number_of_times_action_taken[action])*(reward - previous_reward)
 
-            # Update the current reward sum
+            # Update the current reward total sum
             self.current_reward_sum = self.current_reward_sum + reward
 
             # Record the current running average
