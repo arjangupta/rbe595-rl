@@ -3,7 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import random
+import sys
 
 class KArmedBandit:
     def __init__(self, num_arms=10, show_plots=True, num_steps=1000):
@@ -83,7 +83,7 @@ class ActionValueMethod:
 
     def run(self):
         """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook."""
-        for n in range(num_steps):
+        for n in range(self.num_steps):
             exploration_decision = np.random.uniform(0, 1)
             action = 0
             # Based on the epsilon value, either take a random action (which is exploration)
@@ -111,8 +111,8 @@ class ActionValueMethod:
 
         return self.average_rewards
 
-def plot(average_rewards1, average_rewards2, average_rewards3, num_runs):
-    """Plot three graphs with various epsilon values"""
+def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
+    """Plot three graphs of average rewards with various epsilon values"""
     plt.plot(average_rewards1)
     plt.plot(average_rewards2)
     plt.plot(average_rewards3)
@@ -124,11 +124,10 @@ def plot(average_rewards1, average_rewards2, average_rewards3, num_runs):
     plt.show()
 
 
-if __name__ == "__main__":
+def get_graphs(num_runs = 2000):
+    """Obtain the two graphs for the exercise"""
     # Set the total steps for each run
     num_steps = 1000
-    # Set the number of runs
-    num_runs = 2000
     # Declare arrays to store the average rewards for each method
     greedy_rewards = np.zeros(num_steps)
     epsilon_greedy_1_rewards = np.zeros(num_steps)
@@ -147,6 +146,14 @@ if __name__ == "__main__":
         epsilon_greedy_2_rewards = np.add(epsilon_greedy_2_rewards, epsilon_greedy2.run())
     print("Done all runs!")
     # Plot the average rewards for each method
-    plot(greedy_rewards/num_runs, epsilon_greedy_1_rewards/num_runs, epsilon_greedy_2_rewards/num_runs, num_runs)
+    plot_graph1(greedy_rewards/num_runs, epsilon_greedy_1_rewards/num_runs, epsilon_greedy_2_rewards/num_runs, num_runs)
+
+if __name__ == "__main__":
+    # If user input was given, use that as the number of runs
+    if len(sys.argv) > 1:
+        num_runs = int(sys.argv[1])
+        get_graphs(num_runs)
+    else:
+        get_graphs()
 
 
