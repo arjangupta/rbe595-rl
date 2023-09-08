@@ -111,15 +111,14 @@ class ActionValueMethod:
 
         return self.average_rewards
 
-def plot(average_rewards1, average_rewards2, average_rewards3):
+def plot(average_rewards1, average_rewards2, average_rewards3, num_runs):
     """Plot three graphs with various epsilon values"""
-
     plt.plot(average_rewards1)
     plt.plot(average_rewards2)
     plt.plot(average_rewards3)
     plt.xlabel("Steps")
-    plt.ylabel("Estimated Reward")
-    plt.title("Estimated Reward vs Steps")
+    plt.ylabel(f"Average reward over {num_runs} runs")
+    plt.title("Average Reward vs Steps")
     # Add legend
     plt.legend(["Epsilon = 0", "Epsilon = 0.1", "Epsilon = 0.01"])
     plt.show()
@@ -148,6 +147,6 @@ if __name__ == "__main__":
         epsilon_greedy_2_rewards = np.add(epsilon_greedy_2_rewards, epsilon_greedy2.run())
     print("Done all runs!")
     # Plot the average rewards for each method
-    plot(greedy_rewards/num_runs, epsilon_greedy_1_rewards/num_runs, epsilon_greedy_2_rewards/num_runs)
+    plot(greedy_rewards/num_runs, epsilon_greedy_1_rewards/num_runs, epsilon_greedy_2_rewards/num_runs, num_runs)
 
 
