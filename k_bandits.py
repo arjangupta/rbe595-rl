@@ -12,8 +12,8 @@ class KArmedBandit:
         self.num_arms = num_arms
         self.create_distributions(size=num_steps)
         self.shift_distributions()
+        self.print_distributions()
         if show_plots:
-            self.print_distributions()
             self.plot_distributions()
 
     def create_distributions(self, size):
@@ -21,7 +21,8 @@ class KArmedBandit:
            with mean 0 and variance 1. These represent the true values of each action."""
         self.distributions = []
         for i in range(self.num_arms):
-            self.distributions.append(np.random.normal(0, 1, (1,size))) # this is a Gaussian distribution
+            # For each arm generate a normal distribution with mean 0 and variance 1
+            self.distributions.append(np.random.normal(0, 1, size))
 
     def print_distributions(self):
         """Show means and variances of each bandit"""
@@ -71,18 +72,18 @@ class KArmedBandit:
     
     def take_action(self, action, current_step):
         """Take an action and return a reward"""
-        return self.distributions[action][0][current_step]
+        return self.distributions[action][current_step]
     
     def is_optimal_action(self, action, current_step):
         """Return whether the given action is the optimal action for the current step"""
         # Find the optimal action for this step
         optimal_action = 0
         for i in range(self.num_arms):
-            if self.distributions[i][0][current_step] > self.distributions[optimal_action][0][current_step]:
+            if self.distributions[i][current_step] > self.distributions[optimal_action][current_step]:
                 optimal_action = i
         if action == optimal_action:
             return True
-        elif self.distributions[action][0][current_step] == self.distributions[optimal_action][0][current_step]:
+        elif self.distributions[action][current_step] == self.distributions[optimal_action][current_step]:
             # If the action value taken is the same as the optimal action value, return true
             return True
         else:
