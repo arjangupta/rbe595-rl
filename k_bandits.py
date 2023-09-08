@@ -106,6 +106,8 @@ class ActionValueMethod:
             # Record the current running average
             self.average_rewards[n] = self.current_reward_sum / (n + 1)
 
+        return self.average_rewards
+
 def plot(average_rewards1, average_rewards2, average_rewards3):
     """Plot three graphs with various epsilon values"""
 
@@ -123,14 +125,23 @@ def plot(average_rewards1, average_rewards2, average_rewards3):
 if __name__ == "__main__":
     # Set the total steps for each run
     num_steps = 1000
-    # Create a 10-armed bandit
-    bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
+    num_runs = 2000
     # Run the action-value method with epsilon = 0 (greedy only)
-    greedy_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
-    greedy_method.run()
-    # Run the action-value method with epsilon = 0.1 and epsilon = 0.01
-    epsilon_greedy1 = ActionValueMethod(bandit, epsilon=0.1, num_steps=num_steps)
-    epsilon_greedy1.run()
-    epsilon_greedy2 = ActionValueMethod(bandit, epsilon=0.01, num_steps=num_steps)
-    epsilon_greedy2.run()
-    plot(greedy_method.average_rewards, epsilon_greedy1.average_rewards, epsilon_greedy2.average_rewards)
+    greedy_average_rewards = np.zeros(num_steps)
+    epsilon_greedy_1_rewards = np.zeros(num_steps)
+    epsilon_greedy_2_rewards = np.zeros(num_steps)
+    for run in range(num_runs):
+
+        # Create a 10-armed bandit
+        bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
+        greedy_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
+        greedy_average_rewards = np.add(greedy_average_rewards, greedy_method.run())
+        # Run the action-value method with epsilon = 0.1 and epsilon = 0.01
+        epsilon_greedy1 = ActionValueMethod(bandit, epsilon=0.1, num_steps=num_steps)
+        epsilon_greedy_1_rewards = np.add(epsilon_greedy_1_rewards, epsilon_greedy1.run())
+        epsilon_greedy2 = ActionValueMethod(bandit, epsilon=0.01, num_steps=num_steps)
+        epsilon_greedy_2_rewards = np.add(epsilon_greedy_2_rewards, epsilon_greedy2.run())
+
+    plot(greedy_average_rewards/num_runs, epsilon_greedy_1_rewards/num_runs, epsilon_greedy_2_rewards/num_runs)
+
+
