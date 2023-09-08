@@ -21,7 +21,7 @@ class KArmedBandit:
            with mean 0 and variance 1. These represent the true values of each action."""
         self.distributions = []
         for i in range(self.num_arms):
-            # For each arm generate a normal distribution with mean 0 and variance 1
+            # For each arm generate a normal distribution with mean 0 and variance 1 (std dev 1)
             self.distributions.append(np.random.normal(0, 1, size))
 
     def print_distributions(self):
