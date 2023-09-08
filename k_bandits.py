@@ -150,6 +150,8 @@ def plot_graph2(optimal_actions1, optimal_actions2, optimal_actions3, num_runs):
     plt.title("Optimal Action vs Steps")
     # Add legend
     plt.legend(["Epsilon = 0", "Epsilon = 0.1", "Epsilon = 0.01"])
+    # Have y-axis show as percentage
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}%".format(int(x * 100))))
     plt.show()
 
 def get_graphs(num_runs = 2000):
