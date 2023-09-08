@@ -1,6 +1,7 @@
+# Authors: Taylor Bergeron and Arjan Gupta
+# RBE 595 Reinforcement Learning
 # Week 2 Programming Exercise
 # Write a program to generate figure 2.2 of the textbook
-# Authors: Taylor Bergeron and Arjan Gupta
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -129,9 +130,9 @@ class ActionValueMethod:
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
     """Plot three graphs of average rewards with various epsilon values"""
-    plt.plot(average_rewards1)
-    plt.plot(average_rewards2)
-    plt.plot(average_rewards3)
+    plt.plot(average_rewards1, color='green')
+    plt.plot(average_rewards2, color='blue')
+    plt.plot(average_rewards3, color='red')
     plt.xlabel("Steps")
     plt.ylabel(f"Average reward over {num_runs} runs")
     plt.title("Average Reward vs Steps")
@@ -141,9 +142,9 @@ def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
 
 def plot_graph2(optimal_actions1, optimal_actions2, optimal_actions3, num_runs):
     """Plot three graphs of optimal actions with various epsilon values"""
-    plt.plot(optimal_actions1)
-    plt.plot(optimal_actions2)
-    plt.plot(optimal_actions3)
+    plt.plot(optimal_actions1, color='green')
+    plt.plot(optimal_actions2, color='blue')
+    plt.plot(optimal_actions3, color='red')
     plt.xlabel("Steps")
     plt.ylabel(f"Optimal action over {num_runs} runs")
     plt.title("Optimal Action vs Steps")
@@ -153,6 +154,7 @@ def plot_graph2(optimal_actions1, optimal_actions2, optimal_actions3, num_runs):
 
 def get_graphs(num_runs = 2000):
     """Obtain the two graphs for the exercise"""
+
     # Set the total steps for each run
     num_steps = 1000
     # Declare arrays to store the average rewards for each method
@@ -163,6 +165,8 @@ def get_graphs(num_runs = 2000):
     greedy_optimal_actions = np.zeros(num_steps)
     epsilon_greedy_1_optimal_actions = np.zeros(num_steps)
     epsilon_greedy_2_optimal_actions = np.zeros(num_steps)
+
+    # Perform the given number of runs
     for run in range(num_runs):
         print(f"Performing run {run+1} of {num_runs}...")
         # Create a 10-armed bandit
