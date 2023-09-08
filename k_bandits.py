@@ -80,7 +80,13 @@ class KArmedBandit:
         for i in range(self.num_arms):
             if self.distributions[i][0][current_step] > self.distributions[optimal_action][0][current_step]:
                 optimal_action = i
-        return action == optimal_action
+        if action == optimal_action:
+            return True
+        elif self.distributions[action][0][current_step] == self.distributions[optimal_action][0][current_step]:
+            # If the action value taken is the same as the optimal action value, return true
+            return True
+        else:
+            return False
 
 class ActionValueMethod:
     def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
