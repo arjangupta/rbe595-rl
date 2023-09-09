@@ -12,8 +12,8 @@ class KArmedBandit:
         self.num_arms = num_arms
         self.create_distributions(size=num_steps)
         self.shift_distributions()
-        self.print_distributions()
         if show_plots:
+            self.print_distributions()
             self.plot_distributions()
 
     def create_distributions(self, size):
