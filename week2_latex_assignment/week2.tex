@@ -133,51 +133,38 @@
 
 \maketitle
 
-\nobreak\extramarks{Problem 4.6}{}\nobreak{}
+\nobreak\extramarks{Problem 1}{}\nobreak{}
 
 \pagebreak
 
-\begin{homeworkProblem}[Problem 4.6]
-    Given \(R = R_{x,\theta}R_{y,\phi}\), compute \(\pderivcomp{R}{\phi}\).
-    Evaluate \(\pderivcomp{R}{\phi}\) at $\theta = \frac{\pi}{2}$, $\phi = \frac{\pi}{2}$.
-    First parametrically compute, then evaluate by plugging the values in. 
+\begin{homeworkProblem}[Problem 1]
+    What is the benefit of incremental update for action-value function, versus non-incremental?
 
-    \subsection{Solution}
+    \subsection{Answer}
 
+    The non-incremental implementation of the action-value function requires that we store all of the
+    rewards that have been seen so far in each time-step. The formula for this would be,
     \[
-        \pderiv{R_{x,\theta}R_{y,\phi}}{\phi} = R_{x,\theta}\pderiv{R_{y,\phi}}{\phi}
+        Q_n = \frac{R_1 + R_2 + \dots + R_{n-1}}{n - 1}
     \]
-    Using the the fact that \(\deriv{R_{y,\theta}}{\theta} = S(j)R_{y,\theta}\),
-    \begin{align*}
-        R_{x,\theta}\pderiv{R_{y,\phi}}{\phi} =
-        R_{x,\theta}S(j)R_{y,\phi}
-        &=
-        \begin{bmatrix}
-            1 & 0 & 0\\
-            0 & \cos\theta & -\sin\theta\\
-            0 & \sin\theta & \cos\theta
-        \end{bmatrix}   
-        \begin{bmatrix}
-            0 & 0 & 1\\
-            0 & 0 & 0\\
-            -1 & 0 & 0
-        \end{bmatrix}
-        \begin{bmatrix}
-            \cos\phi & 0 & \sin\phi\\
-            0 & 1 & 0\\
-            -\sin\phi & 0 & \cos\phi
-        \end{bmatrix}\\
-        &= \begin{bmatrix}-\sin\left(\phi \right) & 0 & \cos\left(\phi \right)\\ \cos\left(\phi \right)\,\sin\left(\theta \right) & 0 & \sin\left(\phi \right)\,\sin\left(\theta \right)\\ -\cos\left(\phi \right)\,\cos\left(\theta \right) & 0 & -\cos\left(\theta \right)\,\sin\left(\phi \right)\end{bmatrix}
-    \end{align*}
-    Now, plugging in the values $\theta = \frac{\pi}{2}$, $\phi = \frac{\pi}{2}$, we get
-    \[
-        \begin{bmatrix}
-            -1 & 0 & 0\\
-            0 & 0 & 1\\
-            0 & 0 & 0
-        \end{bmatrix}
-    \]
+    Where $Q_n$ is the current estimation of the reward $R$ after $n-1$ time-steps. The problem
+    with this approach is that, as the number of time-steps increases, the amount of memory required
+    to store all of the rewards increases linearly, i.e.\ the space complexity is $\mathcal{O}(n)$.\\
     
+    Instead, we use the incremental update approach, which
+    uses $\mathcal{O}(1)$ space complexity (constant memory). The formula for this can be derived as follows,
+    \begin{align*}
+        Q_{n+1} &= \frac{1}{n} \sum_{i=1}^{n} R_i\\
+        &= \frac{1}{n} (R_n + \sum_{i=1}^{n-1} R_i)\\
+        &= \frac{1}{n} (R_n + (n-1) \frac{1}{n-1} \sum_{i=1}^{n-1} R_i)\\
+        &= \frac{1}{n} (R_n + (n-1) Q_n)\\
+        &= \frac{1}{n} (R_n + nQ_n - Q_n)\\
+        &= Q_n + \frac{1}{n} (R_n - Q_n)
+    \end{align*}
+    Computationally, this incremental approach is better as well, because it only requires one addition,
+    one subtraction, and one division per time-step. The non-incremental approach requires $n-1$ additions,
+    1 subtraction, and one division per time-step. Therefore, the incremental approach is $\mathcal{O}(1)$
+    in terms of time complexity, while the non-incremental approach is $\mathcal{O}(n)$.
 \end{homeworkProblem}
 
 \nobreak\extramarks{Problem 4.10}{}\nobreak{}
