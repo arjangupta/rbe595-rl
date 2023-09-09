@@ -167,239 +167,83 @@
     in terms of time complexity, while the non-incremental approach is $\mathcal{O}(n)$.
 \end{homeworkProblem}
 
-\nobreak\extramarks{Problem 4.10}{}\nobreak{}
+\nobreak\extramarks{Problem 2}{}\nobreak{}
 
 \pagebreak
 
-\begin{homeworkProblem}[Problem 4.10]
-    Two frames $o_0x_0y_0z_0$ and $o_1x_1y_1z_1$ are related by the homogeneous transformation
+\begin{homeworkProblem}[Problem 2]
+    Why balancing exploration/exploitation is important? Name a few ways to balance
+    exploration/exploitation in multi-armed bandits.
 
-    \[
-        H =
-        \begin{bmatrix}
-            0 & -1 & 0 & 1\\
-            1 & 0 & 0 & -1\\
-            0 & 0 & 1 & 0\\
-            0 & 0 & 0 & 1
-        \end{bmatrix}
-    \]
+    \subsection{Answer}
 
-    A particle has velocity $v_1(t) = (3,1,0)$ relative to frame $o_1x_1y_1z_1$. What is the
-    velocity of the particle in frame $o_0x_0y_0z_0$?
-
-    \subsection{Solution}
-
-    The given H is the homogeneous transformation $H^0_1$. Therefore, \(
-        R^0_1 =
-        \begin{bmatrix}
-            0 & -1 & 0\\
-            1 & 0 & 0\\
-            0 & 0 & 1
-        \end{bmatrix}
-    \) and \(
-        o^0_1 =
-        \begin{bmatrix}
-            1\\
-            -1\\
-            0
-        \end{bmatrix}
-    \).
-    \vspace{0.15in}
-    \\
-    At any given point in time, the position of the particle with respect to frame $o_1x_1y_1z_1$ is given as $p^1(t)$.
-    We know that
-
-    \[
-        p^0(t) = R^0_1 p^1(t) + o^0_1
-    \]
-
-    Taking the derivative of both sides and using the product rule, we get
-
-    \[
-        v^0(t) = \dot{R^0_1} p^1(t) +  R^0_1 v^1(t) + 0
-    \]
-
-    But, $\dot{R^0_1} = 0$ since $R^0_1$ is a constant in time. Therefore,
-
-    \begin{align*}
-        v^0(t) &= R^0_1 v^1(t)\\
-        v^0(t) &=
-            \begin{bmatrix}
-                0 & -1 & 0\\
-                1 & 0 & 0\\
-                0 & 0 & 1
-            \end{bmatrix}
-            \begin{bmatrix}
-                3\\
-                1\\
-                0
-            \end{bmatrix}\\
-        v^0(t) &= 
-            \begin{bmatrix}
-                -1\\
-                3\\
-                0        
-            \end{bmatrix}
-    \end{align*}
-
-    Which was calculated by the following MATLAB script
-
-    % \lstinputlisting{prob4_10.m}
-
-\end{homeworkProblem}
-
-\nobreak\extramarks{Problem 4.15}{}\nobreak{}
-
-\pagebreak
-
-\begin{homeworkProblem}[Problem 4.15]
-    Find the $6 \times 3$ Jacobian for the three links of the cylindrical manipulator of Figure 3.7.
-    Find the singular conﬁgurations for this arm.
-
-    \subsection{Solution}
-
-    Figure 3.7 of our book is the following.
+    Balancing exploration and exploitation is important because we want to be able to eventually
+    find the optimal action. If we only exploit, we will never find the optimal action. This is
+    the the \textit{greedy} approach, where we always choose the action with the highest reward
+    so far. On the other hand, if we only explore, we will never be able to exploit the highest
+    estimated action (the action we believe to be the optimal action).\\
+    
+    When we give our action-value method the opportunity to explore some of the time, we find that
+    we are able to estimate the highest known reward far better than the greedy approach. In fact,
+    the greedy approach simply plateaus off after a while, attaining a roughly 0 slope. The approaches
+    that have been given some opportunity to explore maintain a positive slope and continue to
+    estimate the reward better. The following two graphs from the textbook summarize this behavior.\\
+    
     \begin{figure}[h]
-        % \includegraphics[scale=0.5]{prob4_15.png}
+        \includegraphics[scale=0.5]{images/textbook-fig-2.2.png}
         \centering
     \end{figure}
+\end{homeworkProblem}
 
-    We can see that we have 3 joints, so $n = 3$. Let us also form the table given in the lecture videos:
+    The following are a few ways to balance exploration/exploitation in multi-armed bandits.
+    \begin{itemize}
+        \item \textbf{Epsilon-greedy}: This is the simplest approach when the bandit has stationary
+        probability distributions.
+        We choose the greedy action
+        with probability $1 - \epsilon$, and we choose a random action with probability $\epsilon$.
+        \item \textbf{Optimistic initial values}: We set high initial values for the actions in our
+        action-value algorithm, so that we are encouraged to explore more.
+        This is because we will always choose the action with the highest estimated reward, so
+        with high initial values, the algorithm is more likely to choose various
+        actions and therefore explore more.
+        \item \textbf{Upper confidence bound (UCB)}: This approach helps choose actions according
+        to their potential for actually being optimal (as against a random choice as in the case
+        for epsilon-greedy). The UCB action selection uses the following formula (from the textbook):
+        \[
+            UCB = Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}}
+        \]
+        Where $Q_t(a)$ is the current estimate of the value of action $a$. Also, $c$ is a constant that
+        determines the degree of exploration, $t$ is the number of time-steps so far, and $N_t(a)$
+        is the number of times that action $a$ has been chosen prior to time-step $t$.
+    \end{itemize}
 
-    \begin{table}[h!]
-        \begin{center}
-            \begin{tabular}{|c|c|c|}
-            \hline
-            & Linear component & Angular component\\
-            \hline
-            Revolute joint & \(J_{v_i} = z^0_{i-1} \times (o^0_n - o^0_{i-1})\) & \(J_{v_i} = z^0_{i-1}\) \\
-            Prismatic joint & \(J_{\omega_i} = z^0_{i-1}\) & \(J_{\omega_i} = 0\)\\
-            \hline
-            \end{tabular}
-        \end{center}
-    \end{table}
-    
-    Using this table, and the fact that the upper half of the Jacobian contains linear components while the bottom half
-    contains angular components, we have
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 3}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 3]
+    In the equation,
     \[
-        J =
-        \begin{bmatrix}
-           z_0 \times (o_3 - o_0) & z_1 & z_2\\
-           z_0 & 0 & 0
-        \end{bmatrix}
+        NewEstimate = OldEstimate + StepSize \times [Target - OldEstimate]
     \]
+    what is the target?
 
-    In this Jacobian matrix, we know that \(z_0 = \begin{bmatrix}
-        0\\
-        0\\
-        1
-    \end{bmatrix}\) and \(o_0 =\begin{bmatrix}
-        0\\
-        0\\
-        0
-    \end{bmatrix}\). To find $z_1$, $z_2$, and $o_3$, we need to find
-    $T^0_n = A_1 \dots A_n$ for $n = 1, 2, 3$. Following the DH convention
-    (which Figure 3.7 already abides by), we have the following table for
-    quantities \(\alpha_i, a_i, \theta_i, d_i\).
+    \subsection{Answer}
 
-    \begin{table}[h!]
-        \begin{center}
-            \begin{tabular}{|c|c|c|c|c|}
-            \hline
-            Link & $\alpha_i$ & $a_i$ & $\theta_i$ & $d_i$ \\
-            \hline
-            1 & 0 & 0 & $\theta_1$ & $d_1$ \\
-            2 & -90\degree & 0 & 0 & $d_2$\\
-            3 & 0 & 0 & 0 & $d_3$\\
-            \hline
-            \end{tabular}
-        \end{center}
-    \end{table}
+    In general, the target is the presumed desired value of the action-value function that we are
+    trying to estimate, or the direction we are trying to move towards. That is why $[Target - Estimate]$
+    is known as the \textit{error} in the estimate.\\
 
-    Which gives us the following $A_i$ matrices.
-
+    In the specific case of the multi-armed bandit problem, the target is the reward that we received after
+    taking the action. With each time step, we attempt to get closer to the target value. For the
+    sample-average method used in the multi-armed bandit problem, the equation in the problem takes
+    on the following form,
     \[
-        A_1 =
-        \begin{bmatrix}\cos\left(\theta _{1}\right) & -\sin\left(\theta _{1}\right) & 0 & 0\\ \sin\left(\theta _{1}\right) & \cos\left(\theta _{1}\right) & 0 & 0\\ 0 & 0 & 1 & d_{1}\\ 0 & 0 & 0 & 1 \end{bmatrix},
-    % \]
-    % \[
-        A_2 =
-        \begin{bmatrix}1 & 0 & 0 & 0\\ 0 & 0 & 1 & 0\\ 0 & -1 & 0 & d_{2}\\ 0 & 0 & 0 & 1\end{bmatrix},
-        A_3 =
-        \begin{bmatrix}1 & 0 & 0 & 0\\ 0 & 1 & 0 & 0\\ 0 & 0 & 1 & d_{3}\\ 0 & 0 & 0 & 1\end{bmatrix}
+        Q_{n+1} = Q_n + \frac{1}{n} (R_n - Q_n)
     \]
-
-    Now we can compute our $T$ matrices using the following MATLAB code,
-
-    % \lstinputlisting{prob4_15_tmats.m}
-
-    \[
-        T^0_1 = A_1 =
-        \begin{bmatrix}\cos\left(\theta _{1}\right) & -\sin\left(\theta _{1}\right) & 0 & 0\\ \sin\left(\theta _{1}\right) & \cos\left(\theta _{1}\right) & 0 & 0\\ 0 & 0 & 1 & d_{1}\\ 0 & 0 & 0 & 1 \end{bmatrix}
-    \]
-    \[
-        T^0_2 = A_1 A_2 =
-        \begin{bmatrix}\cos\left(\theta _{1}\right) & 0 & -\sin\left(\theta _{1}\right) & 0\\ \sin\left(\theta _{1}\right) & 0 & \cos\left(\theta _{1}\right) & 0\\ 0 & -1 & 0 & d_{1}+d_{2}\\ 0 & 0 & 0 & 1\end{bmatrix}
-    \]
-    \[
-        T^0_3 = A_1 A_2 A_3 =
-        \begin{bmatrix}\cos\left(\theta _{1}\right) & 0 & -\sin\left(\theta _{1}\right) & -d_{3}\,\sin\left(\theta _{1}\right)\\ \sin\left(\theta _{1}\right) & 0 & \cos\left(\theta _{1}\right) & d_{3}\,\cos\left(\theta _{1}\right)\\ 0 & -1 & 0 & d_{1}+d_{2}\\ 0 & 0 & 0 & 1\end{bmatrix}
-    \]
-
-    From these $T$ matrices, we get
-
-    \[
-        z_1 =
-        \begin{bmatrix}
-            0\\
-            0\\
-            1
-        \end{bmatrix},
-        z_2 =
-        \begin{bmatrix}
-            -\sin\left(\theta _{1}\right)\\
-            \cos\left(\theta _{1}\right)\\
-            0
-        \end{bmatrix},
-        o_3 =
-        \begin{bmatrix}
-            -d_{3}\,\sin\left(\theta _{1}\right)\\
-            d_{3}\,\cos\left(\theta _{1}\right)\\
-            d_{1}+d_{2}
-        \end{bmatrix}
-    \]\\
-    \vspace{0.15in}\\
-
-    Now we are ready to compute our Jacobian matrix. We do this using the following
-    MATLAB code.
-
-    % \lstinputlisting{prob4_15_jacobian.m}
-
-    Which gives us the following Jacobian,
-
-    \[
-        J =
-        \begin{bmatrix} -d_{3}\,\cos\left(\theta _{1}\right) & 0 & -\sin\left(\theta _{1}\right)\\ -d_{3}\,\sin\left(\theta _{1}\right) & 0 & \cos\left(\theta _{1}\right)\\ 0 & 1 & 0\\ 0 & 0 & 0\\ 0 & 0 & 0\\ 1 & 0 & 0 \end{bmatrix}
-        = J_P
-        = \left[\begin{array}{@{}c@{}}
-            J_{11}\\\hline
-            J_{21} \\
-            \end{array}\right]
-    \]
-    Where $J_{11}$ and $J_{21}$ are $3 \times 3$ matrices. By setting $\det J_{11} = 0$ we
-    can find the singular configurations for the arm portion of the manipulator (first
-    three joints). We calculate the determinant using the following MATLAB code,
-
-    % \lstinputlisting{prob4_15_det.m}
-
-    \vspace{0.15in}
-
-    Which gives us,
-    \[J_{11} = d_{3}\,{\cos^2\left(\theta _{1}\right)}+d_{3}\,{\sin^2\left(\theta _{1}\right)} 
-        = d_3({\cos^2\left(\theta _{1}\right)}+{\sin^2\left(\theta _{1}\right)}) = d_3\]
-
-    When we set $J_{11} = 0$ here, we get $d_3 = 0$. Therefore, the only singular configuration for this manipulator
-    will occur when the third joint variable (which is a prismatic joint) goes to 0.
+    where the target is the reward $R_n$ that we received after taking the action.
 \end{homeworkProblem}
 
 \end{document}
