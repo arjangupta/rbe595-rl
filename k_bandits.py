@@ -82,14 +82,15 @@ class KArmedBandit:
             if self.distributions[i][current_step] > self.distributions[optimal_action][current_step]:
                 optimal_action = i
         if action == optimal_action:
-            return True
+            return 1
         elif self.distributions[action][current_step] == self.distributions[optimal_action][current_step]:
             # If the action value taken is the same as the optimal action value, return true
-            return True
+            return 1
         else:
-            return False
+            return 0
 
 class ActionValueMethod:
+    """Class to perform the action-value method for a given bandit and epsilon value"""
     def __init__(self, bandit: KArmedBandit, epsilon, num_steps=1000):
         self.bandit = bandit
         self.epsilon = epsilon
@@ -97,8 +98,9 @@ class ActionValueMethod:
         self.estimated_reward = np.zeros(10) # this is Q as described in the textbook
         self.number_of_times_action_taken = np.zeros(10) # this is N as described in the textbook
         self.average_rewards = np.zeros(num_steps)
-        self.optimal_actions = np.zeros(num_steps)
         self.current_reward_sum = 0
+        self.average_optimal_actions = np.zeros(num_steps)
+        self.current_optimal_action_sum = 0
 
     def run(self):
         """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook.
@@ -124,16 +126,16 @@ class ActionValueMethod:
             self.estimated_reward[action] = previous_reward + (1/self.number_of_times_action_taken[action])*(reward - previous_reward)
 
             # Update the current reward total sum
-            self.current_reward_sum = self.current_reward_sum + reward
-
+            self.current_reward_sum += reward
             # Record the current running average
             self.average_rewards[n] = self.current_reward_sum / (n + 1)
 
-            # Record whether the action taken was optimal
-            is_optimal_action = self.bandit.is_optimal_action(action, n)
-            self.optimal_actions[n] = 1 if is_optimal_action else 0
+            # Update the current optimal action total sum
+            self.current_optimal_action_sum += self.bandit.is_optimal_action(action, n)
+            # Record the current average optimal action
+            self.average_optimal_actions[n] = self.current_optimal_action_sum / (n + 1)
 
-        return self.average_rewards, self.optimal_actions
+        return self.average_rewards, self.average_optimal_actions
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
     """Plot three graphs of average rewards with various epsilon values"""
