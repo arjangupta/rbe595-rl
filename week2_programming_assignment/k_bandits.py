@@ -12,6 +12,8 @@ class KArmedBandit:
         self.num_arms = num_arms
         self.create_distributions(size=num_steps)
         self.shift_distributions()
+        self.find_means()
+        self.find_optimal_action()
         if show_plots:
             self.print_distributions()
             self.plot_distributions()
@@ -24,11 +26,21 @@ class KArmedBandit:
             # For each arm generate a normal distribution with mean 0 and variance 1 (std dev 1)
             self.distributions.append(np.random.normal(0, 1, size))
 
+    def find_means(self):
+        """Get the means of each bandit"""
+        self.means = []
+        for i in range(self.num_arms):
+            self.means.append(np.mean(self.distributions[i]))
+
+    def find_optimal_action(self):
+        """Fix the optimal action based on the mean of each distribution"""
+        self.optimal_action = np.argmax(self.means)
+
     def print_distributions(self):
         """Show means and variances of each bandit"""
         print("---- True values of each action/arm ----")
         for i in range(self.num_arms):
-            mean = np.mean(self.distributions[i])
+            mean = self.means[i]
             mean_str = ""
             # Format mean to be 7 characters long
             if mean < 0:
@@ -45,7 +57,7 @@ class KArmedBandit:
     def shift_distributions(self):
         """Shift each bandit's distribution by roughly the amounts shown in the textbook."""
         #                   1      2      3     4     5      6     7      8     9      10
-        textbook_shifts = [0.20, -0.80, 1.50, 0.40, 1.05, -1.50, -0.15, -1.00, 1.75, -0.50]
+        textbook_shifts = [0.20, -0.80, 1.50, 0.40, 1.05, -1.50, -0.15, -1.00, 0.75, -0.50]
         for i in range(self.num_arms):
             self.distributions[i] += textbook_shifts[i]
 
@@ -73,21 +85,6 @@ class KArmedBandit:
     def take_action(self, action, current_step):
         """Take an action and return a reward"""
         return self.distributions[action][current_step]
-    
-    def is_optimal_action(self, action, current_step):
-        """Return whether the given action is the optimal action for the current step"""
-        # Find the optimal action for this step
-        optimal_action = 0
-        for i in range(self.num_arms):
-            if self.distributions[i][current_step] > self.distributions[optimal_action][current_step]:
-                optimal_action = i
-        if action == optimal_action:
-            return 1
-        elif self.distributions[action][current_step] == self.distributions[optimal_action][current_step]:
-            # If the action value taken is the same as the optimal action value, return true
-            return 1
-        else:
-            return 0
 
 class ActionValueMethod:
     """Class to perform the action-value method for a given bandit and epsilon value"""
@@ -100,7 +97,6 @@ class ActionValueMethod:
         self.average_rewards = np.zeros(num_steps)
         self.current_reward_sum = 0
         self.average_optimal_actions = np.zeros(num_steps)
-        self.current_optimal_action_sum = 0
 
     def run(self):
         """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook.
@@ -113,7 +109,10 @@ class ActionValueMethod:
             if exploration_decision <= self.epsilon:
                 action = np.random.randint(0, 10)
             else:
+                # Find the max arg of the estimated reward
                 action = self.estimated_reward.argmax()
+                # If this estimation occurs more than once, randomly choose one of the actions
+                action = np.random.choice(np.where(self.estimated_reward == self.estimated_reward[action])[0])
 
             # Take the action and get the reward (this is R as described in the textbook)
             reward = self.bandit.take_action(action, n)
@@ -130,11 +129,8 @@ class ActionValueMethod:
             # Record the current running average
             self.average_rewards[n] = self.current_reward_sum / (n + 1)
 
-            # Update the current optimal action total sum
-            self.current_optimal_action_sum += self.bandit.is_optimal_action(action, n)
-            # Record the current average optimal action
-            self.average_optimal_actions[n] = self.current_optimal_action_sum / (n + 1)
-
+            # Record whether the action taken was optimal
+            self.average_optimal_actions[n] = self.bandit.optimal_action == action
         return self.average_rewards, self.average_optimal_actions
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
