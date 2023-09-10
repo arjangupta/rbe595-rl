@@ -96,7 +96,7 @@ class ActionValueMethod:
         self.number_of_times_action_taken = np.zeros(10) # this is N as described in the textbook
         self.average_rewards = np.zeros(num_steps)
         self.current_reward_sum = 0
-        self.average_optimal_actions = np.zeros(num_steps)
+        self.optimal_actions = np.zeros(num_steps)
 
     def run(self):
         """Run the action-value method for given number of steps. Follows the pseudocode given in the textbook.
@@ -130,8 +130,9 @@ class ActionValueMethod:
             self.average_rewards[n] = self.current_reward_sum / (n + 1)
 
             # Record whether the action taken was optimal
-            self.average_optimal_actions[n] = self.bandit.optimal_action == action
-        return self.average_rewards, self.average_optimal_actions
+            self.optimal_actions[n] = self.bandit.optimal_action == action
+
+        return self.average_rewards, self.optimal_actions
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
     """Plot three graphs of average rewards with various epsilon values"""
