@@ -12,6 +12,7 @@ class KArmedBandit:
         self.num_arms = num_arms
         self.create_distributions(size=num_steps)
         self.shift_distributions()
+        self.find_best_action()
         if show_plots:
             self.print_distributions()
             self.plot_distributions()
@@ -22,7 +23,7 @@ class KArmedBandit:
         self.distributions = []
         for i in range(self.num_arms):
             # For each arm generate a normal distribution with mean 0 and variance 1 (std dev 1)
-            self.distributions.append(np.random.normal(0, 1, size))
+            self.distributions.append(np.random.randn(size))
 
     def print_distributions(self):
         """Show means and variances of each bandit"""
@@ -48,6 +49,10 @@ class KArmedBandit:
         textbook_shifts = [0.20, -0.80, 1.50, 0.40, 1.05, -1.50, -0.15, -1.00, 1.75, -0.50]
         for i in range(self.num_arms):
             self.distributions[i] += textbook_shifts[i]
+
+    def find_best_action(self):
+        # find the index of the best action by finding the max value in the distribution's index
+        return np.unravel_index(np.array(self.distributions).argmax(), np.array(self.distributions).shape)[0]
 
     def plot_distributions(self):
         """Plot the distributions of each bandit:
@@ -76,15 +81,7 @@ class KArmedBandit:
     
     def is_optimal_action(self, action, current_step):
         """Return whether the given action is the optimal action for the current step"""
-        # Find the optimal action for this step
-        optimal_action = 0
-        for i in range(self.num_arms):
-            if self.distributions[i][current_step] > self.distributions[optimal_action][current_step]:
-                optimal_action = i
-        if action == optimal_action:
-            return 1
-        elif self.distributions[action][current_step] == self.distributions[optimal_action][current_step]:
-            # If the action value taken is the same as the optimal action value, return true
+        if action == self.find_best_action():
             return 1
         else:
             return 0
