@@ -109,7 +109,10 @@ class ActionValueMethod:
             if exploration_decision <= self.epsilon:
                 action = np.random.randint(0, 10)
             else:
+                # Find the max arg of the estimated reward
                 action = self.estimated_reward.argmax()
+                # If this estimation occurs more than once, randomly choose one of the actions
+                action = np.random.choice(np.where(self.estimated_reward == self.estimated_reward[action])[0])
 
             # Take the action and get the reward (this is R as described in the textbook)
             reward = self.bandit.take_action(action, n)
@@ -128,10 +131,6 @@ class ActionValueMethod:
 
             # Record whether the action taken was optimal
             self.average_optimal_actions[n] = self.bandit.optimal_action == action
-
-        if self.epsilon == 0:
-            np.sum(self.average_optimal_actions)
-            print(f"Greedy method: {np.sum(self.average_optimal_actions)} out of {self.num_steps} were optimal actions")
         return self.average_rewards, self.average_optimal_actions
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
