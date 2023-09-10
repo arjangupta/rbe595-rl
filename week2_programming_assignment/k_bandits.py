@@ -12,6 +12,7 @@ class KArmedBandit:
         self.num_arms = num_arms
         self.create_distributions(size=num_steps)
         self.shift_distributions()
+        self.set_distribution_means()
         self.find_best_action()
         if show_plots:
             self.print_distributions()
@@ -50,9 +51,17 @@ class KArmedBandit:
         for i in range(self.num_arms):
             self.distributions[i] += textbook_shifts[i]
 
+    def set_distribution_means(self):
+        self.distribution_means = np.zeros(self.num_arms)
+        for i in range(self.num_arms):
+            self.distribution_means[i] = np.mean(self.distributions[i])
+
     def find_best_action(self):
         # find the index of the best action by finding the max value in the distribution's index
-        return np.unravel_index(np.array(self.distributions).argmax(), np.array(self.distributions).shape)[0]
+        # return np.unravel_index(np.array(self.distributions).argmax(), np.array(self.distributions).shape)[0]
+        best_action = np.argmax(self.distribution_means)
+        # print(best_action)
+        return best_action
 
     def plot_distributions(self):
         """Plot the distributions of each bandit:
