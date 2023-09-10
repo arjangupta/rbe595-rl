@@ -57,7 +57,7 @@ class KArmedBandit:
     def shift_distributions(self):
         """Shift each bandit's distribution by roughly the amounts shown in the textbook."""
         #                   1      2      3     4     5      6     7      8     9      10
-        textbook_shifts = [0.20, -0.80, 1.50, 0.40, 1.05, -1.50, -0.15, -1.00, 1.75, -0.50]
+        textbook_shifts = [0.20, -0.80, 1.50, 0.40, 1.05, -1.50, -0.15, -1.00, 0.75, -0.50]
         for i in range(self.num_arms):
             self.distributions[i] += textbook_shifts[i]
 
