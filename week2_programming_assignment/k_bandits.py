@@ -129,6 +129,9 @@ class ActionValueMethod:
             # Record whether the action taken was optimal
             self.average_optimal_actions[n] = self.bandit.optimal_action == action
 
+        if self.epsilon == 0:
+            np.sum(self.average_optimal_actions)
+            print(f"Greedy method: {np.sum(self.average_optimal_actions)} out of {self.num_steps} were optimal actions")
         return self.average_rewards, self.average_optimal_actions
 
 def plot_graph1(average_rewards1, average_rewards2, average_rewards3, num_runs):
