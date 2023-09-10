@@ -255,19 +255,38 @@
 
     \subsection{Answer}
 
-    The purpose of using UCB is to choose actions according to their potential for actually being optimal
-    (as against a random choice as in the case for epsilon-greedy).\\
+    The purpose of using UCB is to provide exploratory behavior balanced with exploitation in a systematic manner.\\
 
     The UCB formula is as follows,
     \[
         A_t = argmax_a \left[ Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}} \right]
     \]
     Here, the square root term is a measure of the uncertainty in the estimate of the current action $a$,
-    and $c$ is used to control the confidence level of that uncertainty. Therefore, at any given time
-    step, we are finding the maximum possible value, or the `upper bound' on what we believe to be the
-    true value of the action. Therefore, UCB is used to approach the true value of an action in a more
-    `systematic' way than epsilon-greedy.
+    and $c$ is used to control the confidence level of that uncertainty. The way this square root term
+    works is that it increases if the action has not been chosen often (because denominator $N_t(a)$ is
+    the number of times the action is chosen), and decreases if the action has
+    been chosen often. This means that the action will be chosen more often if it has not been chosen
+    much in the past, and less often if it has been chosen a lot in the past.
+    The nature of the logarithm term is ideal because, in the beginning it favors exploration overall
+    because of high slope,
+    but then as all actions are tried, it flattens out and favors exploitation.\\
+    
+    Therefore, UCB is used to
+    approach the true value of an action in a more `systematic' way than epsilon-greedy.
 
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 5}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 5]
+    Why do you think in Gradient Bandit Algorithm, we defined a soft-max distribution to
+    choose the actions from, rather than just choosing action?
+
+    \subsection{Answer}
+
+    
 \end{homeworkProblem}
 
 \end{document}
