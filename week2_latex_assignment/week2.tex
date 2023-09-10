@@ -246,4 +246,28 @@
     where the target is the reward $R_n$ that we received after taking the action.
 \end{homeworkProblem}
 
+\pagebreak
+
+\nobreak\extramarks{Problem 4}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 4]
+    What is the purpose of using Upper Confidence Bound (UCB)?
+
+    \subsection{Answer}
+
+    The purpose of using UCB is to choose actions according to their potential for actually being optimal
+    (as against a random choice as in the case for epsilon-greedy).\\
+
+    The UCB formula is as follows,
+    \[
+        A_t = argmax_a \left[ Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}} \right]
+    \]
+    Here, the square root term is a measure of the uncertainty in the estimate of the current action $a$,
+    and $c$ is used to control the confidence level of that uncertainty. Therefore, at any given time
+    step, we are finding the maximum possible value, or the `upper bound' on what we believe to be the
+    true value of the action. Therefore, UCB is used to approach the true value of an action in a more
+    `systematic' way than epsilon-greedy.
+
+\end{homeworkProblem}
+
 \end{document}
