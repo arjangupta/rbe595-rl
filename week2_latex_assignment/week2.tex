@@ -285,7 +285,20 @@
     choose the actions from, rather than just choosing action?
 
     \subsection{Answer}
+    In the Gradient Bandit Algorithm, we are looking to to create a \textbf{numerical preference}
+    for each action. The ideal way to do this is by using the \textit{soft-max distribution},
+    or the Gibbs/Boltzmann distribution. This is done by exponentiating the action-value function,
+    and then normalizing it. In the form of a formula, this is,
+    \[
+        \pi_t(a) \doteq \frac{e^{H_t(a)}}{\sum_{b=1}^{k} e^{H_t(b)}}
+    \]
+    which is the probability of choosing action $a$ at time-step $t$.\\
 
+    The reason we want to create a numerical preference for each action is because we want a snapshot
+    in the current time-step of likely we are to select each action. This gives us a high degree
+    of predictability in our method. This is a big improvement over the epsilon-greedy method, where
+    we have no idea how likely we are to select each action (because with epsilon probability,
+    it is random, and just chooses an action).\\
     
 \end{homeworkProblem}
 
