@@ -47,3 +47,5 @@ slprj/
 # Simulink cache & autosave files
 *.slxc
 *.slx.autosave
+
+*.zip
