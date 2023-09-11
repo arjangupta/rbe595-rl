@@ -157,7 +157,7 @@ def plot_graph2(optimal_actions1, optimal_actions2, optimal_actions3, num_runs):
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}%".format(int(x * 100))))
     plt.show()
 
-def get_graphs(num_runs = 2000):
+def get_graphs(num_runs = 2000, print_distribution_graphs = False):
     """Obtain the two graphs for the exercise"""
 
     # Set the total steps for each run
@@ -175,7 +175,7 @@ def get_graphs(num_runs = 2000):
     for run in range(num_runs):
         print(f"Performing run {run+1} of {num_runs}...")
         # Create a 10-armed bandit
-        bandit = KArmedBandit(num_arms=10, show_plots=False, num_steps=num_steps)
+        bandit = KArmedBandit(num_arms=10, show_plots=print_distribution_graphs, num_steps=num_steps)
 
         # Run the action-value method with epsilon = 0 (greedy only)
         greedy_method = ActionValueMethod(bandit, epsilon=0, num_steps=num_steps)
@@ -202,9 +202,13 @@ def get_graphs(num_runs = 2000):
 
 if __name__ == "__main__":
     # If user input was given, use that as the number of runs
-    if len(sys.argv) > 1:
+    if len(sys.argv) == 2:
         num_runs = int(sys.argv[1])
         get_graphs(num_runs)
+    elif len(sys.argv) > 2:
+        num_runs = int(sys.argv[1])
+        print_distribution_graphs = sys.argv[2].lower() == 'true'
+        get_graphs(num_runs, print_distribution_graphs)
     else:
         get_graphs()
 
