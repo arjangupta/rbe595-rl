@@ -314,6 +314,35 @@
 
     \subsection{Answer}
 
+    This article shows how the problem of showing an optimal ad to a user can be modeled as
+    a multi-armed bandit problem. Here, an `optimal ad' is one that maximizes the click-through rate (CTR).\\
+    
+    First, we are shown how we can use the greedy-epsilon method to solve this problem. The
+    true probability of a user-click is modeled as 1 trial of a binomial distribution, with the probability
+    of success being the CTR, a number chosen arbitrarily. An array of estimated rewards is maintained,
+    which the article calls `emperical CTRs'. The greedy-epsilon method is used to choose the ad based
+    on an array of weights, where the best ad has a weight of $1 - \epsilon$, and the rest have a weight
+    of $\frac{\epsilon}{1 - K}$, where the number of ads is $K$. This experiment set up was run 10,000
+    times and the results were plotted in two graphs --- how the emperical CTR changed over the course of
+    the runs, and the \% of chosen actions. The analysis of the results showed that the greedy-epsilon
+    method found the second most effective ad, and stuck with it for a while, but eventually found
+    the most effective ad.\\
+
+    The second method of modeling the problem we are shown is the Thompson sampling method. Here,
+    Bayesian beliefs are used to model the probability of a user clicking on an ad. Therefore, instead
+    of using an array of weights like in the greedy-epsilon method, we use a beta distribution to
+    choose the ad. As more clicks are recorded, the alpha and beta arrays for each ad is updated.
+    If the chosen ad was clicked, then we update the alpha array, and if it was not clicked, we update
+    the beta array. The results of this experiment were also plotted in the same way as the greedy-epsilon
+    approach. The analysis of the results showed that the Thompson sampling method found the most effective
+    ad much faster than the greedy-epsilon method.\\
+
+    In the final part of the article, a concept of comparing the two methods is introduced: \textit{regret}.
+    Regret is defined as the difference between the reward of the optimal action and the reward of the
+    chosen action. Via a definitive plot, the
+    regret for the greedy-epsilon method was found to be much higher than the regret
+    for the Thompson sampling method.\\
+
 \end{homeworkProblem}
 
 \end{document}
