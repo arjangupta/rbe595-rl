@@ -228,26 +228,24 @@
 \nobreak\extramarks{Problem 3}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 3]
-    In the equation,
-    \[
-        NewEstimate = OldEstimate + StepSize \cdot [Target - OldEstimate]
-    \]
-    what is the target?
+    What is the reward hypothesis in RL?
 
     \subsection{Answer}
 
-    In general, the target is the presumed desired value of the action-value function that we are
-    trying to estimate, or the direction we are trying to move towards. That is why $[Target - Estimate]$
-    is known as the \textit{error} in the estimate.\\
+    The book states the \textit{reward hypothesis} as follows,
+    \begin{quote}
+        That all of what we mean by goals and purposes can be well thought of as the maximization
+        of the expected value of the cumulative sum of a received scalar signal (called reward).
+    \end{quote}
 
-    In the specific case of the multi-armed bandit problem, the target is the reward that we received after
-    taking the action. With each time step, we attempt to get closer to the target value. For the
-    sample-average method used in the multi-armed bandit problem, the equation in the problem takes
-    on the following form,
-    \[
-        Q_{n+1} = Q_n + \frac{1}{n} (R_n - Q_n)
-    \]
-    where the target is the reward $R_n$ that we received after taking the action.
+    Here is a simple break-down of what the reward hypothesis means:
+    \begin{itemize}
+        \item In RL, we talk about goals and purposes, which is to find best way to solve a problem.
+        \item Any solution to a complex problem can be broken down into a series of steps, and each step can have
+        a value associated with it.
+        \item We design this `value' associated with each step as a scalar signal which is received from the environment. This scalar signal is called the \textit{reward}.
+        \item Therefore, our ultimate goal is to maximize the expected value of the cumulative sum of these rewards.
+    \end{itemize}
 \end{homeworkProblem}
 
 \pagebreak
