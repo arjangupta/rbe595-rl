@@ -253,28 +253,13 @@
 \nobreak\extramarks{Problem 4}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 4]
-    What is the purpose of using Upper Confidence Bound (UCB)?
+    We have an agent in maze-like world. We want the agent to find the goal as soon as possible.
+    We set the reward for reaching the goal equal to $+1$ With $\gamma = 1$. But we notice that the agent
+    does not always reach the goal as soon as possible. How can we fix this?
 
     \subsection{Answer}
 
-    The purpose of using UCB is to provide exploratory behavior balanced with exploitation in a systematic manner.\\
-
-    The UCB formula is as follows,
-    \[
-        A_t = argmax_a \left[ Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}} \right]
-    \]
-    Here, the square root term is a measure of the uncertainty in the estimate of the current action $a$,
-    and $c$ is used to control the confidence level of that uncertainty. The way this square root term
-    works is that it increases if the action has not been chosen often (because denominator $N_t(a)$ is
-    the number of times the action is chosen), and decreases if the action has
-    been chosen often. This means that the action will be chosen more often if it has not been chosen
-    much in the past, and less often if it has been chosen a lot in the past.
-    The nature of the logarithm term is ideal because, in the beginning it favors exploration overall
-    because of high slope,
-    but then as all actions are tried, it flattens out and favors exploitation.\\
-    
-    Therefore, UCB is used to
-    approach the true value of an action in a more `systematic' way than epsilon-greedy.
+    TODO
 
 \end{homeworkProblem}
 
@@ -283,24 +268,10 @@
 \nobreak\extramarks{Problem 5}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 5]
-    Why do you think in Gradient Bandit Algorithm, we defined a soft-max distribution to
-    choose the actions from, rather than just choosing action?
+    What is the difference between policy and action?
 
     \subsection{Answer}
-    In the Gradient Bandit Algorithm, we are looking to to create a \textbf{numerical preference}
-    for each action. The ideal way to do this is by using the \textit{soft-max distribution},
-    or the Gibbs/Boltzmann distribution. This is done by exponentiating the action-value function,
-    and then normalizing it. In the form of a formula, this is,
-    \[
-        \pi_t(a) \doteq \frac{e^{H_t(a)}}{\sum_{b=1}^{k} e^{H_t(b)}}
-    \]
-    which is the probability of choosing action $a$ at time-step $t$.\\
-
-    The reason we want to create a numerical preference for each action is because we want a snapshot
-    in the current time-step of likely we are to select each action. This gives us a high degree
-    of predictability in our method. This is a big improvement over the epsilon-greedy method, where
-    we have no idea how likely we are to select each action (because with epsilon probability,
-    it is random, and just chooses an action).\\
+    TODO
     
 \end{homeworkProblem}
 
@@ -309,41 +280,13 @@
 \nobreak\extramarks{Problem 6}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 6]
-    Read the article below and summarize what you learned in a paragraph:
 
-    \href{https://web.archive.org/web/20220122192029/https://www.spotx.tv/resources/blog/developer-blog/introduction-to-multi-armed-bandits-with-applications-in-digital-advertising/}{Introduction to Multi-Armed Bandits with Applications in Digital Advertising}
+    \textbf{(Exercise 3.14)}
+    Write prompt
 
     \subsection{Answer}
 
-    This article shows how the problem of showing an optimal ad to a user can be modeled as
-    a multi-armed bandit problem. Here, an `optimal ad' is one that maximizes the click-through rate (CTR).\\
-    
-    First, we are shown how we can use the greedy-epsilon method to solve this problem. The
-    true probability of a user-click is modeled as 1 trial of a binomial distribution, with the probability
-    of success being the CTR, a number chosen arbitrarily. An array of estimated rewards is maintained,
-    which the article calls `emperical CTRs'. The greedy-epsilon method is used to choose the ad based
-    on an array of weights, where the best ad has a weight of $1 - \epsilon$, and the rest have a weight
-    of $\frac{\epsilon}{1 - K}$, where the number of ads is $K$. This experiment set up was run 10,000
-    times and the results were plotted in two graphs --- how the emperical CTR changed over the course of
-    the runs, and the \% of chosen actions. The analysis of the results showed that the greedy-epsilon
-    method found the second most effective ad, and stuck with it for a while, but eventually found
-    the most effective ad.\\
-
-    The second method of modeling the problem we are shown is the Thompson sampling method. Here,
-    Bayesian beliefs are used to model the probability of a user clicking on an ad. Therefore, instead
-    of using an array of weights like in the greedy-epsilon method, we use a beta distribution to
-    choose the ad. As more clicks are recorded, the alpha and beta arrays for each ad is updated.
-    If the chosen ad was clicked, then we update the alpha array, and if it was not clicked, we update
-    the beta array. The results of this experiment were also plotted in the same way as the greedy-epsilon
-    approach. The analysis of the results showed that the Thompson sampling method found the most effective
-    ad much faster than the greedy-epsilon method.\\
-
-    In the final part of the article, a concept of comparing the two methods is introduced: \textit{regret}.
-    Regret is defined as the difference between the reward of the optimal action and the reward of the
-    chosen action. Via a definitive plot, the
-    regret for the greedy-epsilon method was found to be much higher than the regret
-    for the Thompson sampling method. Therefore, the Thompson sampling method is the better method
-    for this problem.
+    TODO
 
 \end{homeworkProblem}
 
