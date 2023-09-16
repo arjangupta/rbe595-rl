@@ -202,50 +202,24 @@
 \pagebreak
 
 \begin{homeworkProblem}[Problem 2]
-    Why balancing exploration/exploitation is important? Name a few ways to balance
-    exploration/exploitation in multi-armed bandits.
+    Explain how a room temperature control system can be modeled as an MDP? What are the
+    states, actions, rewards, and transitions.
 
     \subsection{Answer}
 
-    Balancing exploration and exploitation is important because we want to be able to eventually
-    find the optimal action. If we only exploit, we will never find the optimal action. This is
-    the the \textit{greedy} approach, where we always choose the action with the highest reward
-    so far. On the other hand, if we only explore, we will never be able to exploit the highest
-    estimated action (the action we believe to be the optimal action).\\
-    
-    When we give our action-value method the opportunity to explore some of the time, we find that
-    we are able to estimate the highest known reward far better than the greedy approach. In fact,
-    the greedy approach simply plateaus off after a while, attaining a roughly 0 slope. The approaches
-    that have been given some opportunity to explore maintain a positive slope and continue to
-    estimate the reward better. The following two graphs from the textbook summarize this behavior.\\
-    
-    % \begin{figure}[h]
-    %     \includegraphics[scale=0.5]{images/textbook-fig-2.2.png}
-    %     \centering
-    % \end{figure}
-\end{homeworkProblem}
+    A room temperature control system can be modeled as an MDP as follows.\\
 
-    The following are a few ways to balance exploration/exploitation in multi-armed bandits.
-    \begin{itemize}
-        \item \textbf{Epsilon-greedy}: This is the simplest approach when the bandit has stationary
-        probability distributions.
-        We choose the greedy action
-        with probability $1 - \epsilon$, and we choose a random action with probability $\epsilon$.
-        \item \textbf{Optimistic initial values}: We set high initial values for the actions in our
-        action-value algorithm, so that we are encouraged to explore more.
-        This is because we will always choose the action with the highest estimated reward, so
-        with high initial values, the algorithm is more likely to choose various
-        actions and therefore explore more.
-        \item \textbf{Upper confidence bound (UCB)}: This approach helps choose actions according
-        to their potential for actually being optimal (as against a random choice as in the case
-        for epsilon-greedy). The UCB action selection uses the following formula (from the textbook):
-        \[
-            UCB = Q_t(a) + c \sqrt{\frac{\ln t}{N_t(a)}}
-        \]
-        Where $Q_t(a)$ is the current estimate of the value of action $a$. Also, $c$ is a constant that
-        determines the degree of exploration, $t$ is the number of time-steps so far, and $N_t(a)$
-        is the number of times that action $a$ has been chosen prior to time-step $t$.
-    \end{itemize}
+    \textbf{States:} The states are the different temperatures that the room can be in.\\
+
+    \textbf{Actions:} The actions are the different actions that the system can take to change the
+    temperature of the room.\\
+
+    \textbf{Rewards:} The rewards are the different rewards that the system can receive for taking 
+    an action.\\
+
+    \textbf{Transitions:} The transitions are the different transitions that the system can make
+    from one state to another.\\
+\end{homeworkProblem}
 
 \nobreak\extramarks{Problem 2}{}\nobreak{}
 
