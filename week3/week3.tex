@@ -352,12 +352,22 @@
 
 \begin{homeworkProblem}[Problem 4]
     We have an agent in maze-like world. We want the agent to find the goal as soon as possible.
-    We set the reward for reaching the goal equal to $+1$ With $\gamma = 1$. But we notice that the agent
+    We set the reward for reaching the goal equal to $+1$ with $\gamma = 1$. But we notice that the agent
     does not always reach the goal as soon as possible. How can we fix this?
 
     \subsection{Answer}
 
-    TODO
+    As stated in the textbook, the \textit{discounted return} (equation 3.8), $G_t$, is defined as,
+
+    \[
+    \tag{3.8}
+        G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
+    \]
+
+    Here, as $\gamma$ approaches $1$, the discounted return takes far-sighted rewards into account.
+    Therefore, if the agent is not reaching the goal as soon as possible, then the agent is likely
+    too far-sighted. Therefore, we can reduce the value of $\gamma$ to make the agent more near-sighted
+    and reach the goal sooner.\\
 
 \end{homeworkProblem}
 
