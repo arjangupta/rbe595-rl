@@ -209,16 +209,36 @@
 
     A room temperature control system can be modeled as an MDP as follows.\\
 
-    \textbf{States:} The states are the different temperatures that the room can be in.\\
+    \textbf{Scope}\\
+    \vspace{-0.25cm}\\
+    Let us make some assumptions to define the scope of the solution.
+    \begin{itemize}
+        \item The temperatures are being measured in Fahrenheit.
+        \item The temperature resolution of the temperature sensor in the room is $1\degree $F.
+        \item Given the climate of the area, the room naturally stays between the range of $40\degree $F and $90\degree$F.
+        \item The humans in the room are comfortable with temperatures between $68\degree $F and $72\degree$F.
+    \end{itemize}
+    \vspace{0.25cm}
 
-    \textbf{Actions:} The actions are the different actions that the system can take to change the
-    temperature of the room.\\
+    \textbf{States}\\
+    \vspace{-0.25cm}\\
+    Therefore, the states of the system are the temperatures 
+    in the room, $S = \{s \in \mathbb{Z} \mid 40 \leq s \leq 90\}$.\\
 
-    \textbf{Rewards:} The rewards are the different rewards that the system can receive for taking 
-    an action.\\
-
-    \textbf{Transitions:} The transitions are the different transitions that the system can make
-    from one state to another.\\
+    \textbf{Actions}\\
+    \vspace{-0.25cm}\\
+    The actions of the system are the temperature changes in the room. Assume that the control system
+    can change the temperature by up to $5\degree $F in either direction. Therefore, in general,
+    the set of all actions are
+    $A = \{a \in \mathbb{Z} \mid -5 \leq a \leq 5\}$. However, the action at each state is limited by the
+    state itself. For example, if the current temperature is below $68\degree $F, then the action
+    cannot be to decrease the temperature further. Therefore, the set of actions can take on three
+    possible sub-sets of $A$ depending on the state, as follows,
+    \begin{itemize}
+        \item $A_{\text{low}} = \{a \in A \mid a \geq 0\}$, if $s \leq 68$
+        \item $A_{\text{mid}} = \{a \in A \mid -1 \leq a \leq 1\}$, if $68 < s < 72$
+        \item $A_{\text{high}} = \{a \in A \mid a \leq 0\}$, if $s \geq 72$
+    \end{itemize}
 \end{homeworkProblem}
 
 \nobreak\extramarks{Problem 2}{}\nobreak{}
