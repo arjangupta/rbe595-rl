@@ -498,10 +498,31 @@
 
     \begin{align*}
         q_{\pi}(s, a) &=  \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} r \cdot p(s', r \mid s, a) + \gamma\sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} q_{\pi}(s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
-        q_{\pi}(s, a) &= \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} p(s', r \mid s, a) \left[ r + \gamma\sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s', a') \right]\\
+        q_{\pi}(s, a) &= \sum_{s',r} p(s', r \mid s, a) \left[ r + \gamma\sum_{a'} \pi(a' \mid s') q_{\pi}(s', a') \right]\\
     \end{align*}
 
     Which is the Bellman equation for action values, i.e., for $q_{\pi}$.
+
+    \subsubsection{Backup Diagram Confirmation}
+
+    This equation can be verified by looking at the backup diagram given in the prompt. The backup diagram
+    shows that we start with the state-action pair $(s, a)$. To get to the next state, we are subjected
+    to the environment $p(s', r \mid s, a)$. The reward $r$ is added to the discounted return $G_{t+1}$.
+    This brings us to our new state, $s'$. At this point, the equation would look as follows,
+
+    \begin{align*}
+        q_{\pi}(s, a) &= \sum_{s',r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]\\
+    \end{align*}
+
+    However we still need to eliminate the $v_{\pi}(s')$ term. To do this, we go through our
+    policy, $\pi$, to get the action $a'$ that we would take in the state $s'$. Now the equation
+    becomes,
+
+    \begin{align*}
+        q_{\pi}(s, a) &= \sum_{s',r} p(s', r \mid s, a) \left[ r + \gamma\sum_{a'} \pi(a'\mid s') q_{\pi}(s', a') \right]\\
+    \end{align*}
+
+    So, the Bellman equation for action values, i.e., for $q_{\pi}$, is confirmed by the backup diagram.
 
 \end{homeworkProblem}
 
