@@ -533,11 +533,76 @@
 \begin{homeworkProblem}[Problem 8]
 
     \textbf{(Exercise 3.22)}
-    Write prompt
+    Consider the continuing MDP shown below. The only decision to be made is that in the top state,
+    where two actions are available, left and right. The numbers
+    show the rewards that are received deterministically after
+    each action. There are exactly two deterministic policies,
+    $\pi_{\text{left}}$ and $\pi_{\text{right}}$.
+    What policy is optimal if $\gamma = 0$? If $\gamma = 0.9$?
+    If  $\gamma = 0.5$?
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.45]{images/suttonbook-ex3.22-fig.png}
+    \end{figure}
 
     \subsection{Answer}
 
-    TODO
+    The discounted return is defined as,
+
+    \[
+    \tag{3.8}
+        G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \cdots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
+    \]
+
+    \subsubsection{Case 1: $\gamma = 0$}
+
+    When $\gamma = 0$, the left policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{left}} &= 1 + 0 + 0 + \cdots = 1
+    \end{align*}
+
+    Similarly, the right policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{right}} &= 0 + 0 + \cdots = 0
+    \end{align*}
+
+    In this case, the left policy is optimal.
+
+    \subsubsection{Case 2: $\gamma = 0.9$}
+
+    When $\gamma = 0.9$, the left policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{left}} &= 1 + 0.9 \cdot 0 + 0.9^2 \cdot 1 + \cdots = 1 + 0.9^2 + 0.9^4 + \cdots
+                        = \sum_{k=0}^{\infty} 0.9^{2k}
+    \end{align*}
+
+    Similarly, the right policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{right}} &= 0 + 0.9 \cdot 2 = 1.8
+    \end{align*}
+
+    In this case, the right policy is optimal.
+
+    \subsubsection{Case 3: $\gamma = 0.5$}
+
+    When $\gamma = 0.5$, the left policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{left}} &= 1 + 0.5 \cdot 0 = 1
+    \end{align*}
+
+    Similarly, the right policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{right}} &= 0 + 0.5 \cdot 2 = 1
+    \end{align*}
+
+    In this case, both policies are optimal.
 
 \end{homeworkProblem}
 
