@@ -569,40 +569,61 @@
         G_{\text{right}} &= 0 + 0 + \cdots = 0
     \end{align*}
 
-    In this case, the left policy is optimal.
+    In this case, the \textbf{left} policy is optimal.
 
     \subsubsection{Case 2: $\gamma = 0.9$}
 
     When $\gamma = 0.9$, the left policy rewards are calculated as follows,
 
     \begin{align*}
-        G_{\text{left}} &= 1 + 0.9 \cdot 0 + 0.9^2 \cdot 1 + \cdots = 1 + 0.9^2 + 0.9^4 + \cdots
-                        = \sum_{k=0}^{\infty} 0.9^{2k}
+        G_{\text{left}} &= 1 + 0.9 \cdot 0 + 0.9^2 \cdot 1 + \cdots\\
+                        &= 1 + 0.9^2 + 0.9^4 + \cdots\\
+                        &= \sum_{k=0}^{\infty} 0.9^{2k}\\
+                        &= \sum_{k=0}^{\infty} 0.81^{k}\\
+                        &= \frac{1}{1 - 0.81}
+                        = \frac{1}{0.19}\\
+                        &= 5.263
     \end{align*}
 
     Similarly, the right policy rewards are calculated as follows,
 
     \begin{align*}
-        G_{\text{right}} &= 0 + 0.9 \cdot 2 = 1.8
+        G_{\text{right}} &= 0 + 0.9 \cdot 2 + 0 + 0.9^3 \cdot 2 + \cdots \\
+                        &= 0.9 \cdot 2 + 0.9^3 \cdot 2 + \cdots\\
+                        &= 2 \cdot \sum_{k=0}^{\infty} 0.9^{2k+1}
+                        = 2 \cdot \sum_{k=0}^{\infty} (0.9)(0.81)^{k}
+                        = 2 \cdot \frac{0.9}{1 - 0.81}\\
+                        &= \frac{1.8}{0.19} = 9.474
     \end{align*}
 
-    In this case, the right policy is optimal.
+    In this case, the \textbf{right} policy is optimal.
 
     \subsubsection{Case 3: $\gamma = 0.5$}
 
     When $\gamma = 0.5$, the left policy rewards are calculated as follows,
 
     \begin{align*}
-        G_{\text{left}} &= 1 + 0.5 \cdot 0 = 1
+        G_{\text{left}} &= 1 + 0.5 \cdot 0 + 0.5^2 \cdot 1 + \cdots\\
+                        &= 1 + 0.5^2 + 0.5^4 + \cdots\\
+                        &= \sum_{k=0}^{\infty} 0.5^{2k}
+                        = \sum_{k=0}^{\infty} 0.25^{k}\\
+                        &= \frac{1}{1 - 0.25}
+                        = \frac{1}{0.75}\\
+                        &= 1.333
     \end{align*}
 
     Similarly, the right policy rewards are calculated as follows,
 
     \begin{align*}
-        G_{\text{right}} &= 0 + 0.5 \cdot 2 = 1
+        G_{\text{right}} &= 0 + 0.5 \cdot 2 + 0 + 0.5^3 \cdot 2 + \cdots \\
+                        &= 0.5 \cdot 2 + 0.5^3 \cdot 2 + \cdots\\
+                        &= 2 \cdot \sum_{k=0}^{\infty} 0.5^{2k+1}
+                        = 2 \cdot \sum_{k=0}^{\infty} (0.5)(0.25)^{k}
+                        = 2 \cdot \frac{0.5}{1 - 0.25}\\
+                        &= \frac{1}{0.75} = 1.333
     \end{align*}
 
-    In this case, both policies are optimal.
+    In this case, both the \textbf{left} and \textbf{right} policies are optimal.
 
 \end{homeworkProblem}
 
