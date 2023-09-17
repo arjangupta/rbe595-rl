@@ -447,11 +447,61 @@
 \begin{homeworkProblem}[Problem 7]
 
     \textbf{(Exercise 3.17)}
-    Write prompt
+    What is the Bellman equation for action values, that
+    is, for $q_{\pi}$? It must give the action value $q_{\pi}(s, a)$ in terms of the action
+    values, $q_{\pi}(s', a')$, of possible successors to the state-action pair $(s, a)$.\\
+    Hint: the backup diagram below corresponds to this equation.
+    Show the sequence of equations analogous to (3.14), but for action
+    values.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.45]{images/suttonbook-qpi-backup-diag.png}
+    \end{figure}
 
     \subsection{Answer}
 
-    TODO
+    From the textbook, the action-value function for a policy $\pi$ is defined as,
+
+    \begin{align*}
+        q_{\pi}(s, a) &\doteq \mathbb{E}_{\pi} \left[ G_t \mid S_t = s, A_t = a \right]\\
+                   &= \mathbb{E}_{\pi} \left[ \sum_{k=0}^{\infty} \gamma^k R_{t+k+1} \mid S_t = s, A_t = a \right]\\
+                   &= \mathbb{E}_{\pi} \left[ R_{t+1} + \gamma \sum_{k=0}^{\infty} \gamma^k R_{t+k+2} \mid S_t = s, A_t = a \right]\\
+                   &= \mathbb{E}_{\pi} \left[ R_{t+1} + \gamma G_{t+1} \mid S_t = s, A_t = a \right]\\
+                     &= \mathbb{E}_{\pi} \left[ R_{t+1} \mid S_t = s, A_t = a \right] + \gamma \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_t = s, A_t = a \right]\\
+    \end{align*}
+
+    Now, let us consider the first and second terms of the above equation separately.\\
+
+    \textbf{First Term}\\
+    \vspace{-0.25cm}
+    \begin{align*}
+        \mathbb{E}_{\pi} \left[ R_{t+1} \mid S_t = s, A_t = a \right] &= \sum_{r \in \mathcal{R}} r \cdot p(r \mid s, a)
+        = \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} r \cdot p(s', r \mid s, a)
+    \end{align*}
+
+    \textbf{Second Term}\\
+    \vspace{-0.25cm}
+    \begin{align*}
+        \gamma \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_t = s, A_t = a \right] &= \gamma \sum_{g \in \mathcal{G}} g \cdot p(g \mid s, a)\\
+        &= \gamma \sum_{g \in \mathcal{G}} \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} g \cdot p(g \mid s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
+    \end{align*}
+    Where, $\sum_{g \in \mathcal{G}} g \cdot p(g \mid s', a') = \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_{t+1} = s', A_{t+1} = a' \right] = q_{\pi}(s', a')$\\
+
+    Therefore the second term is,
+
+    \begin{align*}
+        \gamma \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_t = s, A_t = a \right] &= \gamma\sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} q_{\pi}(s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
+    \end{align*}
+
+    Now, combining the first and second terms, we get,
+
+    \begin{align*}
+        q_{\pi}(s, a) &=  \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} r \cdot p(s', r \mid s, a) + \gamma\sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} q_{\pi}(s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
+        q_{\pi}(s, a) &= \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} p(s', r \mid s, a) \left[ r + \gamma\sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s', a') \right]\\
+    \end{align*}
+
+    Which is the Bellman equation for action values, i.e., for $q_{\pi}$.
 
 \end{homeworkProblem}
 
