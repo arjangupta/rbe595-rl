@@ -395,11 +395,48 @@
 \begin{homeworkProblem}[Problem 6]
 
     \textbf{(Exercise 3.14)}
-    Write prompt
+    The Bellman equation must hold for each state for the value function
+    $v_{\pi}$ shown in Figure 3.2 (right-side) of Example 3.5. Show numerically that this equation holds
+    for the center state, valued at +0.7, with respect to its four neighboring states, valued at
+    +2.3, +0.4, -0.4, and +0.7. (These numbers are accurate only to one decimal place.)
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.45]{images/suttonbook-fig3.2.png}
+    \end{figure}
 
     \subsection{Answer}
 
-    TODO
+    From the textbook, the state-value function for a policy $\pi$ is defined as,
+    \begin{align*}
+        v_{\pi}(s) &\doteq \mathbb{E}_{\pi} \left[ G_t \mid S_t = s \right]\\
+                   &= \sum_{a} \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]
+    \end{align*}
+
+    From Example 3.5, we also know the following given information:
+    \begin{itemize}
+        \item The action set $A =\{\text{up}, \text{down}, \text{left}, \text{right}\}$ in each state.
+        \item An equiprobable random policy is used. Therefore, $\pi(a \mid s) = 0.25$ for all $a \in A$ and $s \in S$.
+        \item The reward is always $0$ for all transitions. 
+        \item $\gamma = 0.9$.
+        \item Any action taken deterministically leads to the expected state, so $p = 1$.
+    \end{itemize}
+        
+    Hence, the state-value function for the center state is,
+    \vspace{-0.25cm}\\
+    \begin{align*}
+        v_{\pi}(s_{\text{center}}) &= \sum_{a} \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]\\
+                   &= \pi(\text{up} \mid s) p(s_{\text{up}}, r \mid s, \text{up}) \left[ r + \gamma v_{\pi}(s_{\text{up}}) \right] + 
+                   \pi(\text{down} \mid s) p(s_{\text{down}}, r \mid s, \text{down}) \left[ r + \gamma v_{\pi}(s_{\text{down}}) \right]\\
+                    & \;\;\; + \pi(\text{left} \mid s) p(s_{\text{left}}, r \mid s, \text{left}) \left[ r + \gamma v_{\pi}(s_{\text{left}}) \right]
+                    + \pi(\text{right} \mid s) p(s_{\text{right}}, r \mid s, \text{right}) \left[ r + \gamma v_{\pi}(s_{\text{right}}) \right]\\
+                    &= 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot 2.3 \right] + 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot 0.4 \right] + 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot (-0.4) \right] + 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot 0.7 \right]\\
+                    &= 0.25 \cdot 0.9 \cdot \left[ 2.3 + 0.4 - 0.4 + 0.7 \right]\\
+                    &= 0.25 \cdot 0.9 \cdot 3.0\\
+                    &= 0.675 \approx 0.7 \text{ (rounded to one decimal place, as mentioned in prompt)}
+    \end{align*}
+
+    Therefore, we see that the Bellman equation holds for the center state, valued at $+0.7$.
 
 \end{homeworkProblem}
 
