@@ -6,7 +6,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_2d_array(array, goal_y=7, goal_x=10):
+def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
     it to a plot of occupied and unoccupied spaces"""
 
@@ -18,6 +18,18 @@ def plot_2d_array(array, goal_y=7, goal_x=10):
     ax.imshow(array, cmap = 'binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
+    # In each unoccupied space, place a small quiver with the direction of the optimal policy
+    for i in range(array.shape[0]):
+        for j in range(array.shape[1]):
+            if array[i][j] == 0:
+                if policy[i][j] == 0:
+                    ax.quiver(j, i, 0, -0.5, scale=1, units='xy')
+                elif policy[i][j] == 1:
+                    ax.quiver(j, i, 0.5, 0, scale=1, units='xy')
+                elif policy[i][j] == 2:
+                    ax.quiver(j, i, 0, 0.5, scale=1, units='xy')
+                elif policy[i][j] == 3:
+                    ax.quiver(j, i, -0.5, 0, scale=1, units='xy')
     # Displaying the plot
     plt.show()
 
@@ -39,8 +51,9 @@ def main():
                       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-    # Calling the function that will convert the 2D array to a plot
-    plot_2d_array(array)
+    # Create a policy array of the same size as the array, fill with random integers from 0 to 3
+    policy = np.random.randint(4, size=(array.shape[0], array.shape[1]))
+    plot_2d_array(array, policy)
     
 # Calling the main function
 if __name__ == "__main__":
