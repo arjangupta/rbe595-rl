@@ -47,8 +47,15 @@ def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
     ax.imshow(array, cmap = 'binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
-    # Form the grid lines
-    ax.grid(which='major', axis='both', linestyle='-', color='k', linewidth=2)
+    # Form the grid lines such that they are in the middle of each cell
+    ax.set_xticks(np.arange(-.5, array.shape[1], 1))
+    ax.set_yticks(np.arange(-.5, array.shape[0], 1))
+    # Hide the tick marks
+    ax.tick_params(axis='both', which='both', length=0)
+    # Decrease text size along the axes
+    ax.tick_params(axis='both', which='major', labelsize=6)
+    # Display the grid
+    ax.grid()
     # Displaying the plot
     plt.show()
 
