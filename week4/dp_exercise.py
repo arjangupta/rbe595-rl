@@ -22,13 +22,16 @@ def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     X, Y = np.meshgrid(np.arange(array.shape[1]), np.arange(array.shape[0]))
     U = np.cos(policy)
     V = np.sin(policy)
+    # Try to hide arrows in the occupied spaces
+    U[array == 1] = 1
+    V[array == 1] = 0.1
     # Plot the arrows
     ax.quiver(X, Y, U, V)
-    # Print X, Y, U, V
-    print("X: ", X)
-    print("Y: ", Y)
-    print("U: ", U)
-    print("V: ", V)
+    # Print X, Y, U, V for only the first 5 rows and columns
+    print("X first5: ", X[:5, :5])
+    print("Y first5: ", Y[:5, :5])
+    print("U first5: ", U[:5, :5])
+    print("V first5: ", V[:5, :5])
     # Displaying the plot
     plt.show()
 
