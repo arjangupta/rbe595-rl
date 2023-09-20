@@ -8,7 +8,7 @@ import numpy as np
 
 def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
-    it to a plot of occupied and unoccupied spaces"""
+    it to a plot of occupied and unoccupied spaces, with arrows"""
 
     # Creating a figure and axes
     fig, ax = plt.subplots()
@@ -35,6 +35,23 @@ def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     # Displaying the plot
     plt.show()
 
+def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
+    """Takes in a 2D array of 0's and 1's and converts
+    it to a plot of occupied and unoccupied spaces, with a grid for every cell"""
+    
+    # Creating a figure and axes
+    fig, ax = plt.subplots()
+    # Set the size of the figure
+    fig.set_size_inches(10, 20)
+    # Creating a plot of the array
+    ax.imshow(array, cmap = 'binary')
+    # Color the goal state red
+    ax.plot(goal_x, goal_y, 'ro')
+    # Form the grid lines
+    ax.grid(which='major', axis='both', linestyle='-', color='k', linewidth=2)
+    # Displaying the plot
+    plt.show()
+
 # Defining the main function
 def main():
     # Creating a 2D array of 0,s and 1,
@@ -56,6 +73,7 @@ def main():
     # Create a policy array of the same size as the array, fill with random real numbers between -2pi and 2pi
     policy = np.random.uniform(-2*np.pi, 2*np.pi, array.shape)
     plot_2d_array(array, policy)
+    plot_2d_array_with_grid(array)
     
 # Calling the main function
 if __name__ == "__main__":
