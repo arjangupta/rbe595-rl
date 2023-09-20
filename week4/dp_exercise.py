@@ -56,6 +56,12 @@ def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
     ax.tick_params(axis='both', which='major', labelsize=6)
     # Display the grid
     ax.grid()
+    # For every unoccupied cell, fill it in as a random shade of grey
+    for i in range(array.shape[0]):
+        for j in range(array.shape[1]):
+            if array[i, j] == 0:
+                grey = np.random.uniform(0.4, 0.9)
+                ax.add_patch(plt.Rectangle((j-.5, i-.5), 1, 1, color=(grey, grey, grey)))
     # Displaying the plot
     plt.show()
 
