@@ -18,18 +18,18 @@ def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     ax.imshow(array, cmap = 'binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
-    # In each unoccupied space, place a small quiver with the direction of the optimal policy
+    # In each unoccupied space, place a quiver
     for i in range(array.shape[0]):
         for j in range(array.shape[1]):
             if array[i][j] == 0:
                 if policy[i][j] == 0:
-                    ax.quiver(j, i, 0, -0.5, scale=1, units='xy')
+                    ax.quiver(j, i, 0, -0.5)
                 elif policy[i][j] == 1:
-                    ax.quiver(j, i, 0.5, 0, scale=1, units='xy')
+                    ax.quiver(j, i, 0.5, 0)
                 elif policy[i][j] == 2:
-                    ax.quiver(j, i, 0, 0.5, scale=1, units='xy')
+                    ax.quiver(j, i, 0, 0.5)
                 elif policy[i][j] == 3:
-                    ax.quiver(j, i, -0.5, 0, scale=1, units='xy')
+                    ax.quiver(j, i, -0.5, 0)
     # Displaying the plot
     plt.show()
 
