@@ -13,7 +13,7 @@ def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     # Creating a figure and axes
     fig, ax = plt.subplots()
     # Set the size of the figure
-    fig.set_size_inches(10, 20)
+    fig.set_size_inches(14, 7)
     # Creating a plot of the array
     ax.imshow(array, cmap = 'binary')
     # Color the goal state red
@@ -42,7 +42,7 @@ def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
     # Creating a figure and axes
     fig, ax = plt.subplots()
     # Set the size of the figure
-    fig.set_size_inches(10, 20)
+    fig.set_size_inches(14, 7)
     # Creating a plot of the array
     ax.imshow(array, cmap = 'binary')
     # Color the goal state red
