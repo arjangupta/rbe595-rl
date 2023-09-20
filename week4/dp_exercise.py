@@ -24,6 +24,11 @@ def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     V = np.sin(policy)
     # Plot the arrows
     ax.quiver(X, Y, U, V)
+    # Print X, Y, U, V
+    print("X: ", X)
+    print("Y: ", Y)
+    print("U: ", U)
+    print("V: ", V)
     # Displaying the plot
     plt.show()
 
@@ -45,8 +50,8 @@ def main():
                       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-    # Create a policy array of the same size as the array, fill with random integers from 0 to 3
-    policy = np.random.randint(4, size=(array.shape[0], array.shape[1]))
+    # Create a policy array of the same size as the array, fill with random real numbers between -2pi and 2pi
+    policy = np.random.uniform(-2*np.pi, 2*np.pi, array.shape)
     plot_2d_array(array, policy)
     
 # Calling the main function
