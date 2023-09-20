@@ -32,6 +32,11 @@ def plot_2d_array(array, policy, goal_y=7, goal_x=10):
     print("Y first5: ", Y[:5, :5])
     print("U first5: ", U[:5, :5])
     print("V first5: ", V[:5, :5])
+    # Show ticks at every integer
+    ax.set_xticks(np.arange(0, array.shape[1], 1))
+    ax.set_yticks(np.arange(0, array.shape[0], 1))
+    # Decrease text size along the axes
+    ax.tick_params(axis='both', which='major', labelsize=8)
     # Displaying the plot
     plt.show()
 
