@@ -18,7 +18,7 @@ class Robot:
         self.goal_x = goal_x
         self.goal_y = goal_y
 
-    def get_reward(self, i, j, action):
+    def get_reward(self, i, j):
         """Returns the reward for a given state and action"""
         # If the state is the goal state, return max reward
         if i == self.goal_y and j == self.goal_x:
@@ -153,7 +153,7 @@ class PolicyIteration:
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
             # Calculate the reward for the action
-            reward = self.robot.get_reward(i, j, action)
+            reward = self.robot.get_reward(new_i, new_j)
             # Add to total value summation
             value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
         # Print the value summation
@@ -193,7 +193,7 @@ class PolicyIteration:
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
             # Calculate the reward for the action
-            reward = self.robot.get_reward(i, j, action)
+            reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
             action_value = reward + self.gamma * self.value_function[new_i, new_j]
             # Add to list of action values
