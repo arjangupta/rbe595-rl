@@ -150,7 +150,7 @@ class PolicyIteration:
                     # Store the old action
                     old_action = self.policy[i, j]
                     # Calculate the new action
-                    new_action = self.calculate_new_action(i, j, self.value_function)
+                    new_action = self.calculate_new_action(i, j)
                     # Update the policy
                     self.policy[i, j] = new_action
                     # If the old action and the new action are the same, set the flag to true
@@ -282,12 +282,11 @@ def main():
                       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-    # Create a policy array of the same size as the array, fill with random real numbers between -2pi and 2pi
-    policy = np.random.uniform(-2*np.pi, 2*np.pi, grid_world.shape)
-    plot_2d_array_with_arrows(grid_world, policy)
-    plot_2d_array_with_grid(grid_world)
 
-    # Run
+    # Run Policy Iteration algorithm
+    policy_iteration = PolicyIteration(grid_world, generalized=False, theta=5)
+    print("Running Policy Iteration algorithm...")
+    value_function, policy = policy_iteration.run()
     
 # Calling the main function
 if __name__ == "__main__":
