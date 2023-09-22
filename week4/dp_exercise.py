@@ -195,9 +195,18 @@ class PolicyIteration:
     def run(self):
         """Run the policy iteration algorithm as described in Page 80 of textbook"""
         keep_running = True
+        i = 0
         while keep_running:
+            # For every N iterations, print the value function and policy
+            if i % 500 == 0:
+                print("Iteration: ", i)
+                print("Value Function: ", self.value_function)
+                print("Policy: ", self.policy)
+                print()
             self.policy_evaluation()
             keep_running = self.policy_improvement()
+            i += 1
+
         return self.value_function, self.policy
 
 def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
