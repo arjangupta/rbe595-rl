@@ -196,8 +196,8 @@ class PolicyIteration:
         action = self.policy[i, j]
         # Take action
         new_i, new_j = self.robot.take_action(i, j, action)
-        # if new_i == i and new_j == j:
-        #     return value_summation
+        if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            return value_summation
         # Calculate the reward for the action
         reward = self.robot.get_reward(new_i, new_j)
         # Add to total value summation
