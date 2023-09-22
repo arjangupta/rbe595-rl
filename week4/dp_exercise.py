@@ -37,66 +37,50 @@ class Robot:
         if action == 0:
             # If the state is not in the top row
             if i != 0:
-                # If the state above is unoccupied
-                if self.grid_world[i-1, j] == 0:
-                    # Return the new state
-                    return i-1, j
+                # Return the new state
+                return i-1, j
         # If the action is 1 (up-right)
         elif action == 1:
             # If the state is not in the top row or the rightmost column
             if i != 0 and j != self.grid_world.shape[1]-1:
-                # If the state above and to the right is unoccupied
-                if self.grid_world[i-1, j+1] == 0:
-                    # Return the new state
-                    return i-1, j+1
+                # Return the new state
+                return i-1, j+1
         # If the action is 2 (right)
         elif action == 2:
             # If the state is not in the rightmost column
             if j != self.grid_world.shape[1]-1:
-                # If the state to the right is unoccupied
-                if self.grid_world[i, j+1] == 0:
-                    # Return the new state
-                    return i, j+1
+                # Return the new state
+                return i, j+1
         # If the action is 3 (down-right)
         elif action == 3:
             # If the state is not in the bottom row or the rightmost column
             if i != self.grid_world.shape[0]-1 and j != self.grid_world.shape[1]-1:
-                # If the state below and to the right is unoccupied
-                if self.grid_world[i+1, j+1] == 0:
-                    # Return the new state
-                    return i+1, j+1
+                # Return the new state
+                return i+1, j+1
         # If the action is 4 (down)
         elif action == 4:
             # If the state is not in the bottom row
             if i != self.grid_world.shape[0]-1:
-                # If the state below is unoccupied
-                if self.grid_world[i+1, j] == 0:
-                    # Return the new state
-                    return i+1, j
+                # Return the new state
+                return i+1, j
         # If the action is 5 (down-left)
         elif action == 5:
             # If the state is not in the bottom row or the leftmost column
             if i != self.grid_world.shape[0]-1 and j != 0:
-                # If the state below and to the left is unoccupied
-                if self.grid_world[i+1, j-1] == 0:
-                    # Return the new state
-                    return i+1, j-1
+                # Return the new state
+                return i+1, j-1
         # If the action is 6 (left)
         elif action == 6:
             # If the state is not in the leftmost column
             if j != 0:
-                # If the state to the left is unoccupied
-                if self.grid_world[i, j-1] == 0:
-                    # Return the new state
-                    return i, j-1
+                # Return the new state
+                return i, j-1
         # If the action is 7 (up-left)
         elif action == 7:
             # If the state is not in the top row or the leftmost column
             if i != 0 and j != 0:
-                # If the state above and to the left is unoccupied
-                if self.grid_world[i-1, j-1] == 0:
-                    # Return the new state
-                    return i-1, j-1
+                # Return the new state
+                return i-1, j-1
         # If the action is invalid, return the current state
         return i, j
 
@@ -152,6 +136,8 @@ class PolicyIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
+            if new_i == i and new_j == j:
+                continue
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Add to total value summation
@@ -192,6 +178,8 @@ class PolicyIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
+            if new_i == i and new_j == j:
+                continue
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
