@@ -128,7 +128,7 @@ class PolicyIteration:
             for i in range(self.grid_world.shape[0]):
                 for j in range(self.grid_world.shape[1]):
                     # If the state is unoccupied
-                    if self.grid_world[i, j] == 0:  # FIXME: do we need this?
+                    if self.grid_world[i, j] == 0:
                         # Calculate the value function for the state
                         v = self.calculate_value_function(i, j)
                         # Calculate the difference between the old value function and the new value function
