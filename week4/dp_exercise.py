@@ -162,6 +162,7 @@ class PolicyIteration:
                     self.value_function[i, j] = self.calculate_value_function_bellman(i, j)
                     # Calculate the difference between the old value function and the new value function
                     delta = max(delta, abs(v - self.value_function[i, j]))
+            # avg_delta = delta/(self.grid_world.shape[0]*self.grid_world.shape[1])
             print("Delta: ", delta)
             # print("Value Function: ", self.value_function)
             # If delta < theta, then break
@@ -213,6 +214,7 @@ class PolicyIteration:
     def policy_improvement(self):
         """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
+        #FIXME: should we do a count for this instead? make sure all values are stable?
         policy_stable = False
         # For each state in the grid world
         for i in range(self.grid_world.shape[0]):
@@ -304,6 +306,7 @@ class ValueIteration:
                     self.value_function[i, j] = self.calculate_value_function_bellman(i, j)
                     # Calculate the difference between the old value function and the new value function
                     delta = max(delta, abs(v - self.value_function[i, j]))
+            # avg_delta = delta/(self.grid_world.shape[0]*self.grid_world.shape[1])
             print("Delta: ", delta)
             # print("Value Function: ", self.value_function)
             # If delta < theta, then break
@@ -536,7 +539,11 @@ def main(model_type, alg_type):
         plot_2d_array_with_grid(grid_world, value_function)
     else:
         # Run Generalized Policy Iteration
+        policy_iteration = PolicyIteration(probability, grid_world, generalized=True, theta=0.01)
         print("Running Generalized Policy Iteration algorithm...")
+        value_function, policy = policy_iteration.run()
+        plot_2d_array_with_arrows(grid_world, policy)
+        plot_2d_array_with_grid(grid_world, value_function)
 
 # Calling the main function
 if __name__ == "__main__":
