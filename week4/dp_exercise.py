@@ -173,6 +173,8 @@ class PolicyIteration:
             # Calculate the reward for the action
             reward = self.reward_system.get_reward(i, j, action)
             # Add to total value summation
+            #FIXME: which one?
+            value_summation += self.policy[i, j] * self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
             value_summation += reward + self.gamma * self.value_function[new_i, new_j]
         # Return the value summation
         return value_summation
