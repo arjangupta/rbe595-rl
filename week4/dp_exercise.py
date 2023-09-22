@@ -382,9 +382,9 @@ def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
     # For every unoccupied cell, fill it in as a shade of grey of the normalized value
     for i in range(values.shape[0]):
         for j in range(values.shape[1]):
-            # if gridworld[i,j]!=1:
-            normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
-            ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(normalized[i,j], normalized[i,j], normalized[i,j])))
+            if gridworld[i,j]!=1:
+                normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
+                ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(normalized[i,j], normalized[i,j], normalized[i,j])))
     # Displaying the plot
     plt.show()
 
