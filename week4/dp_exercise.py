@@ -8,24 +8,118 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
+def take_action(i, j, action, grid_world):
+    """For actions 0-7, returns the new state after taking the action.
+    The actions are enumerated in clockwise order, starting with 0 at 12 o'clock."""
+    # If the action is 0 (up)
+    if action == 0:
+        # If the state is not in the top row
+        if i != 0:
+            # If the state above is unoccupied
+            if grid_world[i-1, j] == 0:
+                # Return the new state
+                return i-1, j
+    # If the action is 1 (up-right)
+    elif action == 1:
+        # If the state is not in the top row or the rightmost column
+        if i != 0 and j != grid_world.shape[1]-1:
+            # If the state above and to the right is unoccupied
+            if grid_world[i-1, j+1] == 0:
+                # Return the new state
+                return i-1, j+1
+    # If the action is 2 (right)
+    elif action == 2:
+        # If the state is not in the rightmost column
+        if j != grid_world.shape[1]-1:
+            # If the state to the right is unoccupied
+            if grid_world[i, j+1] == 0:
+                # Return the new state
+                return i, j+1
+    # If the action is 3 (down-right)
+    elif action == 3:
+        # If the state is not in the bottom row or the rightmost column
+        if i != grid_world.shape[0]-1 and j != grid_world.shape[1]-1:
+            # If the state below and to the right is unoccupied
+            if grid_world[i+1, j+1] == 0:
+                # Return the new state
+                return i+1, j+1
+    # If the action is 4 (down)
+    elif action == 4:
+        # If the state is not in the bottom row
+        if i != grid_world.shape[0]-1:
+            # If the state below is unoccupied
+            if grid_world[i+1, j] == 0:
+                # Return the new state
+                return i+1, j
+    # If the action is 5 (down-left)
+    elif action == 5:
+        # If the state is not in the bottom row or the leftmost column
+        if i != grid_world.shape[0]-1 and j != 0:
+            # If the state below and to the left is unoccupied
+            if grid_world[i+1, j-1] == 0:
+                # Return the new state
+                return i+1, j-1
+    # If the action is 6 (left)
+    elif action == 6:
+        # If the state is not in the leftmost column
+        if j != 0:
+            # If the state to the left is unoccupied
+            if grid_world[i, j-1] == 0:
+                # Return the new state
+                return i, j-1
+    # If the action is 7 (up-left)
+    elif action == 7:
+        # If the state is not in the top row or the leftmost column
+        if i != 0 and j != 0:
+            # If the state above and to the left is unoccupied
+            if grid_world[i-1, j-1] == 0:
+                # Return the new state
+                return i-1, j-1
+    # If the action is invalid, return the current state
+    return i, j
+
+class RewardSystem:
+    """Class for the reward system of the grid world"""
+
+    def __init__(self, grid_world, goal_x=10, goal_y=7):
+        """Constructor for the RewardSystem class"""
+        self.grid_world = grid_world
+        self.goal_x = goal_x
+        self.goal_y = goal_y
+
+    def get_reward(self, i, j, action):
+        """Returns the reward for a given state and action"""
+        # If the state is the goal state, return max reward
+        if i == self.goal_y and j == self.goal_x:
+            return 100
+        # If the state is occupied, return min reward
+        if self.grid_world[i, j] == 1:
+            return -50
+        # If the state is unoccupied, return -1
+        else:
+            return -1
 
 class PolicyIteration:
     """Class for the Policy Iteration algorithm as described in the Barto & Sutton textbook"""
 
-    def __init__(self, policy, probability, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01):
+    def __init__(self, probability, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01, generalized=False):
         """Constructor for the Policy Iteration algorithm"""
-        self.policy = policy
         self.probability = probability
         self.grid_world = grid_world
         self.goal_x = goal_x
         self.goal_y = goal_y
         self.gamma = gamma
         self.theta = theta
+        self.generalized = generalized
+        # Initialize a reward system
+        self.reward_system = RewardSystem(self.grid_world, self.goal_x, self.goal_y)
+        # Initialize a value function of zeros
+        self.value_function = np.zeros(self.grid_world.shape)
+        # Initialize a policy of random actions for each state (0-7)
+        self.policy = np.random.randint(0, 8, self.grid_world.shape)
 
     def policy_evaluation(self):
-        """Performs policy evaluation on a policy"""
-        # Initialize a value function of zeros
-        value_function = np.zeros(self.grid_world.shape)
+        """Performs policy evaluation step of algorithm"""
         # Repeat until delta < theta
         while True:
             # Initialize delta to 0
@@ -38,17 +132,17 @@ class PolicyIteration:
                         # Calculate the value function for the state
                         v = self.calculate_value_function(i, j)
                         # Calculate the difference between the old value function and the new value function
-                        delta = max(delta, abs(value_function[i, j] - v))
+                        delta = max(delta, abs(self.value_function[i, j] - v))
                         # Update the value function
-                        value_function[i, j] = v
+                        self.value_function[i, j] = v
             # If delta < theta, then break
             if delta < self.theta:
                 break
-        # Return the value function
-        return value_function
+            if self.generalized:
+                break
 
-    def policy_improvement(self, value_function):
-        """Performs policy improvement on a policy"""
+    def policy_improvement(self):
+        """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
         policy_stable = False
         # For each state in the grid world
@@ -59,50 +153,64 @@ class PolicyIteration:
                     # Store the old action
                     old_action = self.policy[i, j]
                     # Calculate the new action
-                    new_action = self.calculate_new_action(i, j, value_function)
+                    new_action = self.calculate_new_action(i, j)
                     # Update the policy
                     self.policy[i, j] = new_action
                     # If the old action and the new action are the same, set the flag to true
                     if old_action == new_action:
                         policy_stable = True
         # Return the policy and the boolean flag
-        return self.policy, policy_stable
+        return policy_stable
 
     def calculate_value_function(self, i, j):
         """Calculates the value function for a state"""
-        # Calculate the value function for the state
-        v = 0
-        # If the state is not the goal state
-        if i != self.goal_y and j != self.goal_x:
-            # Calculate the value function for the state
-            # FIXME: why cosine???
-            # FIXME: we should be using the value of all the states around it right???
-            eight_connected_locations = self.calculate_eight_connected(i, j)
-            v = 0
-            for neighbor in eight_connected_locations:
-                v += self.policy[i,j] * self.probability[i, j] * (self.reward[i,j] + self.gamma * self.calculate_value_function_for_action(neighbor[0],neighbor[1],self.policy[neighbor[0],neighbor[1]]))
-        # Return the value function
-        return v
-
-    def calculate_eight_connected(self, row, col):
-        locations = list()
-        for i in range(-1, 1, 1):
-            if 0 <= row + i < len(self.grid_world[0]):
-                for j in range(-1, 1, 1):
-                    if 0 <= col + j < len(self.grid_world[1]):
-                        locations.append((row + i, col + j))
-        return locations
-
-    def calculate_new_action(self, i, j, value_function):
-        """Calculates the new action for a state"""
-        # Initialize an array to store the value function for each action
-        value_function_for_action = np.zeros(4)
+        # Summation variable
+        value_summation = 0
         # For each action
-        for action in range(4):
-            # Calculate the value function for the action
-            value_function_for_action[action] = self.calculate_value_function_for_action(i, j, action)
-        # Return the action with the maximum value function
-        return np.argmax(value_function_for_action)
+        for action in range(8):
+            # Take action
+            new_i, new_j = take_action(i, j, action, self.grid_world)
+            # Calculate the reward for the action
+            reward = self.reward_system.get_reward(i, j, action)
+            # Add to total value summation
+            value_summation += reward + self.gamma * self.value_function[new_i, new_j]
+        # Return the value summation
+        return value_summation
+            
+
+    def calculate_new_action(self, i, j):
+        """Calculates the new action for a state"""
+        # Initialize a list of action values
+        action_values = []
+        # For each action
+        for action in range(8):
+            # Take action
+            new_i, new_j = take_action(i, j, action, self.grid_world)
+            # Calculate the reward for the action
+            reward = self.reward_system.get_reward(i, j, action)
+            # Calculate the action value
+            action_value = reward + self.gamma * self.value_function[new_i, new_j]
+            # Add to list of action values
+            action_values.append(action_value)
+        # Return the action with the maximum action value
+        return np.argmax(action_values)
+    
+    def run(self):
+        """Run the policy iteration algorithm as described in Page 80 of textbook"""
+        keep_running = True
+        i = 0
+        while keep_running:
+            # For every N iterations, print the value function and policy
+            if i % 500 == 0:
+                print("Iteration: ", i)
+                print("Value Function: ", self.value_function)
+                print("Policy: ", self.policy)
+                print()
+            self.policy_evaluation()
+            keep_running = self.policy_improvement()
+            i += 1
+
+        return self.value_function, self.policy
 
 
 def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
@@ -204,15 +312,16 @@ def main(model_type):
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
-    # Create a policy array of the same size as the array, fill with random real numbers between -2pi and 2pi
-    policy = np.random.uniform(-2 * np.pi, 2 * np.pi, grid_world.shape)
-    plot_2d_array_with_arrows(grid_world, policy)
+
     if model_type == "Deterministic":
         probability = np.ones(grid_world.shape)
     else:
         probability = np.full(grid_world.shape, .8)
-    plot_2d_array_with_grid(grid_world)
 
+    # Run Policy Iteration algorithm
+    policy_iteration = PolicyIteration(probability, grid_world, generalized=False, theta=5)
+    print("Running Policy Iteration algorithm...")
+    value_function, policy = policy_iteration.run()
 
 # Calling the main function
 if __name__ == "__main__":
