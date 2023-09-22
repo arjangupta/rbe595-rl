@@ -3,15 +3,19 @@
 # Week 4 Dynamic Programming Exercise
 
 # Importing the necessary libraries
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 class PolicyIteration:
     """Class for the Policy Iteration algorithm as described in the Barto & Sutton textbook"""
 
-    def __init__(self, policy, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01):
+    def __init__(self, policy, probability, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01):
         """Constructor for the Policy Iteration algorithm"""
         self.policy = policy
+        self.probability = probability
         self.grid_world = grid_world
         self.goal_x = goal_x
         self.goal_y = goal_y
@@ -30,7 +34,7 @@ class PolicyIteration:
             for i in range(self.grid_world.shape[0]):
                 for j in range(self.grid_world.shape[1]):
                     # If the state is unoccupied
-                    if self.grid_world[i, j] == 0:
+                    if self.grid_world[i, j] == 0:  # FIXME: do we need this?
                         # Calculate the value function for the state
                         v = self.calculate_value_function(i, j)
                         # Calculate the difference between the old value function and the new value function
@@ -69,11 +73,25 @@ class PolicyIteration:
         # Calculate the value function for the state
         v = 0
         # If the state is not the goal state
-        if i != self.goal_y or j != self.goal_x:
+        if i != self.goal_y and j != self.goal_x:
             # Calculate the value function for the state
-            v = np.cos(self.policy[i, j]) + self.gamma * self.calculate_value_function_for_action(i, j, self.policy[i, j])
+            # FIXME: why cosine???
+            # FIXME: we should be using the value of all the states around it right???
+            eight_connected_locations = self.calculate_eight_connected(i, j)
+            v = 0
+            for neighbor in eight_connected_locations:
+                v += self.policy[i,j] * self.probability[i, j] * (self.reward[i,j] + self.gamma * self.calculate_value_function_for_action(neighbor[0],neighbor[1],self.policy[neighbor[0],neighbor[1]]))
         # Return the value function
         return v
+
+    def calculate_eight_connected(self, row, col):
+        locations = list()
+        for i in range(-1, 1, 1):
+            if 0 <= row + i < len(self.grid_world[0]):
+                for j in range(-1, 1, 1):
+                    if 0 <= col + j < len(self.grid_world[1]):
+                        locations.append((row + i, col + j))
+        return locations
 
     def calculate_new_action(self, i, j, value_function):
         """Calculates the new action for a state"""
@@ -86,6 +104,7 @@ class PolicyIteration:
         # Return the action with the maximum value function
         return np.argmax(value_function_for_action)
 
+
 def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
     it to a plot of occupied and unoccupied spaces, with arrows"""
@@ -95,7 +114,7 @@ def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
     # Set the size of the figure
     fig.set_size_inches(14, 7)
     # Creating a plot of the array
-    ax.imshow(array, cmap = 'binary')
+    ax.imshow(array, cmap='binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
     # Form the mesh grid
@@ -120,16 +139,17 @@ def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
     # Displaying the plot
     plt.show()
 
+
 def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
     it to a plot of occupied and unoccupied spaces, with a grid for every cell"""
-    
+
     # Creating a figure and axes
     fig, ax = plt.subplots()
     # Set the size of the figure
     fig.set_size_inches(14, 7)
     # Creating a plot of the array
-    ax.imshow(array, cmap = 'binary')
+    ax.imshow(array, cmap='binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
     # Form the grid lines such that they are in the middle of each cell
@@ -146,33 +166,57 @@ def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
         for j in range(array.shape[1]):
             if array[i, j] == 0:
                 grey = np.random.uniform(0.4, 0.9)
-                ax.add_patch(plt.Rectangle((j-.5, i-.5), 1, 1, color=(grey, grey, grey)))
+                ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(grey, grey, grey)))
     # Displaying the plot
     plt.show()
 
+
 # Defining the main function
-def main():
+def main(model_type):
     # Creating a 2D array of 0,s and 1,
-    grid_world = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
-                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    grid_world = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                           [1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                           [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
     # Create a policy array of the same size as the array, fill with random real numbers between -2pi and 2pi
-    policy = np.random.uniform(-2*np.pi, 2*np.pi, grid_world.shape)
+    policy = np.random.uniform(-2 * np.pi, 2 * np.pi, grid_world.shape)
     plot_2d_array_with_arrows(grid_world, policy)
+    if model_type == "Deterministic":
+        probability = np.ones(grid_world.shape)
+    else:
+        probability = np.full(grid_world.shape, .8)
     plot_2d_array_with_grid(grid_world)
-    
+
+
 # Calling the main function
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) <= 1 or (sys.argv[1] != "Deterministic" and sys.argv[1] != "Stochastic"):
+        print("Please enter either \"Deterministic\" or \"Stochastic\"")
+    else:
+        main(sys.argv[1])
