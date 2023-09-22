@@ -146,7 +146,6 @@ class PolicyIteration:
         # Initialize a policy of random actions for each state (0-7)
         self.policy = np.random.randint(0, 8, self.grid_world.shape)
 
-
     def policy_evaluation(self):
         """Performs policy evaluation step of algorithm"""
         # Repeat until delta < theta
@@ -183,7 +182,7 @@ class PolicyIteration:
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate total value summation
             #FIXME: look at probabilty more for stochastic
-            value_summation += .125 * (reward + self.gamma * self.value_function[new_i, new_j])
+            value_summation += .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
 
         return value_summation
 
@@ -448,8 +447,6 @@ def create_arrows(policy, gridworld):
                     V[i, j] = np.sin(3 * math.pi / 4)
 
     return U,V
-
-
 
 
 
