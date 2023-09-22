@@ -349,7 +349,8 @@ class ValueIteration:
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
-            action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
+            # FIXME: look at probabilty more for stochastic
+            action_value = 0.125 * (reward + self.gamma * self.value_function[new_i, new_j])
             # Add to list of action values
             action_values.append(action_value)
         # Return the action with the maximum action value
