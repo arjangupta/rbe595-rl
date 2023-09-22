@@ -112,14 +112,12 @@ class PolicyIteration:
             # For each state in the grid world
             for i in range(self.grid_world.shape[0]):
                 for j in range(self.grid_world.shape[1]):
-                    # If the state is unoccupied
-                    if self.grid_world[i, j] == 0:
-                        # Calculate the value function for the state
-                        v = self.calculate_value_function(i, j)
-                        # Calculate the difference between the old value function and the new value function
-                        delta = max(delta, abs(self.value_function[i, j] - v))
-                        # Update the value function
-                        self.value_function[i, j] = v
+                    # Calculate the value function for the state
+                    v = self.calculate_value_function(i, j)
+                    # Calculate the difference between the old value function and the new value function
+                    delta = max(delta, abs(self.value_function[i, j] - v))
+                    # Update the value function
+                    self.value_function[i, j] = v
             # Print delta
             print("Delta: ", delta)
             # If delta < theta, then break
