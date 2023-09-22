@@ -8,81 +8,12 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-def take_action(i, j, action, grid_world):
-    """For actions 0-7, returns the new state after taking the action.
-    The actions are enumerated in clockwise order, starting with 0 at 12 o'clock."""
-    # If the action is 0 (up)
-    if action == 0:
-        # If the state is not in the top row
-        if i != 0:
-            # If the state above is unoccupied
-            if grid_world[i-1, j] == 0:
-                # Return the new state
-                return i-1, j
-    # If the action is 1 (up-right)
-    elif action == 1:
-        # If the state is not in the top row or the rightmost column
-        if i != 0 and j != grid_world.shape[1]-1:
-            # If the state above and to the right is unoccupied
-            if grid_world[i-1, j+1] == 0:
-                # Return the new state
-                return i-1, j+1
-    # If the action is 2 (right)
-    elif action == 2:
-        # If the state is not in the rightmost column
-        if j != grid_world.shape[1]-1:
-            # If the state to the right is unoccupied
-            if grid_world[i, j+1] == 0:
-                # Return the new state
-                return i, j+1
-    # If the action is 3 (down-right)
-    elif action == 3:
-        # If the state is not in the bottom row or the rightmost column
-        if i != grid_world.shape[0]-1 and j != grid_world.shape[1]-1:
-            # If the state below and to the right is unoccupied
-            if grid_world[i+1, j+1] == 0:
-                # Return the new state
-                return i+1, j+1
-    # If the action is 4 (down)
-    elif action == 4:
-        # If the state is not in the bottom row
-        if i != grid_world.shape[0]-1:
-            # If the state below is unoccupied
-            if grid_world[i+1, j] == 0:
-                # Return the new state
-                return i+1, j
-    # If the action is 5 (down-left)
-    elif action == 5:
-        # If the state is not in the bottom row or the leftmost column
-        if i != grid_world.shape[0]-1 and j != 0:
-            # If the state below and to the left is unoccupied
-            if grid_world[i+1, j-1] == 0:
-                # Return the new state
-                return i+1, j-1
-    # If the action is 6 (left)
-    elif action == 6:
-        # If the state is not in the leftmost column
-        if j != 0:
-            # If the state to the left is unoccupied
-            if grid_world[i, j-1] == 0:
-                # Return the new state
-                return i, j-1
-    # If the action is 7 (up-left)
-    elif action == 7:
-        # If the state is not in the top row or the leftmost column
-        if i != 0 and j != 0:
-            # If the state above and to the left is unoccupied
-            if grid_world[i-1, j-1] == 0:
-                # Return the new state
-                return i-1, j-1
-    # If the action is invalid, return the current state
-    return i, j
 
-class RewardSystem:
-    """Class for the reward system of the grid world"""
+class Robot:
+    """Class for taking action, returning reward"""
 
     def __init__(self, grid_world, goal_x=10, goal_y=7):
-        """Constructor for the RewardSystem class"""
+        """Constructor for the Robot class"""
         self.grid_world = grid_world
         self.goal_x = goal_x
         self.goal_y = goal_y
@@ -99,6 +30,76 @@ class RewardSystem:
         else:
             return -1
 
+    def take_action(self, i, j, action):
+        """For actions 0-7, returns the new state after taking the action.
+        The actions are enumerated in clockwise order, starting with 0 at 12 o'clock."""
+        # If the action is 0 (up)
+        if action == 0:
+            # If the state is not in the top row
+            if i != 0:
+                # If the state above is unoccupied
+                if self.grid_world[i-1, j] == 0:
+                    # Return the new state
+                    return i-1, j
+        # If the action is 1 (up-right)
+        elif action == 1:
+            # If the state is not in the top row or the rightmost column
+            if i != 0 and j != self.grid_world.shape[1]-1:
+                # If the state above and to the right is unoccupied
+                if self.grid_world[i-1, j+1] == 0:
+                    # Return the new state
+                    return i-1, j+1
+        # If the action is 2 (right)
+        elif action == 2:
+            # If the state is not in the rightmost column
+            if j != self.grid_world.shape[1]-1:
+                # If the state to the right is unoccupied
+                if self.grid_world[i, j+1] == 0:
+                    # Return the new state
+                    return i, j+1
+        # If the action is 3 (down-right)
+        elif action == 3:
+            # If the state is not in the bottom row or the rightmost column
+            if i != self.grid_world.shape[0]-1 and j != self.grid_world.shape[1]-1:
+                # If the state below and to the right is unoccupied
+                if self.grid_world[i+1, j+1] == 0:
+                    # Return the new state
+                    return i+1, j+1
+        # If the action is 4 (down)
+        elif action == 4:
+            # If the state is not in the bottom row
+            if i != self.grid_world.shape[0]-1:
+                # If the state below is unoccupied
+                if self.grid_world[i+1, j] == 0:
+                    # Return the new state
+                    return i+1, j
+        # If the action is 5 (down-left)
+        elif action == 5:
+            # If the state is not in the bottom row or the leftmost column
+            if i != self.grid_world.shape[0]-1 and j != 0:
+                # If the state below and to the left is unoccupied
+                if self.grid_world[i+1, j-1] == 0:
+                    # Return the new state
+                    return i+1, j-1
+        # If the action is 6 (left)
+        elif action == 6:
+            # If the state is not in the leftmost column
+            if j != 0:
+                # If the state to the left is unoccupied
+                if self.grid_world[i, j-1] == 0:
+                    # Return the new state
+                    return i, j-1
+        # If the action is 7 (up-left)
+        elif action == 7:
+            # If the state is not in the top row or the leftmost column
+            if i != 0 and j != 0:
+                # If the state above and to the left is unoccupied
+                if self.grid_world[i-1, j-1] == 0:
+                    # Return the new state
+                    return i-1, j-1
+        # If the action is invalid, return the current state
+        return i, j
+
 class PolicyIteration:
     """Class for the Policy Iteration algorithm as described in the Barto & Sutton textbook"""
 
@@ -112,7 +113,7 @@ class PolicyIteration:
         self.theta = theta
         self.generalized = generalized
         # Initialize a reward system
-        self.reward_system = RewardSystem(self.grid_world, self.goal_x, self.goal_y)
+        self.robot = Robot(self.grid_world, self.goal_x, self.goal_y)
         # Initialize a value function of zeros
         self.value_function = np.zeros(self.grid_world.shape)
         # Initialize a policy of random actions for each state (0-7)
@@ -169,9 +170,9 @@ class PolicyIteration:
         # For each action
         for action in range(8):
             # Take action
-            new_i, new_j = take_action(i, j, action, self.grid_world)
+            new_i, new_j = self.robot.take_action(i, j, action)
             # Calculate the reward for the action
-            reward = self.reward_system.get_reward(i, j, action)
+            reward = self.robot.get_reward(i, j, action)
             # Add to total value summation
             #FIXME: which one?
             value_summation += self.policy[i, j] * self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
@@ -187,9 +188,9 @@ class PolicyIteration:
         # For each action
         for action in range(8):
             # Take action
-            new_i, new_j = take_action(i, j, action, self.grid_world)
+            new_i, new_j = self.robot.take_action(i, j, action)
             # Calculate the reward for the action
-            reward = self.reward_system.get_reward(i, j, action)
+            reward = self.robot.get_reward(i, j, action)
             # Calculate the action value
             action_value = reward + self.gamma * self.value_function[new_i, new_j]
             # Add to list of action values
