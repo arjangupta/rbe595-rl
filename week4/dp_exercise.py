@@ -6,20 +6,114 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+def take_action(i, j, action, grid_world):
+    """For actions 0-7, returns the new state after taking the action.
+    The actions are enumerated in clockwise order, starting with 0 at 12 o'clock."""
+    # If the action is 0 (up)
+    if action == 0:
+        # If the state is not in the top row
+        if i != 0:
+            # If the state above is unoccupied
+            if grid_world[i-1, j] == 0:
+                # Return the new state
+                return i-1, j
+    # If the action is 1 (up-right)
+    elif action == 1:
+        # If the state is not in the top row or the rightmost column
+        if i != 0 and j != grid_world.shape[1]-1:
+            # If the state above and to the right is unoccupied
+            if grid_world[i-1, j+1] == 0:
+                # Return the new state
+                return i-1, j+1
+    # If the action is 2 (right)
+    elif action == 2:
+        # If the state is not in the rightmost column
+        if j != grid_world.shape[1]-1:
+            # If the state to the right is unoccupied
+            if grid_world[i, j+1] == 0:
+                # Return the new state
+                return i, j+1
+    # If the action is 3 (down-right)
+    elif action == 3:
+        # If the state is not in the bottom row or the rightmost column
+        if i != grid_world.shape[0]-1 and j != grid_world.shape[1]-1:
+            # If the state below and to the right is unoccupied
+            if grid_world[i+1, j+1] == 0:
+                # Return the new state
+                return i+1, j+1
+    # If the action is 4 (down)
+    elif action == 4:
+        # If the state is not in the bottom row
+        if i != grid_world.shape[0]-1:
+            # If the state below is unoccupied
+            if grid_world[i+1, j] == 0:
+                # Return the new state
+                return i+1, j
+    # If the action is 5 (down-left)
+    elif action == 5:
+        # If the state is not in the bottom row or the leftmost column
+        if i != grid_world.shape[0]-1 and j != 0:
+            # If the state below and to the left is unoccupied
+            if grid_world[i+1, j-1] == 0:
+                # Return the new state
+                return i+1, j-1
+    # If the action is 6 (left)
+    elif action == 6:
+        # If the state is not in the leftmost column
+        if j != 0:
+            # If the state to the left is unoccupied
+            if grid_world[i, j-1] == 0:
+                # Return the new state
+                return i, j-1
+    # If the action is 7 (up-left)
+    elif action == 7:
+        # If the state is not in the top row or the leftmost column
+        if i != 0 and j != 0:
+            # If the state above and to the left is unoccupied
+            if grid_world[i-1, j-1] == 0:
+                # Return the new state
+                return i-1, j-1
+    # If the action is invalid, return the current state
+    return i, j
+
+class RewardSystem:
+    """Class for the reward system of the grid world"""
+
+    def __init__(self, grid_world, goal_x=10, goal_y=7):
+        """Constructor for the RewardSystem class"""
+        self.grid_world = grid_world
+        self.goal_x = goal_x
+        self.goal_y = goal_y
+
+    def get_reward(self, i, j, action):
+        """Returns the reward for a given state and action"""
+        # If the state is the goal state, return max reward
+        if i == self.goal_y and j == self.goal_x:
+            return 100
+        # If the state is occupied, return min reward
+        if self.grid_world[i, j] == 1:
+            return -50
+        # If the state is unoccupied, return -1
+        else:
+            return -1
+
 class PolicyIteration:
     """Class for the Policy Iteration algorithm as described in the Barto & Sutton textbook"""
 
-    def __init__(self, policy, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01, generalized=False):
+    def __init__(self, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01, generalized=False):
         """Constructor for the Policy Iteration algorithm"""
-        self.policy = policy
         self.grid_world = grid_world
         self.goal_x = goal_x
         self.goal_y = goal_y
         self.gamma = gamma
         self.theta = theta
         self.generalized = generalized
+        # Initialize a reward system
+        self.reward_system = RewardSystem(self.grid_world, self.goal_x, self.goal_y)
         # Initialize a value function of zeros
         self.value_function = np.zeros(self.grid_world.shape)
+        # Initialize a policy of random actions for each state (0-7)
+        self.policy = np.random.randint(0, 8, self.grid_world.shape)
 
     def policy_evaluation(self):
         """Performs policy evaluation step of algorithm"""
