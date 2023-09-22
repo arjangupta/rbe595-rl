@@ -114,8 +114,8 @@ class PolicyIteration:
         self.generalized = generalized
         # Initialize a reward system
         self.robot = Robot(self.grid_world, self.goal_x, self.goal_y)
-        # Initialize a value function of zeros
-        self.value_function = np.zeros(self.grid_world.shape)
+        # Initialize a value function of random nonzero real numbers
+        self.value_function = np.random.uniform(-1, 1, self.grid_world.shape)
         # Initialize a policy of random actions for each state (0-7)
         self.policy = np.random.randint(0, 8, self.grid_world.shape)
 
@@ -136,11 +136,30 @@ class PolicyIteration:
                         delta = max(delta, abs(self.value_function[i, j] - v))
                         # Update the value function
                         self.value_function[i, j] = v
+            # Print delta
+            print("Delta: ", delta)
             # If delta < theta, then break
             if delta < self.theta:
                 break
             if self.generalized:
                 break
+
+    def calculate_value_function(self, i, j):
+        """Calculates the value function for a state"""
+        # Summation variable
+        value_summation = 0
+        # For each action
+        for action in range(8):
+            # Take action
+            new_i, new_j = self.robot.take_action(i, j, action)
+            # Calculate the reward for the action
+            reward = self.robot.get_reward(i, j, action)
+            # Add to total value summation
+            value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        # Print the value summation
+        print("Value Summation: ", value_summation)
+        # Return the value summation
+        return value_summation
 
     def policy_improvement(self):
         """Performs policy improvement step of algorithm"""
@@ -163,22 +182,6 @@ class PolicyIteration:
         # Return the policy and the boolean flag
         return policy_stable
 
-    def calculate_value_function(self, i, j):
-        """Calculates the value function for a state"""
-        # Summation variable
-        value_summation = 0
-        # For each action
-        for action in range(8):
-            # Take action
-            new_i, new_j = self.robot.take_action(i, j, action)
-            # Calculate the reward for the action
-            reward = self.robot.get_reward(i, j, action)
-            # Add to total value summation
-            #FIXME: which one?
-            value_summation += self.policy[i, j] * self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
-            value_summation += reward + self.gamma * self.value_function[new_i, new_j]
-        # Return the value summation
-        return value_summation
             
 
     def calculate_new_action(self, i, j):
