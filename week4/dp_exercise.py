@@ -118,30 +118,29 @@ class PolicyIteration:
                     delta = max(delta, abs(self.value_function[i, j] - v))
                     # Update the value function
                     self.value_function[i, j] = v
-            # Print delta
             print("Delta: ", delta)
+            print("Value Function: ", self.value_function)
             # If delta < theta, then break
             if delta < self.theta:
                 break
             if self.generalized:
                 break
 
+
     def calculate_value_function(self, i, j):
         """Calculates the value function for a state"""
         # Summation variable
         value_summation = 0
-        # For each action
-        for action in range(8):
-            # Take action
-            new_i, new_j = self.robot.take_action(i, j, action)
-            if new_i == i and new_j == j:
-                continue
-            # Calculate the reward for the action
-            reward = self.robot.get_reward(new_i, new_j)
-            # Add to total value summation
-            value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        # Get action from policy
+        action = self.policy[i, j]
+        # Take action
+        new_i, new_j = self.robot.take_action(i, j, action)
+        # Calculate the reward for the action
+        reward = self.robot.get_reward(new_i, new_j)
+        # Add to total value summation
+        value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
         # Print the value summation
-        print("Value Summation: ", value_summation)
+        # print("Value Summation: ", value_summation)
         # Return the value summation
         return value_summation
 
@@ -195,7 +194,6 @@ class PolicyIteration:
             # For every N iterations, print the value function and policy
             if i % 500 == 0:
                 print("Iteration: ", i)
-                print("Value Function: ", self.value_function)
                 print("Policy: ", self.policy)
                 print()
             self.policy_evaluation()
