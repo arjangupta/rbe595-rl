@@ -9,7 +9,7 @@ import numpy as np
 class PolicyIteration:
     """Class for the Policy Iteration algorithm as described in the Barto & Sutton textbook"""
 
-    def __init__(self, policy, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01):
+    def __init__(self, policy, grid_world, goal_x=10, goal_y=7, gamma=0.95, theta=0.01, generalized=False):
         """Constructor for the Policy Iteration algorithm"""
         self.policy = policy
         self.grid_world = grid_world
@@ -17,11 +17,12 @@ class PolicyIteration:
         self.goal_y = goal_y
         self.gamma = gamma
         self.theta = theta
+        self.generalized = generalized
+        # Initialize a value function of zeros
+        self.value_function = np.zeros(self.grid_world.shape)
 
     def policy_evaluation(self):
-        """Performs policy evaluation on a policy"""
-        # Initialize a value function of zeros
-        value_function = np.zeros(self.grid_world.shape)
+        """Performs policy evaluation step of algorithm"""
         # Repeat until delta < theta
         while True:
             # Initialize delta to 0
@@ -34,17 +35,17 @@ class PolicyIteration:
                         # Calculate the value function for the state
                         v = self.calculate_value_function(i, j)
                         # Calculate the difference between the old value function and the new value function
-                        delta = max(delta, abs(value_function[i, j] - v))
+                        delta = max(delta, abs(self.value_function[i, j] - v))
                         # Update the value function
-                        value_function[i, j] = v
+                        self.value_function[i, j] = v
             # If delta < theta, then break
             if delta < self.theta:
                 break
-        # Return the value function
-        return value_function
+            if self.generalized:
+                break
 
     def policy_improvement(self, value_function):
-        """Performs policy improvement on a policy"""
+        """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
         policy_stable = False
         # For each state in the grid world
