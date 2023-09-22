@@ -3,6 +3,7 @@
 # Week 4 Dynamic Programming Exercise
 
 # Importing the necessary libraries
+import math
 import sys
 
 import matplotlib.pyplot as plt
@@ -30,57 +31,97 @@ class Robot:
         else:
             return -1
 
-    def take_action(self, i, j, action):
+    def take_action(self, i, j, action, consider_occupied_spaces=True):
         """For actions 0-7, returns the new state after taking the action.
         The actions are enumerated in clockwise order, starting with 0 at 12 o'clock."""
         # If the action is 0 (up)
         if action == 0:
             # If the state is not in the top row
             if i != 0:
-                # Return the new state
-                return i-1, j
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i - 1, j
+                # If the state above is unoccupied
+                elif self.grid_world[i - 1, j] == 0:
+                    # # Return the new state
+                    return i - 1, j
         # If the action is 1 (up-right)
         elif action == 1:
             # If the state is not in the top row or the rightmost column
             if i != 0 and j != self.grid_world.shape[1]-1:
-                # Return the new state
-                return i-1, j+1
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i - 1, j + 1
+                # If the state above and to the right is unoccupied
+                elif self.grid_world[i - 1, j + 1] == 0:
+                    # Return the new state
+                    return i - 1, j + 1
         # If the action is 2 (right)
         elif action == 2:
             # If the state is not in the rightmost column
             if j != self.grid_world.shape[1]-1:
-                # Return the new state
-                return i, j+1
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i, j+1
+                # If the state to the right is unoccupied
+                elif self.grid_world[i, j+1] == 0:
+                    # Return the new state
+                    return i, j+1
         # If the action is 3 (down-right)
         elif action == 3:
             # If the state is not in the bottom row or the rightmost column
             if i != self.grid_world.shape[0]-1 and j != self.grid_world.shape[1]-1:
-                # Return the new state
-                return i+1, j+1
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i + 1, j + 1
+                # If the state below and to the right is unoccupied
+                elif self.grid_world[i + 1, j + 1] == 0:
+                    # Return the new state
+                    return i + 1, j + 1
         # If the action is 4 (down)
         elif action == 4:
             # If the state is not in the bottom row
             if i != self.grid_world.shape[0]-1:
-                # Return the new state
-                return i+1, j
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i + 1, j
+                # If the state below is unoccupied
+                elif self.grid_world[i + 1, j] == 0:
+                    # Return the new state
+                    return i + 1, j
         # If the action is 5 (down-left)
         elif action == 5:
             # If the state is not in the bottom row or the leftmost column
             if i != self.grid_world.shape[0]-1 and j != 0:
-                # Return the new state
-                return i+1, j-1
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i + 1, j - 1
+                # If the state below and to the left is unoccupied
+                elif self.grid_world[i + 1, j - 1] == 0:
+                    # Return the new state
+                    return i + 1, j - 1
         # If the action is 6 (left)
         elif action == 6:
             # If the state is not in the leftmost column
             if j != 0:
-                # Return the new state
-                return i, j-1
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i, j - 1
+                # If the state to the left is unoccupied
+                elif self.grid_world[i, j - 1] == 0:
+                    # Return the new state
+                    return i, j - 1
         # If the action is 7 (up-left)
         elif action == 7:
             # If the state is not in the top row or the leftmost column
             if i != 0 and j != 0:
-                # Return the new state
-                return i-1, j-1
+                if consider_occupied_spaces:
+                    # Return the new state
+                    return i - 1, j - 1
+                # If the state above and to the left is unoccupied
+                elif self.grid_world[i - 1, j - 1] == 0:
+                    # Return the new state
+                    return i - 1, j - 1
         # If the action is invalid, return the current state
         return i, j
 
@@ -99,9 +140,11 @@ class PolicyIteration:
         # Initialize a reward system
         self.robot = Robot(self.grid_world, self.goal_x, self.goal_y)
         # Initialize a value function of random nonzero real numbers
-        self.value_function = np.random.uniform(-1, 1, self.grid_world.shape)
+        # self.value_function = np.random.uniform(-1, 1, self.grid_world.shape)
+        self.value_function = np.zeros(self.grid_world.shape)
         # Initialize a policy of random actions for each state (0-7)
         self.policy = np.random.randint(0, 8, self.grid_world.shape)
+
 
     def policy_evaluation(self):
         """Performs policy evaluation step of algorithm"""
@@ -112,6 +155,7 @@ class PolicyIteration:
             # For each state in the grid world
             for i in range(self.grid_world.shape[0]):
                 for j in range(self.grid_world.shape[1]):
+                    # if self.grid_world[i, j] == 0:
                     # Calculate the value function for the state
                     v = self.value_function[i,j]
                     # Update the value function
@@ -132,15 +176,20 @@ class PolicyIteration:
         # Summation variable
         value_summation = 0
         # Get action from policy
+        # FIXME: is this right? should incorporate probability - right now not an issue because deterministic
         action = self.policy[i, j]
         # Take action
         new_i, new_j = self.robot.take_action(i, j, action)
+        # if new_i == i and new_j == j:
+        #     return value_summation
         # Calculate the reward for the action
         reward = self.robot.get_reward(new_i, new_j)
         # Add to total value summation
-        #FIXME: is this the right probability?????
+        #FIXME: needs to include probability(pi)
         # value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        # needs to be a sum of all 3 states 80: main 10/each other state for stochastic
         value_summation += reward + self.gamma * self.value_function[new_i, new_j]
+        print("vs: ", value_summation)
         # Print the value summation
         # print("Value Summation: ", value_summation)
         # Return the value summation
@@ -154,16 +203,16 @@ class PolicyIteration:
         for i in range(self.grid_world.shape[0]):
             for j in range(self.grid_world.shape[1]):
                 # If the state is unoccupied
-                if self.grid_world[i, j] == 0:
-                    # Store the old action
-                    old_action = self.policy[i, j]
-                    # Calculate the new action
-                    new_action = self.calculate_new_action(i, j)
-                    # Update the policy
-                    self.policy[i, j] = new_action
-                    # If the old action and the new action are the same, set the flag to true
-                    if old_action == new_action:
-                        policy_stable = True
+                # if self.grid_world[i, j] == 0:
+                # Store the old action
+                old_action = self.policy[i, j]
+                # Calculate the new action
+                new_action = self.calculate_new_action(i, j)
+                # Update the policy
+                self.policy[i, j] = new_action
+                # If the old action and the new action are the same, set the flag to true
+                if old_action == new_action:
+                    policy_stable = True
         # Return the policy and the boolean flag
         return policy_stable
 
@@ -182,7 +231,6 @@ class PolicyIteration:
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
-            #FIXME: need probability? p(s',r|s,a) - chance that if robot chooses action it will happen - for stochastic .8??
             action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
             # Add to list of action values
             action_values.append(action_value)
@@ -206,7 +254,7 @@ class PolicyIteration:
         return self.value_function, self.policy
 
 
-def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
+def plot_2d_array_with_arrows(gridworld, policy, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
     it to a plot of occupied and unoccupied spaces, with arrows"""
 
@@ -215,16 +263,12 @@ def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
     # Set the size of the figure
     fig.set_size_inches(14, 7)
     # Creating a plot of the array
-    ax.imshow(array, cmap='binary')
+    ax.imshow(gridworld, cmap='binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
     # Form the mesh grid
-    X, Y = np.meshgrid(np.arange(array.shape[1]), np.arange(array.shape[0]))
-    U = np.cos(policy)
-    V = np.sin(policy)
-    # Try to hide arrows in the occupied spaces
-    U[array == 1] = 1
-    V[array == 1] = 0.1
+    X, Y = np.meshgrid(np.arange(gridworld.shape[1]), np.arange(gridworld.shape[0]))
+    U, V = create_arrows(policy, gridworld)
     # Plot the arrows
     ax.quiver(X, Y, U, V)
     # Print X, Y, U, V for only the first 5 rows and columns
@@ -233,15 +277,72 @@ def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
     print("U first5: ", U[:5, :5])
     print("V first5: ", V[:5, :5])
     # Show ticks at every integer
-    ax.set_xticks(np.arange(0, array.shape[1], 1))
-    ax.set_yticks(np.arange(0, array.shape[0], 1))
+    ax.set_xticks(np.arange(0, gridworld.shape[1], 1))
+    ax.set_yticks(np.arange(0, gridworld.shape[0], 1))
     # Decrease text size along the axes
     ax.tick_params(axis='both', which='major', labelsize=8)
     # Displaying the plot
     plt.show()
 
 
-def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
+#FIXME: make this cleaner
+def create_arrows(policy, gridworld):
+    U = np.zeros(policy.shape)
+    V = np.zeros(policy.shape)
+    for i in range(policy.shape[0]):
+        for j in range(policy.shape[1]):
+            # Try to hide arrows in the occupied spaces
+            if gridworld[i, j] == 1:
+                U[i,j] = 1
+                V[i,j] = 0.1
+            else:
+                # If the action is 0 (up)
+                if policy[i,j]==0:
+                    U[i,j]=0
+                    V[i,j]=1
+
+                # If the action is 1 (up-right)
+                if policy[i,j]==1:
+                    U[i,j]=np.cos(math.pi/4)
+                    V[i,j]=np.sin(math.pi/4)
+
+                # If the action is 2 (right)
+                if policy[i,j]==2:
+                    U[i,j]=1
+                    V[i,j]=0
+
+                # If the action is 3 (down-right)
+                if policy[i,j]==3:
+                    U[i, j] = np.cos(-1*math.pi / 4)
+                    V[i, j] = np.sin(-1*math.pi / 4)
+
+                # If the action is 4 (down)
+                if policy[i,j]==4:
+                    U[i,j]=0
+                    V[i,j]=-1
+
+                # If the action is 5 (down-left)
+                if policy[i,j]==5:
+                    U[i, j] = np.cos(-3 * math.pi / 4)
+                    V[i, j] = np.sin(-3 * math.pi / 4)
+
+                # If the action is 6 (left)
+                if policy[i,j]==6:
+                    U[i,j]=-1
+                    V[i,j]=0
+
+                # If the action is 7 (up-left)
+                if policy[i,j]==7:
+                    U[i, j] = np.cos(3 * math.pi / 4)
+                    V[i, j] = np.sin(3 * math.pi / 4)
+
+    return U,V
+
+
+
+
+
+def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
     it to a plot of occupied and unoccupied spaces, with a grid for every cell"""
 
@@ -250,24 +351,24 @@ def plot_2d_array_with_grid(array, goal_y=7, goal_x=10):
     # Set the size of the figure
     fig.set_size_inches(14, 7)
     # Creating a plot of the array
-    ax.imshow(array, cmap='binary')
+    ax.imshow(gridworld, cmap='binary')
     # Color the goal state red
     ax.plot(goal_x, goal_y, 'ro')
     # Form the grid lines such that they are in the middle of each cell
-    ax.set_xticks(np.arange(-.5, array.shape[1], 1))
-    ax.set_yticks(np.arange(-.5, array.shape[0], 1))
+    ax.set_xticks(np.arange(-.5, gridworld.shape[1], 1))
+    ax.set_yticks(np.arange(-.5, gridworld.shape[0], 1))
     # Hide the tick marks
     ax.tick_params(axis='both', which='both', length=0)
     # Decrease text size along the axes
     ax.tick_params(axis='both', which='major', labelsize=6)
     # Display the grid
     ax.grid()
-    # For every unoccupied cell, fill it in as a random shade of grey
-    for i in range(array.shape[0]):
-        for j in range(array.shape[1]):
-            if array[i, j] == 0:
-                grey = np.random.uniform(0.4, 0.9)
-                ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(grey, grey, grey)))
+    # For every unoccupied cell, fill it in as a shade of grey of the normalized value
+    for i in range(values.shape[0]):
+        for j in range(values.shape[1]):
+            # if gridworld[i,j]!=1:
+            normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
+            ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(normalized[i,j], normalized[i,j], normalized[i,j])))
     # Displaying the plot
     plt.show()
 
@@ -312,11 +413,11 @@ def main(model_type):
         probability = np.full(grid_world.shape, .8)
 
     # Run Policy Iteration algorithm
-    policy_iteration = PolicyIteration(probability, grid_world, generalized=False, theta=5)
+    policy_iteration = PolicyIteration(probability, grid_world, generalized=False, theta=.01)
     print("Running Policy Iteration algorithm...")
     value_function, policy = policy_iteration.run()
     plot_2d_array_with_arrows(grid_world, policy)
-    plot_2d_array_with_grid(value_function)
+    plot_2d_array_with_grid(grid_world, value_function)
 
 # Calling the main function
 if __name__ == "__main__":
