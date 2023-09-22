@@ -138,7 +138,7 @@ class PolicyIteration:
             if self.generalized:
                 break
 
-    def policy_improvement(self, value_function):
+    def policy_improvement(self):
         """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
         policy_stable = False
@@ -150,36 +150,55 @@ class PolicyIteration:
                     # Store the old action
                     old_action = self.policy[i, j]
                     # Calculate the new action
-                    new_action = self.calculate_new_action(i, j, value_function)
+                    new_action = self.calculate_new_action(i, j, self.value_function)
                     # Update the policy
                     self.policy[i, j] = new_action
                     # If the old action and the new action are the same, set the flag to true
                     if old_action == new_action:
                         policy_stable = True
         # Return the policy and the boolean flag
-        return self.policy, policy_stable
+        return policy_stable
 
     def calculate_value_function(self, i, j):
         """Calculates the value function for a state"""
-        # Calculate the value function for the state
-        v = 0
-        # If the state is not the goal state
-        if i != self.goal_y or j != self.goal_x:
-            # Calculate the value function for the state
-            v = np.cos(self.policy[i, j]) + self.gamma * self.calculate_value_function_for_action(i, j, self.policy[i, j])
-        # Return the value function
-        return v
-
-    def calculate_new_action(self, i, j, value_function):
-        """Calculates the new action for a state"""
-        # Initialize an array to store the value function for each action
-        value_function_for_action = np.zeros(4)
+        # Summation variable
+        value_summation = 0
         # For each action
-        for action in range(4):
-            # Calculate the value function for the action
-            value_function_for_action[action] = self.calculate_value_function_for_action(i, j, action)
-        # Return the action with the maximum value function
-        return np.argmax(value_function_for_action)
+        for action in range(8):
+            # Take action
+            new_i, new_j = take_action(i, j, action, self.grid_world)
+            # Calculate the reward for the action
+            reward = self.reward_system.get_reward(i, j, action)
+            # Add to total value summation
+            value_summation += reward + self.gamma * self.value_function[new_i, new_j]
+        # Return the value summation
+        return value_summation
+            
+
+    def calculate_new_action(self, i, j):
+        """Calculates the new action for a state"""
+        # Initialize a list of action values
+        action_values = []
+        # For each action
+        for action in range(8):
+            # Take action
+            new_i, new_j = take_action(i, j, action, self.grid_world)
+            # Calculate the reward for the action
+            reward = self.reward_system.get_reward(i, j, action)
+            # Calculate the action value
+            action_value = reward + self.gamma * self.value_function[new_i, new_j]
+            # Add to list of action values
+            action_values.append(action_value)
+        # Return the action with the maximum action value
+        return np.argmax(action_values)
+    
+    def run(self):
+        """Run the policy iteration algorithm as described in Page 80 of textbook"""
+        keep_running = True
+        while keep_running:
+            self.policy_evaluation()
+            keep_running = self.policy_improvement()
+        return self.value_function, self.policy
 
 def plot_2d_array_with_arrows(array, policy, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
@@ -267,6 +286,8 @@ def main():
     policy = np.random.uniform(-2*np.pi, 2*np.pi, grid_world.shape)
     plot_2d_array_with_arrows(grid_world, policy)
     plot_2d_array_with_grid(grid_world)
+
+    # Run
     
 # Calling the main function
 if __name__ == "__main__":
