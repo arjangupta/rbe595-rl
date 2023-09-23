@@ -384,11 +384,6 @@ def plot_2d_array_with_arrows(gridworld, policy, goal_y=7, goal_x=10):
     U, V = create_arrows(policy, gridworld)
     # Plot the arrows
     ax.quiver(X, Y, U, V)
-    # Print X, Y, U, V for only the first 5 rows and columns
-    print("X first5: ", X[:5, :5])
-    print("Y first5: ", Y[:5, :5])
-    print("U first5: ", U[:5, :5])
-    print("V first5: ", V[:5, :5])
     # Show ticks at every integer
     ax.set_xticks(np.arange(0, gridworld.shape[1], 1))
     ax.set_yticks(np.arange(0, gridworld.shape[0], 1))
