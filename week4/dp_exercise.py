@@ -250,9 +250,6 @@ class PolicyIteration:
             action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
             # Add to list of action values
             pi_values.append(action_value)
-        # If i and j represent the 5x5 area above the goal state, then print the pi values
-        if i == self.goal_y - 5 and j == self.goal_x - 5:
-            print("Pi Values: ", pi_values)
         # Return the action with the maximum action value
         return np.argmax(pi_values)
     
