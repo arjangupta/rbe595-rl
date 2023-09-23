@@ -184,6 +184,8 @@ class PolicyIteration:
             # Calculate total value summation
             #FIXME: look at probabilty more for stochastic
             value_summation += .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        # Print the value summation
+        print("Value Summation: ", value_summation)
 
         return value_summation
 
@@ -206,7 +208,7 @@ class PolicyIteration:
         # needs to be a sum of all 3 states 80: main 10/each other state for stochastic
         value_summation += reward + self.gamma * self.value_function[new_i, new_j]
         # Print the value summation
-        print("Value Summation: ", value_summation)
+        # print("Value Summation: ", value_summation)
         return value_summation
 
     def policy_improvement(self):
