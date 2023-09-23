@@ -445,6 +445,23 @@ def create_arrows(policy, gridworld):
                     U[i, j] = np.cos(3 * math.pi / 4)
                     V[i, j] = np.sin(3 * math.pi / 4)
 
+    # If i/j is in leftmost or rightmost column, set the action as 4 (down)
+    # If i/j is in the topmost or bottommost row, set the action as 2 (right)
+    for i in range(policy.shape[0]):
+        for j in range(policy.shape[1]):
+            if j==0:
+                U[i,j]=-1
+                V[i,j]=0
+            if j==policy.shape[1]-1:
+                U[i,j]=1
+                V[i,j]=0
+            if i==0:
+                U[i,j]=0
+                V[i,j]=1
+            if i==policy.shape[0]-1:
+                U[i,j]=0
+                V[i,j]=-1
+
     return U,V
 
 
