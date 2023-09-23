@@ -198,8 +198,9 @@ class PolicyIteration:
         action = self.policy[i, j]
         # Take action
         new_i, new_j = self.robot.take_action(i, j, action)
-        if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-            return value_summation
+        # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+        #     print("new i and j are the same as old i and j")
+        #     return -100
         # Calculate the reward for the action
         reward = self.robot.get_reward(new_i, new_j)
         # Add to total value summation
@@ -236,21 +237,24 @@ class PolicyIteration:
     def calculate_new_action(self, i, j):
         """Calculates the new action for a state"""
         # Initialize a list of action values
-        action_values = []
+        pi_values = []
         # For each action
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-                action_values.append(0)
+            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            #     pi_values.append(0)
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
             action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
             # Add to list of action values
-            action_values.append(action_value)
+            pi_values.append(action_value)
+        # If i and j represent the 5x5 area above the goal state, then print the pi values
+        if i == self.goal_y - 5 and j == self.goal_x - 5:
+            print("Pi Values: ", pi_values)
         # Return the action with the maximum action value
-        return np.argmax(action_values)
+        return np.argmax(pi_values)
     
     def run(self):
         """Run the policy iteration algorithm as described in Page 80 of textbook"""
