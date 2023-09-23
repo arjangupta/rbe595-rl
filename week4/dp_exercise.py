@@ -18,7 +18,7 @@ class Robot:
         self.grid_world = grid_world
         self.goal_x = goal_x
         self.goal_y = goal_y
-        self.consider_occupied_spaces = False
+        self.consider_occupied_spaces = True
 
     def get_reward(self, i, j):
         """Returns the reward for a given state and action"""
