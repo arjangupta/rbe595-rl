@@ -528,22 +528,18 @@ def main(model_type, alg_type):
         policy_iteration = PolicyIteration(probability, grid_world, generalized=False, theta=0.01)
         print("Running Policy Iteration algorithm...")
         value_function, policy = policy_iteration.run()
-        plot_2d_array_with_arrows(grid_world, policy)
-        plot_2d_array_with_grid(grid_world, value_function)
     elif alg_type == "ValueIteration":
         # Run Value Iteration
         value_iteration = ValueIteration(probability, grid_world, theta=0.01)
         print("Running Value Iteration algorithm...")
         value_function, policy = value_iteration.run()
-        plot_2d_array_with_arrows(grid_world, policy)
-        plot_2d_array_with_grid(grid_world, value_function)
     else:
         # Run Generalized Policy Iteration
         policy_iteration = PolicyIteration(probability, grid_world, generalized=True, theta=0.01)
         print("Running Generalized Policy Iteration algorithm...")
         value_function, policy = policy_iteration.run()
-        plot_2d_array_with_arrows(grid_world, policy)
-        plot_2d_array_with_grid(grid_world, value_function)
+    plot_2d_array_with_arrows(grid_world, policy)
+    plot_2d_array_with_grid(grid_world, value_function)
 
 # Calling the main function
 if __name__ == "__main__":
