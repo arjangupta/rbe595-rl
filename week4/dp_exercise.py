@@ -215,7 +215,7 @@ class PolicyIteration:
         """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
         #FIXME: should we do a count for this instead? make sure all values are stable?
-        policy_stable = False
+        policy_stable = True
         # For each state in the grid world
         for i in range(self.grid_world.shape[0]):
             for j in range(self.grid_world.shape[1]):
@@ -228,8 +228,8 @@ class PolicyIteration:
                 # Update the policy
                 self.policy[i, j] = new_action
                 # If the old action and the new action are the same, set the flag to true
-                if old_action == new_action:
-                    policy_stable = True
+                if old_action != new_action:
+                    policy_stable = False
         # Return the policy and the boolean flag
         return policy_stable            
 
@@ -261,11 +261,13 @@ class PolicyIteration:
             if i % 500 == 0:
                 print("Iteration: ", i)
                 print("Policy: ", self.policy)
+                print("Value Function: ", self.value_function)
                 print()
             self.policy_evaluation()
             policy_stable = self.policy_improvement()
             i += 1
-
+        print("Policy: ", self.policy)
+        print("Value Function: ", self.value_function)
         return self.value_function, self.policy
 
 
