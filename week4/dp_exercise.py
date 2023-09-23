@@ -159,7 +159,7 @@ class PolicyIteration:
                     # Calculate the value function for the state
                     v = self.value_function[i,j]
                     # Update the value function
-                    self.value_function[i, j] = self.calculate_value_function_bellman(i, j)
+                    self.value_function[i, j] = self.calculate_value_function(i, j)
                     # Calculate the difference between the old value function and the new value function
                     delta = max(delta, abs(v - self.value_function[i, j]))
             # avg_delta = delta/(self.grid_world.shape[0]*self.grid_world.shape[1])
