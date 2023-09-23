@@ -490,6 +490,7 @@ def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
     # Normalize the values
     normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
     # Show a section of the normalized values
+    print("first 5x5 of normalized values: ")
     print(normalized[0:5, 0:5])
     # For every unoccupied cell, fill (add_patch) it in as a shade of grey of the normalized value
     for i in range(values.shape[0]):
