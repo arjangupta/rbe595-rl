@@ -205,10 +205,8 @@ class PolicyIteration:
         # value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
         # needs to be a sum of all 3 states 80: main 10/each other state for stochastic
         value_summation += reward + self.gamma * self.value_function[new_i, new_j]
-        print("vs: ", value_summation)
         # Print the value summation
-        # print("Value Summation: ", value_summation)
-        # Return the value summation
+        print("Value Summation: ", value_summation)
         return value_summation
 
     def policy_improvement(self):
@@ -231,9 +229,7 @@ class PolicyIteration:
                 if old_action == new_action:
                     policy_stable = True
         # Return the policy and the boolean flag
-        return policy_stable
-
-            
+        return policy_stable            
 
     def calculate_new_action(self, i, j):
         """Calculates the new action for a state"""
@@ -471,6 +467,8 @@ def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
     ax.grid()
     # Normalize the values
     normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
+    # Show a section of the normalized values
+    print(normalized[0:5, 0:5])
     # For every unoccupied cell, fill (add_patch) it in as a shade of grey of the normalized value
     for i in range(values.shape[0]):
         for j in range(values.shape[1]):
