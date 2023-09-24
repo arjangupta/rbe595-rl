@@ -292,7 +292,7 @@ class ValueIteration:
         self.policy = np.random.randint(0, 8, self.grid_world.shape)
 
     def main_loop(self):
-        """Performs policy evaluation step of algorithm"""
+        """Performs main-loop step of algorithm"""
         # Repeat until delta < theta
         while True:
             # Initialize delta to 0
@@ -320,8 +320,8 @@ class ValueIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-                continue
+            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            #     continue
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate total value summation
@@ -347,8 +347,8 @@ class ValueIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-                action_values.append(0)
+            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            #     action_values.append(0)
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
@@ -362,8 +362,14 @@ class ValueIteration:
     def run(self):
         """Run the value iteration algorithm as described in Page 83 of textbook"""
 
+        print("Policy: ", self.policy)
+        print("Value Function: ", self.value_function)
+
         self.main_loop()
         self.policy_improvement()
+
+        print("Policy: ", self.policy)
+        print("Value Function: ", self.value_function)
 
         return self.value_function, self.policy
 
