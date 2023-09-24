@@ -371,20 +371,18 @@ class ValueIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-            #     action_values.append(0)
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
-            action_value = 0.125 *  self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+            action_value = self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
             if (1 - self.probability[i,j]) > 0:
                 # Get actions that are +/-45 degrees current action
                 stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
                 reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
                 # Add to total value summation
                 minority_prob = 1 - self.probability[i,j]
-                action_value += .125 * minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
-                action_value += .125 * minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
+                action_value += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+                action_value += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             # Add to list of action values
             action_values.append(action_value)
         # Return the action with the maximum action value
