@@ -575,7 +575,7 @@ def main(model_type, alg_type):
     if model_type == "Deterministic":
         probability = np.ones(grid_world.shape)
     else:
-        probability = np.full(grid_world.shape, .8)
+        probability = np.full(grid_world.shape, .6)
 
     if alg_type == "PolicyIteration":
         # Run Policy Iteration algorithm
