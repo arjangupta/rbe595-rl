@@ -354,8 +354,8 @@ class ValueIteration:
                 reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
                 # Add to total value summation
                 minority_prob = 1 - self.probability[i,j]
-                value_summation += .125 + minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
-                value_summation += .125 + minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
+                value_summation += .125 * minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+                value_summation += .125 * minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             leaf_values.append(value_summation)
 
         return np.max(leaf_values)
