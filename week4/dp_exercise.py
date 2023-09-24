@@ -553,7 +553,7 @@ def main(model_type, alg_type):
         value_function, policy = policy_iteration.run()
     elif alg_type == "ValueIteration":
         # Run Value Iteration
-        value_iteration = ValueIteration(probability, grid_world, theta=0.01)
+        value_iteration = ValueIteration(probability, grid_world, theta=0.000000000000000000000099)
         print("Running Value Iteration algorithm...")
         value_function, policy = value_iteration.run()
     else:
