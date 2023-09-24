@@ -18,7 +18,7 @@ class Robot:
         self.grid_world = grid_world
         self.goal_x = goal_x
         self.goal_y = goal_y
-        self.consider_occupied_spaces = False
+        self.consider_occupied_spaces = True
 
     def get_reward(self, i, j):
         """Returns the reward for a given state and action"""
@@ -159,7 +159,7 @@ class PolicyIteration:
                     # Calculate the value function for the state
                     v = self.value_function[i,j]
                     # Update the value function
-                    self.value_function[i, j] = self.calculate_value_function_bellman(i, j)
+                    self.value_function[i, j] = self.calculate_value_function(i, j)
                     # Calculate the difference between the old value function and the new value function
                     delta = max(delta, abs(v - self.value_function[i, j]))
             # avg_delta = delta/(self.grid_world.shape[0]*self.grid_world.shape[1])
@@ -184,6 +184,8 @@ class PolicyIteration:
             # Calculate total value summation
             #FIXME: look at probabilty more for stochastic
             value_summation += .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        # Print the value summation
+        print("Value Summation: ", value_summation)
 
         return value_summation
 
@@ -196,8 +198,9 @@ class PolicyIteration:
         action = self.policy[i, j]
         # Take action
         new_i, new_j = self.robot.take_action(i, j, action)
-        if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-            return value_summation
+        # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+        #     print("new i and j are the same as old i and j")
+        #     return -100
         # Calculate the reward for the action
         reward = self.robot.get_reward(new_i, new_j)
         # Add to total value summation
@@ -205,17 +208,15 @@ class PolicyIteration:
         # value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
         # needs to be a sum of all 3 states 80: main 10/each other state for stochastic
         value_summation += reward + self.gamma * self.value_function[new_i, new_j]
-        print("vs: ", value_summation)
         # Print the value summation
         # print("Value Summation: ", value_summation)
-        # Return the value summation
         return value_summation
 
     def policy_improvement(self):
         """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
         #FIXME: should we do a count for this instead? make sure all values are stable?
-        policy_stable = False
+        policy_stable = True
         # For each state in the grid world
         for i in range(self.grid_world.shape[0]):
             for j in range(self.grid_world.shape[1]):
@@ -228,31 +229,29 @@ class PolicyIteration:
                 # Update the policy
                 self.policy[i, j] = new_action
                 # If the old action and the new action are the same, set the flag to true
-                if old_action == new_action:
-                    policy_stable = True
+                if old_action != new_action:
+                    policy_stable = False
         # Return the policy and the boolean flag
-        return policy_stable
-
-            
+        return policy_stable            
 
     def calculate_new_action(self, i, j):
         """Calculates the new action for a state"""
         # Initialize a list of action values
-        action_values = []
+        pi_values = []
         # For each action
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-                action_values.append(0)
+            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            #     pi_values.append(0)
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
             action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
             # Add to list of action values
-            action_values.append(action_value)
+            pi_values.append(action_value)
         # Return the action with the maximum action value
-        return np.argmax(action_values)
+        return np.argmax(pi_values)
     
     def run(self):
         """Run the policy iteration algorithm as described in Page 80 of textbook"""
@@ -263,11 +262,13 @@ class PolicyIteration:
             if i % 500 == 0:
                 print("Iteration: ", i)
                 print("Policy: ", self.policy)
+                print("Value Function: ", self.value_function)
                 print()
             self.policy_evaluation()
             policy_stable = self.policy_improvement()
             i += 1
-
+        print("Policy: ", self.policy)
+        print("Value Function: ", self.value_function)
         return self.value_function, self.policy
 
 
@@ -291,7 +292,7 @@ class ValueIteration:
         self.policy = np.random.randint(0, 8, self.grid_world.shape)
 
     def main_loop(self):
-        """Performs policy evaluation step of algorithm"""
+        """Performs main-loop step of algorithm"""
         # Repeat until delta < theta
         while True:
             # Initialize delta to 0
@@ -319,8 +320,8 @@ class ValueIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-                continue
+            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            #     continue
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate total value summation
@@ -346,8 +347,8 @@ class ValueIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-                action_values.append(0)
+            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
+            #     action_values.append(0)
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
@@ -361,8 +362,14 @@ class ValueIteration:
     def run(self):
         """Run the value iteration algorithm as described in Page 83 of textbook"""
 
+        print("Policy: ", self.policy)
+        print("Value Function: ", self.value_function)
+
         self.main_loop()
         self.policy_improvement()
+
+        print("Policy: ", self.policy)
+        print("Value Function: ", self.value_function)
 
         return self.value_function, self.policy
 
@@ -384,11 +391,6 @@ def plot_2d_array_with_arrows(gridworld, policy, goal_y=7, goal_x=10):
     U, V = create_arrows(policy, gridworld)
     # Plot the arrows
     ax.quiver(X, Y, U, V)
-    # Print X, Y, U, V for only the first 5 rows and columns
-    print("X first5: ", X[:5, :5])
-    print("Y first5: ", Y[:5, :5])
-    print("U first5: ", U[:5, :5])
-    print("V first5: ", V[:5, :5])
     # Show ticks at every integer
     ax.set_xticks(np.arange(0, gridworld.shape[1], 1))
     ax.set_yticks(np.arange(0, gridworld.shape[0], 1))
@@ -449,6 +451,23 @@ def create_arrows(policy, gridworld):
                     U[i, j] = np.cos(3 * math.pi / 4)
                     V[i, j] = np.sin(3 * math.pi / 4)
 
+    # If i/j is in leftmost or rightmost column, set the action as 4 (down)
+    # If i/j is in the topmost or bottommost row, set the action as 2 (right)
+    for i in range(policy.shape[0]):
+        for j in range(policy.shape[1]):
+            if j==0:
+                U[i,j]=-1
+                V[i,j]=0
+            if j==policy.shape[1]-1:
+                U[i,j]=1
+                V[i,j]=0
+            if i==0:
+                U[i,j]=0
+                V[i,j]=1
+            if i==policy.shape[0]-1:
+                U[i,j]=0
+                V[i,j]=-1
+
     return U,V
 
 
@@ -474,11 +493,15 @@ def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
     ax.tick_params(axis='both', which='major', labelsize=6)
     # Display the grid
     ax.grid()
-    # For every unoccupied cell, fill it in as a shade of grey of the normalized value
+    # Normalize the values
+    normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
+    # Show a section of the normalized values
+    print("first 5x5 of normalized values: ")
+    print(normalized[0:5, 0:5])
+    # For every unoccupied cell, fill (add_patch) it in as a shade of grey of the normalized value
     for i in range(values.shape[0]):
         for j in range(values.shape[1]):
-            if gridworld[i,j]!=1:
-                normalized = (values - np.min(values)) / (np.max(values) - np.min(values))
+            if gridworld[i, j] == 0:
                 ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(normalized[i,j], normalized[i,j], normalized[i,j])))
     # Displaying the plot
     plt.show()
@@ -528,22 +551,18 @@ def main(model_type, alg_type):
         policy_iteration = PolicyIteration(probability, grid_world, generalized=False, theta=0.01)
         print("Running Policy Iteration algorithm...")
         value_function, policy = policy_iteration.run()
-        plot_2d_array_with_arrows(grid_world, policy)
-        plot_2d_array_with_grid(grid_world, value_function)
     elif alg_type == "ValueIteration":
         # Run Value Iteration
-        value_iteration = ValueIteration(probability, grid_world, theta=0.01)
+        value_iteration = ValueIteration(probability, grid_world, theta=0.000000000000000000000099)
         print("Running Value Iteration algorithm...")
         value_function, policy = value_iteration.run()
-        plot_2d_array_with_arrows(grid_world, policy)
-        plot_2d_array_with_grid(grid_world, value_function)
     else:
         # Run Generalized Policy Iteration
         policy_iteration = PolicyIteration(probability, grid_world, generalized=True, theta=0.01)
         print("Running Generalized Policy Iteration algorithm...")
         value_function, policy = policy_iteration.run()
-        plot_2d_array_with_arrows(grid_world, policy)
-        plot_2d_array_with_grid(grid_world, value_function)
+    plot_2d_array_with_arrows(grid_world, policy)
+    plot_2d_array_with_grid(grid_world, value_function)
 
 # Calling the main function
 if __name__ == "__main__":
