@@ -182,10 +182,7 @@ class PolicyIteration:
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate total value summation
-            #FIXME: look at probabilty more for stochastic
             value_summation += .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
-        # Print the value summation
-        print("Value Summation: ", value_summation)
 
         return value_summation
 
@@ -194,7 +191,6 @@ class PolicyIteration:
         # Summation variable
         value_summation = 0
         # Get action from policy
-        # FIXME: is this right? should incorporate probability - right now not an issue because deterministic
         action = self.policy[i, j]
         # Take action
         new_i, new_j = self.robot.take_action(i, j, action)
@@ -204,10 +200,21 @@ class PolicyIteration:
         # Calculate the reward for the action
         reward = self.robot.get_reward(new_i, new_j)
         # Add to total value summation
-        #FIXME: needs to include probability(pi)
-        # value_summation += self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
-        # needs to be a sum of all 3 states 80: main 10/each other state for stochastic
-        value_summation += reward + self.gamma * self.value_function[new_i, new_j]
+        value_summation += self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        if (1 - self.probability[i,j]) > 0:
+            minority_prob = 1 - self.probability[i,j]
+            # Get actions that are +/-45 degrees current action
+            action_plus_45 = (action + 1) % 8
+            action_minus_45 = (action - 1) % 8
+            # Take action
+            i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
+            i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
+            # Calculate the reward for the action
+            reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
+            reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+            # Add to total value summation
+            value_summation += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+            value_summation += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
         # Print the value summation
         # print("Value Summation: ", value_summation)
         return value_summation
@@ -248,6 +255,20 @@ class PolicyIteration:
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
             action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
+            if (1 - self.probability[i, j]) > 0:
+                minority_prob = 1 - self.probability[i, j]
+                # Get actions that are +/-45 degrees current action
+                action_plus_45 = (action + 1) % 8
+                action_minus_45 = (action - 1) % 8
+                # Take action
+                i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
+                i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
+                # Calculate the reward for the action
+                reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
+                reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+                # Add to total value summation
+                action_value += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+                action_value += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             # Add to list of action values
             pi_values.append(action_value)
         # Return the action with the maximum action value
