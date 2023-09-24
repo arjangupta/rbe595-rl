@@ -126,6 +126,20 @@ class Robot:
         # If the action is invalid, return the current state
         return i, j
 
+    def get_stochastic_action_rewards(self, current_action, i, j):
+        """Returns the rewards for +/-45 degree actions"""
+        # Get actions that are +/-45 degrees current action
+        action_plus_45 = (current_action + 1) % 8
+        action_minus_45 = (current_action - 1) % 8
+        # Take action
+        i_plus_45, j_plus_45 = self.take_action(i, j, action_plus_45)
+        i_minus_45, j_minus_45 = self.take_action(i, j, action_minus_45)
+        # Calculate the reward for the action
+        reward_plus_45 = self.get_reward(i_plus_45, j_plus_45)
+        reward_minus_45 = self.get_reward(i_minus_45, j_minus_45)
+        # Return rewards
+        return reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45
+
 class PolicyIteration:
     """Class for the Policy Iteration algorithm as described in the Barto & Sutton textbook"""
 
@@ -202,17 +216,11 @@ class PolicyIteration:
         # Add to total value summation
         value_summation += self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
         if (1 - self.probability[i,j]) > 0:
-            minority_prob = 1 - self.probability[i,j]
             # Get actions that are +/-45 degrees current action
-            action_plus_45 = (action + 1) % 8
-            action_minus_45 = (action - 1) % 8
-            # Take action
-            i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
-            i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
-            # Calculate the reward for the action
-            reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
-            reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+            stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
+            reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
             # Add to total value summation
+            minority_prob = 1 - self.probability[i,j]
             value_summation += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
             value_summation += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
         # Print the value summation
@@ -256,17 +264,11 @@ class PolicyIteration:
             # Calculate the action value
             action_value = self.probability[i, j] * (reward + self.gamma * self.value_function[new_i, new_j])
             if (1 - self.probability[i, j]) > 0:
-                minority_prob = 1 - self.probability[i, j]
                 # Get actions that are +/-45 degrees current action
-                action_plus_45 = (action + 1) % 8
-                action_minus_45 = (action - 1) % 8
-                # Take action
-                i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
-                i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
-                # Calculate the reward for the action
-                reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
-                reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+                stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
+                reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
                 # Add to total value summation
+                minority_prob = 1 - self.probability[i, j]
                 action_value += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
                 action_value += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             # Add to list of action values
@@ -291,7 +293,6 @@ class PolicyIteration:
         print("Policy: ", self.policy)
         print("Value Function: ", self.value_function)
         return self.value_function, self.policy
-
 
 class ValueIteration:
     """Class for the Value Iteration algorithm as described in the Barto & Sutton textbook"""
@@ -348,17 +349,11 @@ class ValueIteration:
             # Calculate total value summation
             value_summation = .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
             if (1 - self.probability[i,j]) > 0:
-                minority_prob = 1 - self.probability[i,j]
                 # Get actions that are +/-45 degrees current action
-                action_plus_45 = (action + 1) % 8
-                action_minus_45 = (action - 1) % 8
-                # Take action
-                i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
-                i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
-                # Calculate the reward for the action
-                reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
-                reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+                stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
+                reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
                 # Add to total value summation
+                minority_prob = 1 - self.probability[i,j]
                 value_summation += .125 + minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
                 value_summation += .125 + minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             leaf_values.append(value_summation)
@@ -389,17 +384,11 @@ class ValueIteration:
             # Calculate the action value
             action_value = 0.125 *  self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
             if (1 - self.probability[i,j]) > 0:
-                minority_prob = 1 - self.probability[i,j]
                 # Get actions that are +/-45 degrees current action
-                action_plus_45 = (action + 1) % 8
-                action_minus_45 = (action - 1) % 8
-                # Take action
-                i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
-                i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
-                # Calculate the reward for the action
-                reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
-                reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+                stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
+                reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
                 # Add to total value summation
+                minority_prob = 1 - self.probability[i,j]
                 action_value += .125 * minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
                 action_value += .125 * minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             # Add to list of action values
@@ -420,7 +409,6 @@ class ValueIteration:
         print("Value Function: ", self.value_function)
 
         return self.value_function, self.policy
-
 
 def plot_2d_array_with_arrows(gridworld, policy, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
