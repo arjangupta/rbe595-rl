@@ -169,36 +169,17 @@ class PolicyIteration:
             # For each state in the grid world
             for i in range(self.grid_world.shape[0]):
                 for j in range(self.grid_world.shape[1]):
-                    # if self.grid_world[i, j] == 0:
                     # Calculate the value function for the state
                     v = self.value_function[i,j]
                     # Update the value function
                     self.value_function[i, j] = self.calculate_value_function(i, j)
                     # Calculate the difference between the old value function and the new value function
                     delta = max(delta, abs(v - self.value_function[i, j]))
-            # avg_delta = delta/(self.grid_world.shape[0]*self.grid_world.shape[1])
             print("Delta: ", delta)
-            # print("Value Function: ", self.value_function)
-            # If delta < theta, then break
             if delta < self.theta:
                 break
             if self.generalized:
                 break
-
-    def calculate_value_function_bellman(self, i, j):
-        value_summation = 0
-
-        for action in range(8):
-            # Take action
-            new_i, new_j = self.robot.take_action(i, j, action)
-            if self.robot.consider_occupied_spaces and new_i==i and new_j==j:
-                continue
-            # Calculate the reward for the action
-            reward = self.robot.get_reward(new_i, new_j)
-            # Calculate total value summation
-            value_summation += .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
-
-        return value_summation
 
     def calculate_value_function(self, i, j):
         """Calculates the value function for a state"""
@@ -208,9 +189,6 @@ class PolicyIteration:
         action = self.policy[i, j]
         # Take action
         new_i, new_j = self.robot.take_action(i, j, action)
-        # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-        #     print("new i and j are the same as old i and j")
-        #     return -100
         # Calculate the reward for the action
         reward = self.robot.get_reward(new_i, new_j)
         # Add to total value summation
@@ -224,19 +202,15 @@ class PolicyIteration:
             value_summation += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
             value_summation += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
         # Print the value summation
-        # print("Value Summation: ", value_summation)
         return value_summation
 
     def policy_improvement(self):
         """Performs policy improvement step of algorithm"""
         # Initialize a boolean flag to false
-        #FIXME: should we do a count for this instead? make sure all values are stable?
         policy_stable = True
         # For each state in the grid world
         for i in range(self.grid_world.shape[0]):
             for j in range(self.grid_world.shape[1]):
-                # If the state is unoccupied
-                # if self.grid_world[i, j] == 0:
                 # Store the old action
                 old_action = self.policy[i, j]
                 # Calculate the new action
@@ -257,8 +231,6 @@ class PolicyIteration:
         for action in range(8):
             # Take action
             new_i, new_j = self.robot.take_action(i, j, action)
-            # if self.robot.consider_occupied_spaces and new_i == i and new_j == j:
-            #     pi_values.append(0)
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
@@ -308,7 +280,6 @@ class ValueIteration:
         # Initialize a reward system
         self.robot = Robot(self.grid_world, self.goal_x, self.goal_y)
         # Initialize a value function of random nonzero real numbers
-        # self.value_function = np.random.uniform(-1, 1, self.grid_world.shape)
         self.value_function = np.zeros(self.grid_world.shape)
         # Initialize a policy of random actions for each state (0-7)
         self.policy = np.random.randint(0, 8, self.grid_world.shape)
@@ -322,7 +293,6 @@ class ValueIteration:
             # For each state in the grid world
             for i in range(self.grid_world.shape[0]):
                 for j in range(self.grid_world.shape[1]):
-                    # if self.grid_world[i, j] == 0:
                     # Calculate the value function for the state
                     v = self.value_function[i, j]
                     # Update the value function
@@ -330,7 +300,6 @@ class ValueIteration:
                     # Calculate the difference between the old value function and the new value function
                     delta = max(delta, abs(v - self.value_function[i, j]))
             print("Delta: ", delta)
-            # If delta < theta, then break
             if delta < self.theta:
                 break
 
@@ -356,8 +325,6 @@ class ValueIteration:
 
     def policy_improvement(self):
         """Performs policy improvement step of algorithm"""
-        # Initialize a boolean flag to false
-        policy_stable = False
         # For each state in the grid world
         for i in range(self.grid_world.shape[0]):
             for j in range(self.grid_world.shape[1]):
