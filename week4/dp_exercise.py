@@ -346,8 +346,22 @@ class ValueIteration:
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate total value summation
-            # FIXME: look at probabilty more for stochastic
-            leaf_values.append(.125 * (reward + self.gamma * self.value_function[new_i, new_j]))
+            value_summation = .125 * self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+            if (1 - self.probability[i,j]) > 0:
+                minority_prob = 1 - self.probability[i,j]
+                # Get actions that are +/-45 degrees current action
+                action_plus_45 = (action + 1) % 8
+                action_minus_45 = (action - 1) % 8
+                # Take action
+                i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
+                i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
+                # Calculate the reward for the action
+                reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
+                reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+                # Add to total value summation
+                value_summation += .125 + minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+                value_summation += .125 + minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
+            leaf_values.append(value_summation)
 
         return np.max(leaf_values)
 
@@ -373,8 +387,21 @@ class ValueIteration:
             # Calculate the reward for the action
             reward = self.robot.get_reward(new_i, new_j)
             # Calculate the action value
-            # FIXME: look at probabilty more for stochastic
-            action_value = 0.125 * (reward + self.gamma * self.value_function[new_i, new_j])
+            action_value = 0.125 *  self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+            if (1 - self.probability[i,j]) > 0:
+                minority_prob = 1 - self.probability[i,j]
+                # Get actions that are +/-45 degrees current action
+                action_plus_45 = (action + 1) % 8
+                action_minus_45 = (action - 1) % 8
+                # Take action
+                i_plus_45, j_plus_45 = self.robot.take_action(i, j, action_plus_45)
+                i_minus_45, j_minus_45 = self.robot.take_action(i, j, action_minus_45)
+                # Calculate the reward for the action
+                reward_plus_45 = self.robot.get_reward(i_plus_45, j_plus_45)
+                reward_minus_45 = self.robot.get_reward(i_minus_45, j_minus_45)
+                # Add to total value summation
+                action_value += .125 * minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+                action_value += .125 * minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
             # Add to list of action values
             action_values.append(action_value)
         # Return the action with the maximum action value
@@ -420,8 +447,6 @@ def plot_2d_array_with_arrows(gridworld, policy, goal_y=7, goal_x=10):
     # Displaying the plot
     plt.show()
 
-
-#FIXME: make this cleaner
 def create_arrows(policy, gridworld):
     U = np.zeros(policy.shape)
     V = np.zeros(policy.shape)
@@ -491,8 +516,6 @@ def create_arrows(policy, gridworld):
 
     return U,V
 
-
-
 def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
     """Takes in a 2D array of 0's and 1's and converts
     it to a plot of occupied and unoccupied spaces, with a grid for every cell"""
@@ -526,7 +549,6 @@ def plot_2d_array_with_grid(gridworld, values, goal_y=7, goal_x=10):
                 ax.add_patch(plt.Rectangle((j - .5, i - .5), 1, 1, color=(normalized[i,j], normalized[i,j], normalized[i,j])))
     # Displaying the plot
     plt.show()
-
 
 # Defining the main function
 def main(model_type, alg_type):
