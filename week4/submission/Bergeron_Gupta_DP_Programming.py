@@ -7,7 +7,7 @@ import math
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
-
+import time
 
 class Robot:
     """Class for taking action, returning reward"""
@@ -535,21 +535,34 @@ def main(model_type, alg_type):
     else:
         probability = np.full(grid_world.shape, .6)
 
+    run_time = 0
     if alg_type == "PolicyIteration":
         # Run Policy Iteration algorithm
         policy_iteration = PolicyIteration(probability, grid_world, generalized=False, theta=0.01)
         print("Running Policy Iteration algorithm...")
+        # Time the algorithm
+        start_time = time.time()
         value_function, policy = policy_iteration.run()
+        run_time = time.time() - start_time
     elif alg_type == "ValueIteration":
         # Run Value Iteration
         value_iteration = ValueIteration(probability, grid_world, theta=0.01)
         print("Running Value Iteration algorithm...")
+        # Time the algorithm
+        start_time = time.time()
         value_function, policy = value_iteration.run()
+        run_time = time.time() - start_time
     else:
         # Run Generalized Policy Iteration
         policy_iteration = PolicyIteration(probability, grid_world, generalized=True, theta=0.01)
         print("Running Generalized Policy Iteration algorithm...")
+        # Time the algorithm
+        start_time = time.time()
         value_function, policy = policy_iteration.run()
+        run_time = time.time() - start_time
+
+    print("Run time in seconds: ", run_time)
+
     plot_2d_array_with_arrows(grid_world, policy)
     plot_2d_array_with_grid(grid_world, value_function)
 
