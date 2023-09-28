@@ -35,7 +35,7 @@ class EpisodeGenerator:
         current_state = start_state
         current_action = start_action
         # For each step in the episode
-        for i in range(self.episode_length):
+        for _ in range(self.episode_length):
             # Generate a random number
             random_number = np.random.rand()
             # If the random number is less than expected direction probability
@@ -92,8 +92,11 @@ class MonteCarloES:
         self.policy = np.random.randint(2, size=episode_length)
         # Initialize Q(s,a) arbitrarily to real numbers
         self.Q = np.random.rand(5, 2)
-        # Initialize returns to empty list
-        self.returns = []
+        # Initialize returns to shape of Q, with empty lists
+        self.returns = np.empty_like(self.Q, dtype=list)
+        for i in range(self.returns.shape[0]):
+            for j in range(self.returns.shape[1]):
+                self.returns[i, j] = []
         # Initialize episode length, number of episodes, and discount factor
         self.episode_length = episode_length
         self.num_episodes = num_episodes
@@ -108,17 +111,20 @@ class MonteCarloES:
             episode = self.episode_generator.generate()
             G = 0
             # For each step in the episode
-            for step in reversed(episode):
-                # Update G
-                G = self.gamma * G + step[2]
-                # If the state-action pair is not in the episode
-                if (step[0], step[1], _) not in episode:
-                    # Add it to the returns
-                    self.returns.append((step[0], step[1]))
-                    # Update Q(s,a) using the new return
-                    self.Q[step[0], step[1]] = G
-                    # Update policy
-                    self.policy[step[0]] = np.argmax(self.Q)
+            for i, step in enumerate(reversed(episode)):
+                # Get the state, action, and reward
+                state, action, reward = step
+                # Update the return
+                G = self.gamma * G + reward
+                # Unless the pair state, action appears in any previous step
+                if (state, action) not in episode[:len(episode) - i - 1]:
+                    # Add the return to the returns
+                    self.returns[state, action].append(G)
+                    # Update the Q value
+                    self.Q[state, action] = np.mean(self.returns[state, action])
+                    # Update the policy
+                    self.policy[state] = np.argmax(self.Q[state, :])
+                
 
 
 if __name__ == "__main__":
