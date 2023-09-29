@@ -165,6 +165,6 @@ class MonteCarloES:
             print(self.Q)
 
 if __name__ == "__main__":
-    mc_es = MonteCarloES(stochastic=False)
+    mc_es = MonteCarloES()
     mc_es.show_pi_q(True)
     mc_es.run()
