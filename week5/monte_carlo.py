@@ -10,6 +10,7 @@
 # a reward of 5 in state 5, where there is a can. The robot receives a reward of
 # 1 if it reaches state 0, where there is a charger for its battery. The robot
 # receives a reward of 0 everywhere else.
+import sys
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -159,6 +160,88 @@ class MonteCarloES:
             print("Final Q values:")
             print(self.Q)
 
+
+class OnPolicyFirstVisitMC:
+    """On-policy first visit monte-carlo for estimating optimal policy,
+    as given on page 99 of the textbook"""
+    def __init__(self, num_episodes=500, gamma=0.7, epsilon = 0.1, stochastic=True):
+        self.num_states = 6
+        self.num_actions = 2
+        self.epsilon = epsilon
+
+        # Randomly initialize policy for back and forward actions (0 and 1)
+        self.policy = np.random.randint(self.num_actions, size=self.num_states)
+
+        # Initialize Q(s,a) arbitrarily to real numbers
+        self.Q = np.random.rand(self.num_states, self.num_actions)
+
+        # Initialize returns to shape of Q, with empty lists
+        self.returns = np.empty_like(self.Q, dtype=list)
+        for i in range(self.returns.shape[0]):
+            for j in range(self.returns.shape[1]):
+                self.returns[i, j] = []
+
+        # Initialize number of episodes, and discount factor
+        self.num_episodes = num_episodes
+        self.gamma = gamma
+
+        # Initialize episode generator
+        self.episode_generator = EpisodeGenerator(self.policy, self.num_states, self.num_actions, stochastic)
+
+        # Set verbose flag to False
+        self.show_pi_q = False
+
+    def show_pi_q(self, show):
+        """Sets flag to show the policy and Q values"""
+        self.show_pi_q = show
+
+    def run(self):
+        """Runs the Monte Carlo algorithm for the specified number of episodes"""
+        if self.show_pi_q:
+            print("Initial policy:")
+            print(self.policy)
+            print("Initial Q values:")
+            print(self.Q)
+            print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
+        for i in range(self.num_episodes):
+            # Generate an episode using the current policy
+            episode = self.episode_generator.generate()
+            G = 0
+            # For each step in the episode
+            for i, step in enumerate(reversed(episode)):
+                # Get the state, action, and reward
+                state, action, reward = step
+                # Update the return
+                G = self.gamma * G + reward
+
+                # Iterate through all previous steps in the episode, and
+                # check if the pair (state, action) appears in any previous step
+                pair_occurred = False
+                for j in range(len(episode) - i - 1):
+                    if episode[j][0] == state and episode[j][1] == action:
+                        pair_occurred = True
+
+                # "Unless the pair (state, action) appears in any previous step"
+                if not pair_occurred:
+                    # Add the return to the returns
+                    self.returns[state, action].append(G)
+                    # Update the Q value
+                    self.Q[state, action] = np.mean(self.returns[state, action])
+                    # Epsilon-greedy policy improvement
+                    A_star = np.argmax(self.Q[state, :])
+                    if action == A_star:
+                        self.policy[state] = 1 - self.epsilon + (self.epsilon/self.num_actions)
+                    # taking non-greedy action
+                    else:
+                        self.policy[state] = self.epsilon/self.num_actions
+
+        if self.show_pi_q:
+            print(f"Finished running On-policy First-visit MC Control algorithm with {self.num_episodes} episodes")
+            print("Final policy:")
+            print(self.policy)
+            print("Final Q values:")
+            print(self.Q)
+
 def plot_Qs(Q_arr, max_episodes, algo_name):
     """For each of the 6 states do the following:
     1. Iterate through Q_arr for that state
@@ -181,20 +264,34 @@ def plot_Qs(Q_arr, max_episodes, algo_name):
         axs[row, col].legend()
     plt.show()
 
-def main():
+def main(algorithm):
     # Run Monte Carlo ES for various numbers of episodes
     Q_arr = []
     max_episodes = 100
-    print(f"Running Monte Carlo ES repeatedly up to {max_episodes} episodes per run...")
-    for i in trange(max_episodes):
-        mc_es = MonteCarloES(num_episodes=i)
-        # mc_es.show_pi_q(True)
-        mc_es.run()
-        Q_arr.append(mc_es.Q)
-    Q_arr = np.array(Q_arr)
-    print()
-    # Plot the Q values over number of episodes
-    plot_Qs(Q_arr, max_episodes, "Monte Carlo ES")
+    if algorithm == "1":
+        print(f"Running Monte Carlo ES repeatedly up to {max_episodes} episodes per run...")
+        for i in trange(max_episodes):
+            mc_es = MonteCarloES(num_episodes=i)
+            # mc_es.show_pi_q(True)
+            mc_es.run()
+            Q_arr.append(mc_es.Q)
+        Q_arr = np.array(Q_arr)
+        print()
+        # Plot the Q values over number of episodes
+        plot_Qs(Q_arr, max_episodes, "Monte Carlo ES")
+    else:
+        print(f"RunningOn-policy First-visit MC Control repeatedly up to {max_episodes} episodes per run...")
+        for i in trange(max_episodes):
+            op_fv_mc = OnPolicyFirstVisitMC(num_episodes=i, epsilon=0.1)
+            op_fv_mc.run()
+            Q_arr.append(op_fv_mc.Q)
+        Q_arr = np.array(Q_arr)
+        print()
+        # Plot the Q values over number of episodes
+        plot_Qs(Q_arr, max_episodes, "On-policy First-visit MC Control")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("please specify the algorithm by entering the associated number as a run argument: 1) Monte Carlo ES 2) On-policy First-visit MC Control")
+    else:
+        main(sys.argv[1])
