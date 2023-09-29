@@ -118,20 +118,23 @@ class MonteCarloES:
         # Initialize episode generator
         self.episode_generator = EpisodeGenerator(self.policy, self.num_states, self.num_actions, stochastic)
 
-    def show_pi_q(self, show=True):
+        # Set verbose flag to False
+        self.show_pi_q = False
+
+    def show_pi_q(self, show):
         """Sets flag to show the policy and Q values"""
         self.show_pi_q = show
 
 
     def run(self):
         """Runs the Monte Carlo algorithm for the specified number of episodes"""
-        # if self.show_pi_q:
-        #     print("Initial policy:")
-        #     print(self.policy)
-        #     print("Initial Q values:")
-        #     print(self.Q)
+        if self.show_pi_q:
+            print("Initial policy:")
+            print(self.policy)
+            print("Initial Q values:")
+            print(self.Q)
         print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
-        for i in trange(self.num_episodes):
+        for i in range(self.num_episodes):
             # Generate an episode using the current policy
             episode = self.episode_generator.generate()
             G = 0
@@ -157,37 +160,46 @@ class MonteCarloES:
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the policy
                     self.policy[state] = np.argmax(self.Q[state, :])
-        print("Finished running Monte Carlo ES algorithm")
         if self.show_pi_q:
             print("Final policy:")
             print(self.policy)
             print("Final Q values:")
             print(self.Q)
 
-def plot_Qs(Q_arr):
-    """Plot 6 graphs, one for each state, showing the Q values over number of episodes"""
-    fig, axs = plt.subplots(2, 3)
-    fig.suptitle("Q values over number of episodes")
+def plot_Qs(Q_arr, max_episodes):
+    """For each of the 6 states do the following:
+    1. Iterate through Q_arr for that state
+    2. Sub-plot the Q value for both actions over the number of episodes
+    3. Show the episodes in multiples of 5"""
+    fig, axs = plt.subplots(3, 2, figsize=(10, 10))
+    # Set title for entire figure
+    fig.suptitle(f"Q Values over {max_episodes} Episodes")
     for i in range(6):
-        axs[i // 3, i % 3].plot(Q_arr[:, i, 0], label="Back")
-        axs[i // 3, i % 3].plot(Q_arr[:, i, 1], label="Forward")
-        axs[i // 3, i % 3].set_title(f"State {i}")
-        axs[i // 3, i % 3].set_xlabel("Number of episodes")
-        axs[i // 3, i % 3].set_ylabel("Q value")
-        axs[i // 3, i % 3].legend()
+        row = i // 2
+        col = i % 2
+        # Plot actions with labels
+        axs[row, col].plot(Q_arr[:, i, 0], label="Back")
+        axs[row, col].plot(Q_arr[:, i, 1], label="Forward")
+        # Set subplot title
+        axs[row, col].set_title(f"State {i}")
+        # Set y-axis range
+        axs[row, col].set_ylim([0, 5.5])
+        # Show legend
+        axs[row, col].legend()
     plt.show()
 
 def main():
     Q_arr = []
     # Run Monte Carlo ES for various numbers of episodes
-    for i in range(0, 50, 5):
+    max_episodes = 25
+    for i in range(0, max_episodes):
         mc_es = MonteCarloES(num_episodes=i)
         # mc_es.show_pi_q(True)
         mc_es.run()
         Q_arr.append(mc_es.Q)
     Q_arr = np.array(Q_arr)
     # Plot the Q values over number of episodes
-    plot_Qs(Q_arr)
+    plot_Qs(Q_arr, max_episodes)
 
 if __name__ == "__main__":
     main()
