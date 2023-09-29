@@ -210,7 +210,7 @@ class OnPolicyFirstVisitMC:
             print(self.policy)
             print("Initial Q values:")
             print(self.Q)
-            print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
+            print(f"Running On-policy First-visit MC Control with {self.num_episodes} episodes...")
         for e in trange(self.num_episodes):
             # Generate an episode using the current policy
             episode = self.episode_generator.generate(self.policy)
