@@ -95,7 +95,7 @@ class EpisodeGenerator:
 class MonteCarloES:
     """Monte Carlo Exploring Starts algorithm for estimating optimal policy,
     as given on page 99 of the textbook"""
-    def __init__(self, num_episodes=500, gamma=0.1, stochastic=True):
+    def __init__(self, num_episodes=500, gamma=0.7, stochastic=True):
         self.num_states = 6
         self.num_actions = 2
 
