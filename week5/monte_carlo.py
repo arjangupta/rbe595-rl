@@ -19,7 +19,7 @@ from tqdm import trange
 class EpisodeGenerator:
     """Generates episodes for the Monte Carlo algorithms,
     as given in Example 2.2 of the textbook"""
-    def __init__(self, policy, num_states=6, num_actions=2, stochastic=True):
+    def __init__(self, num_states=6, num_actions=2, stochastic=True):
         self.max_episode_length = 1000
         self.num_states = num_states
         self.num_actions = num_actions
@@ -96,10 +96,10 @@ class MonteCarloES:
         self.num_states = 6
         self.num_actions = 2
 
-        # Randomly initialize policy for back and forward actions (0 and 1)
+        # Arbitrarily assign policy(s) in A(s), for all s in S
         self.policy = np.random.randint(self.num_actions, size=self.num_states)
 
-        # Initialize Q(s,a) arbitrarily to real numbers
+        # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
         # Initialize a Q over time array
@@ -116,7 +116,7 @@ class MonteCarloES:
         self.gamma = gamma
 
         # Initialize episode generator
-        self.episode_generator = EpisodeGenerator(self.policy, self.num_states, self.num_actions, stochastic)
+        self.episode_generator = EpisodeGenerator(self.num_states, self.num_actions, stochastic)
 
         # Set verbose flag to False
         self.show_pi_q = False
@@ -198,7 +198,7 @@ class OnPolicyFirstVisitMC:
         self.gamma = gamma
 
         # Initialize episode generator
-        self.episode_generator = EpisodeGenerator(self.policy, self.num_states, self.num_actions, stochastic)
+        self.episode_generator = EpisodeGenerator(self.num_states, self.num_actions, stochastic)
 
         # Set verbose flag to False
         self.show_pi_q = False
