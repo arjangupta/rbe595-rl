@@ -164,7 +164,30 @@ class MonteCarloES:
             print("Final Q values:")
             print(self.Q)
 
+def plot_Qs(Q_arr):
+    """Plot 6 graphs, one for each state, showing the Q values over number of episodes"""
+    fig, axs = plt.subplots(2, 3)
+    fig.suptitle("Q values over number of episodes")
+    for i in range(6):
+        axs[i // 3, i % 3].plot(Q_arr[:, i, 0], label="Back")
+        axs[i // 3, i % 3].plot(Q_arr[:, i, 1], label="Forward")
+        axs[i // 3, i % 3].set_title(f"State {i}")
+        axs[i // 3, i % 3].set_xlabel("Number of episodes")
+        axs[i // 3, i % 3].set_ylabel("Q value")
+        axs[i // 3, i % 3].legend()
+    plt.show()
+
+def main():
+    Q_arr = []
+    # Run Monte Carlo ES for various numbers of episodes
+    for i in range(0, 50, 5):
+        mc_es = MonteCarloES(num_episodes=i)
+        # mc_es.show_pi_q(True)
+        mc_es.run()
+        Q_arr.append(mc_es.Q)
+    Q_arr = np.array(Q_arr)
+    # Plot the Q values over number of episodes
+    plot_Qs(Q_arr)
+
 if __name__ == "__main__":
-    mc_es = MonteCarloES()
-    mc_es.show_pi_q(True)
-    mc_es.run()
+    main()
