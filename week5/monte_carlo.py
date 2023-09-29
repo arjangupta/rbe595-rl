@@ -3,7 +3,7 @@
 # Programming Exercise 3: Monte Carlo method
 
 # We are simulating the robot in Example 2.2 of the textbook, which is a robot
-# that can move forward or backward in a one-dimensional, 5 state world.
+# that can move forward or backward in a one-dimensional, 6 state world.
 # The transition dynamics are stochastic, such that 0.8 of the time the robot
 # moves in the direction it chooses, and 0.05 of the time it moves in the opposite
 # direction, and 0.15 of the time it stays in the same place. The robot receives
@@ -17,10 +17,10 @@ import matplotlib.pyplot as plt
 class EpisodeGenerator:
     """Generates episodes for the Monte Carlo algorithms,
     as given in Example 2.2 of the textbook"""
-    def __init__(self, episode_length=1000):
+    def __init__(self, episode_length=1000, num_states=6, num_actions=2):
         self.episode_length = episode_length
-        self.num_states = 5
-        self.num_actions = 2
+        self.num_states = num_states
+        self.num_actions = num_actions
         self.expected_dir_prob = 0.8
         self.opposite_dir_prob = 0.05
         self.stay_prob = 0.15
@@ -29,7 +29,7 @@ class EpisodeGenerator:
         """Generates an episode for the Monte Carlo algorithm"""
         episode = []
         # Choose random starting state and action
-        start_state = np.random.randint(1, self.num_states)
+        start_state = np.random.randint(self.num_states)
         start_action = np.random.randint(self.num_actions)
         # Initialize the current state and action
         current_state = start_state
@@ -54,8 +54,8 @@ class EpisodeGenerator:
             if next_state == 0:
                 # The robot receives a reward of 1
                 reward = 1
-            # If the robot is in state 5
-            elif next_state == 5:
+            # If the robot is in rightmost state
+            elif next_state == self.num_states - 1:
                 # The robot receives a reward of 5
                 reward = 5
             # If the robot is in any other state
@@ -75,8 +75,8 @@ class EpisodeGenerator:
         if state == 0:
             # The robot can only move forward
             return 1
-        # If the robot is in state 5
-        elif state == 5:
+        # If the robot is in rightmost-state
+        elif state == self.num_states - 1:
             # The robot can only move backward
             return 0
         # If the robot is in any other state
@@ -88,10 +88,12 @@ class MonteCarloES:
     """Monte Carlo Exploring Starts algorithm for estimating optimal policy,
     as given on page 99 of the textbook"""
     def __init__(self, episode_length=1000, num_episodes=1000, gamma=0.95):
+        self.num_states = 6
+        self.num_actions = 2
         # Randomly initialize policy for back and forward actions (0 and 1)
-        self.policy = np.random.randint(2, size=episode_length)
+        self.policy = np.random.randint(self.num_actions, size=self.num_states)
         # Initialize Q(s,a) arbitrarily to real numbers
-        self.Q = np.random.rand(5, 2)
+        self.Q = np.random.rand(self.num_states, self.num_actions)
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
         for i in range(self.returns.shape[0]):
@@ -102,7 +104,7 @@ class MonteCarloES:
         self.num_episodes = num_episodes
         self.gamma = gamma
         # Initialize episode generator
-        self.episode_generator = EpisodeGenerator(self.episode_length)
+        self.episode_generator = EpisodeGenerator(self.episode_length, self.num_states, self.num_actions)
     
     def run(self):
         """Runs the Monte Carlo algorithm for the specified number of episodes"""
@@ -116,8 +118,14 @@ class MonteCarloES:
                 state, action, reward = step
                 # Update the return
                 G = self.gamma * G + reward
-                # Unless the pair state, action appears in any previous step
-                if (state, action) not in episode[:len(episode) - i - 1]:
+                # Iterate through all previous steps in the episode, and
+                # check if the pair (state, action) appears in any previous step
+                pair_occurred = False
+                for j in range(len(episode) - i - 1):
+                    if episode[j][0] == state and episode[j][1] == action:
+                        pair_occurred = True
+                # "Unless the pair (state, action) appears in any previous step"
+                if not pair_occurred:
                     # Add the return to the returns
                     self.returns[state, action].append(G)
                     # Update the Q value
@@ -129,6 +137,8 @@ class MonteCarloES:
 
 if __name__ == "__main__":
     mc_es = MonteCarloES()
+    print(mc_es.Q)
+    print(mc_es.policy)
     mc_es.run()
     print(mc_es.Q)
     print(mc_es.policy)
