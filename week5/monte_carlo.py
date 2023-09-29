@@ -41,8 +41,8 @@ class EpisodeGenerator:
             # Initialize the current state and action as a random start state
             current_state = np.random.randint(self.num_states)
         else:
-            # Initialize the current state to 0, so we begin at start of environment interaction
-            current_state = 0
+            # Initialize the current state to 3, as in the diagram, so we begin at start of environment interaction
+            current_state = 3
 
         # For each step in the episode
         for _ in range(self.max_episode_length):
@@ -241,11 +241,21 @@ class OnPolicyFirstVisitMC:
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Epsilon-greedy policy improvement
                     A_star = np.argmax(self.Q[state, :])
-                    if action == A_star:
-                        self.policy[state] = 1 - self.epsilon + (self.epsilon/self.num_actions)
+                    policy_action = self.policy[state]
+                    exploration_decision = np.random.uniform(0, 1)
+                    if policy_action == A_star:
+                        if exploration_decision <= 1 - self.epsilon + (self.epsilon/self.num_actions):
+                            #randomly choose any of the other actions
+                            self.policy[state] = np.random.randint(self.num_actions)
+                        else:
+                            self.policy[state] = A_star
                     # taking non-greedy action
                     else:
-                        self.policy[state] = self.epsilon/self.num_actions
+                        if exploration_decision <= self.epsilon/self.num_actions:
+                            #randomly choose any of the other actions
+                            self.policy[state] = np.random.randint(self.num_actions)
+                        else:
+                            self.policy[state] = A_star
 
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
