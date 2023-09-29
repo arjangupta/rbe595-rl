@@ -31,9 +31,8 @@ class EpisodeGenerator:
             self.expected_dir_prob = 1
             self.opposite_dir_prob = 0
             self.stay_prob = 0
-        self.policy = policy
         
-    def generate(self):
+    def generate(self, policy):
         """Generates an episode for the Monte Carlo algorithm"""
         episode = []
 
@@ -43,7 +42,7 @@ class EpisodeGenerator:
         # For each step in the episode
         for _ in range(self.max_episode_length):
             # Get action from policy
-            current_action = self.policy[current_state]
+            current_action = policy[current_state]
 
             # Generate a random number for the direction the robot moves
             random_number = np.random.rand()
@@ -98,6 +97,9 @@ class MonteCarloES:
         # Initialize Q(s,a) arbitrarily to real numbers
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
+        # Initialize a Q over time array
+        self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
         for i in range(self.returns.shape[0]):
@@ -114,7 +116,7 @@ class MonteCarloES:
         # Set verbose flag to False
         self.show_pi_q = False
 
-    def show_pi_q(self, show):
+    def set_show_pi_q(self, show):
         """Sets flag to show the policy and Q values"""
         self.show_pi_q = show
 
@@ -126,9 +128,9 @@ class MonteCarloES:
             print("Initial Q values:")
             print(self.Q)
             print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
-        for i in range(self.num_episodes):
+        for e in trange(self.num_episodes):
             # Generate an episode using the current policy
-            episode = self.episode_generator.generate()
+            episode = self.episode_generator.generate(self.policy)
             G = 0
             # For each step in the episode
             for i, step in enumerate(reversed(episode)):
@@ -152,6 +154,9 @@ class MonteCarloES:
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the policy
                     self.policy[state] = np.argmax(self.Q[state, :])
+            # Add the Q values to the Q over time array
+            self.Q_arr[e, :, :] = self.Q
+
         if self.show_pi_q:
             print(f"Finished running Monte Carlo ES algorithm with {self.num_episodes} episodes")
             print("Final policy:")
@@ -176,25 +181,18 @@ def plot_Qs(Q_arr, max_episodes, algo_name):
         # Set subplot title
         axs[row, col].set_title(f"State {i}")
         # Set y-axis range
-        axs[row, col].set_ylim([0, 5.5])
+        # axs[row, col].set_ylim([0, 5.5])
         # Show legend
         axs[row, col].legend()
     plt.show()
 
 def main():
     # Run Monte Carlo ES for various numbers of episodes
-    Q_arr = []
-    max_episodes = 100
-    print(f"Running Monte Carlo ES repeatedly up to {max_episodes} episodes per run...")
-    for i in trange(max_episodes):
-        mc_es = MonteCarloES(num_episodes=i)
-        # mc_es.show_pi_q(True)
-        mc_es.run()
-        Q_arr.append(mc_es.Q)
-    Q_arr = np.array(Q_arr)
-    print()
+    mc_es = MonteCarloES()
+    mc_es.set_show_pi_q(True)
+    mc_es.run()
     # Plot the Q values over number of episodes
-    plot_Qs(Q_arr, max_episodes, "Monte Carlo ES")
+    plot_Qs(mc_es.Q_arr, mc_es.num_episodes, "Monte Carlo ES")
 
 if __name__ == "__main__":
     main()
