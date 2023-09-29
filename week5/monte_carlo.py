@@ -167,14 +167,14 @@ class MonteCarloES:
             print("Final Q values:")
             print(self.Q)
 
-def plot_Qs(Q_arr, max_episodes):
+def plot_Qs(Q_arr, max_episodes, algo_name):
     """For each of the 6 states do the following:
     1. Iterate through Q_arr for that state
     2. Sub-plot the Q value for both actions over the number of episodes
     3. Show the episodes in multiples of 5"""
     fig, axs = plt.subplots(3, 2, figsize=(10, 10))
     # Set title for entire figure
-    fig.suptitle(f"Q Values over {max_episodes} Episodes")
+    fig.suptitle(f"{algo_name}: Q Values over {max_episodes} Episodes")
     for i in range(6):
         row = i // 2
         col = i % 2
@@ -192,8 +192,8 @@ def plot_Qs(Q_arr, max_episodes):
 def main():
     # Run Monte Carlo ES for various numbers of episodes
     Q_arr = []
-    max_episodes = 75
-    print(f"Running Monte Carlo ES repeatedly from up to {max_episodes} episodes...")
+    max_episodes = 100
+    print(f"Running Monte Carlo ES repeatedly up to {max_episodes} episodes per run...")
     for i in trange(max_episodes):
         mc_es = MonteCarloES(num_episodes=i)
         # mc_es.show_pi_q(True)
@@ -202,7 +202,7 @@ def main():
     Q_arr = np.array(Q_arr)
     print()
     # Plot the Q values over number of episodes
-    plot_Qs(Q_arr, max_episodes)
+    plot_Qs(Q_arr, max_episodes, "Monte Carlo ES")
 
 if __name__ == "__main__":
     main()
