@@ -60,14 +60,12 @@ class EpisodeGenerator:
                 # The robot stays in the same place
                 next_state = current_state
 
+            # Get the reward
             if next_state == 0 and current_state != 0:
-                # The robot receives a reward of 1
                 reward = 1
             elif next_state == self.num_states - 1 and current_state != self.num_states - 1:
-                # The robot receives a reward of 5
                 reward = 5
             else:
-                # The robot receives a reward of 0
                 reward = 0
 
             # Add the step to the episode
