@@ -93,7 +93,7 @@ class MonteCarloES:
         self.num_actions = 2
 
         # Arbitrarily assign policy(s) in A(s), for all s in S
-        self.policy = np.zeros(self.num_states, dtype=int)
+        self.policy = np.random.randint(self.num_actions, size=self.num_states)
 
         # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
