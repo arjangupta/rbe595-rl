@@ -92,10 +92,10 @@ class MonteCarloES:
         self.num_states = 6
         self.num_actions = 2
 
-        # Randomly initialize policy for back and forward actions (0 and 1)
-        self.policy = np.random.randint(self.num_actions, size=self.num_states)
+        # Arbitrarily assign policy(s) in A(s), for all s in S
+        self.policy = np.zeros(self.num_states, dtype=int)
 
-        # Initialize Q(s,a) arbitrarily to real numbers
+        # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
         # Initialize a Q over time array
