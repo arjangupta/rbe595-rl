@@ -18,13 +18,19 @@ from tqdm import trange
 class EpisodeGenerator:
     """Generates episodes for the Monte Carlo algorithms,
     as given in Example 2.2 of the textbook"""
-    def __init__(self, policy, episode_length=1000, num_states=6, num_actions=2):
-        self.episode_length = episode_length
+    def __init__(self, policy, num_states=6, num_actions=2, stochastic=True):
+        self.max_episode_length = 100000
         self.num_states = num_states
         self.num_actions = num_actions
-        self.expected_dir_prob = 0.8
-        self.opposite_dir_prob = 0.05
-        self.stay_prob = 0.15
+        self.stochastic = stochastic
+        if self.stochastic:
+            self.expected_dir_prob = 0.8
+            self.opposite_dir_prob = 0.05
+            self.stay_prob = 0.15
+        else:
+            self.expected_dir_prob = 1
+            self.opposite_dir_prob = 0
+            self.stay_prob = 0
         self.policy = policy
         
     def generate(self):
@@ -35,7 +41,7 @@ class EpisodeGenerator:
         current_state = np.random.randint(self.num_states)
 
         # For each step in the episode
-        for _ in range(self.episode_length):
+        for _ in range(self.max_episode_length):
 
             # Get action from policy
             current_action = self.policy[current_state]
@@ -70,6 +76,10 @@ class EpisodeGenerator:
             # Update the current state and action
             current_state = next_state
 
+            # If we have reached one of the terminal states, stop generating the episode
+            if current_state == 0 or current_state == self.num_states - 1:
+                break
+
         return episode
     
     def transition(self, state, action):
@@ -101,13 +111,12 @@ class MonteCarloES:
             for j in range(self.returns.shape[1]):
                 self.returns[i, j] = []
 
-        # Initialize episode length, number of episodes, and discount factor
-        self.episode_length = episode_length
+        # Initialize number of episodes, and discount factor
         self.num_episodes = num_episodes
         self.gamma = gamma
 
         # Initialize episode generator
-        self.episode_generator = EpisodeGenerator(self.policy, self.episode_length, self.num_states, self.num_actions)
+        self.episode_generator = EpisodeGenerator(self.policy, self.num_states, self.num_actions)
 
     def show_pi_q(self, show=True):
         """Sets flag to show the policy and Q values"""
