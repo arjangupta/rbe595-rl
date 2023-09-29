@@ -180,8 +180,6 @@ def plot_Qs(Q_arr, max_episodes, algo_name):
         axs[row, col].plot(Q_arr[:, i, 1], label="Forward")
         # Set subplot title
         axs[row, col].set_title(f"State {i}")
-        # Set y-axis range
-        # axs[row, col].set_ylim([0, 5.5])
         # Show legend
         axs[row, col].legend()
     plt.show()
