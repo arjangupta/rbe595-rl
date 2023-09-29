@@ -133,7 +133,7 @@ class MonteCarloES:
             print(self.policy)
             print("Initial Q values:")
             print(self.Q)
-        print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
+            print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
         for i in range(self.num_episodes):
             # Generate an episode using the current policy
             episode = self.episode_generator.generate()
@@ -161,6 +161,7 @@ class MonteCarloES:
                     # Update the policy
                     self.policy[state] = np.argmax(self.Q[state, :])
         if self.show_pi_q:
+            print(f"Finished running Monte Carlo ES algorithm with {self.num_episodes} episodes")
             print("Final policy:")
             print(self.policy)
             print("Final Q values:")
@@ -189,15 +190,17 @@ def plot_Qs(Q_arr, max_episodes):
     plt.show()
 
 def main():
-    Q_arr = []
     # Run Monte Carlo ES for various numbers of episodes
-    max_episodes = 25
-    for i in range(0, max_episodes):
+    Q_arr = []
+    max_episodes = 75
+    print(f"Running Monte Carlo ES repeatedly from up to {max_episodes} episodes...")
+    for i in trange(max_episodes):
         mc_es = MonteCarloES(num_episodes=i)
         # mc_es.show_pi_q(True)
         mc_es.run()
         Q_arr.append(mc_es.Q)
     Q_arr = np.array(Q_arr)
+    print()
     # Plot the Q values over number of episodes
     plot_Qs(Q_arr, max_episodes)
 
