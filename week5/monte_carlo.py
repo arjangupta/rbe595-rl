@@ -95,7 +95,7 @@ class EpisodeGenerator:
 class MonteCarloES:
     """Monte Carlo Exploring Starts algorithm for estimating optimal policy,
     as given on page 99 of the textbook"""
-    def __init__(self, num_episodes=1000, gamma=0.95, stochastic=True):
+    def __init__(self, num_episodes=500, gamma=0.1, stochastic=True):
         self.num_states = 6
         self.num_actions = 2
 
@@ -125,11 +125,11 @@ class MonteCarloES:
 
     def run(self):
         """Runs the Monte Carlo algorithm for the specified number of episodes"""
-        if self.show_pi_q:
-            print("Initial policy:")
-            print(self.policy)
-            print("Initial Q values:")
-            print(self.Q)
+        # if self.show_pi_q:
+        #     print("Initial policy:")
+        #     print(self.policy)
+        #     print("Initial Q values:")
+        #     print(self.Q)
         print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
         for i in trange(self.num_episodes):
             # Generate an episode using the current policy
