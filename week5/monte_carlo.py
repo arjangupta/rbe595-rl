@@ -42,13 +42,11 @@ class EpisodeGenerator:
 
         # For each step in the episode
         for _ in range(self.max_episode_length):
-
             # Get action from policy
             current_action = self.policy[current_state]
 
             # Generate a random number for the direction the robot moves
             random_number = np.random.rand()
-
             if random_number < self.expected_dir_prob:
                 # The robot moves in the direction it chooses
                 next_state = self.transition(current_state, current_action)
@@ -59,7 +57,6 @@ class EpisodeGenerator:
             else:
                 # The robot stays in the same place
                 next_state = current_state
-
             # Get the reward
             if next_state == 0 and current_state != 0:
                 reward = 1
@@ -70,14 +67,12 @@ class EpisodeGenerator:
 
             # Add the step to the episode
             episode.append((current_state, current_action, reward))
-
             # Update the current state and action
             current_state = next_state
 
             # If we have reached one of the terminal states, stop generating the episode
             if current_state == 0 or current_state == self.num_states - 1:
                 break
-
         return episode
     
     def transition(self, state, action):
@@ -122,7 +117,6 @@ class MonteCarloES:
     def show_pi_q(self, show):
         """Sets flag to show the policy and Q values"""
         self.show_pi_q = show
-
 
     def run(self):
         """Runs the Monte Carlo algorithm for the specified number of episodes"""
