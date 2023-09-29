@@ -33,12 +33,16 @@ class EpisodeGenerator:
             self.opposite_dir_prob = 0
             self.stay_prob = 0
         
-    def generate(self, policy):
+    def generate(self, policy, exploring_start=True):
         """Generates an episode for the Monte Carlo algorithm"""
         episode = []
 
-        # Initialize the current state and action as a random start state
-        current_state = np.random.randint(self.num_states)
+        if exploring_start:
+            # Initialize the current state and action as a random start state
+            current_state = np.random.randint(self.num_states)
+        else:
+            # Initialize the current state to 0, so we begin at start of environment interaction
+            current_state = 0
 
         # For each step in the episode
         for _ in range(self.max_episode_length):
@@ -213,7 +217,7 @@ class OnPolicyFirstVisitMC:
             print(f"Running On-policy First-visit MC Control with {self.num_episodes} episodes...")
         for e in trange(self.num_episodes):
             # Generate an episode using the current policy
-            episode = self.episode_generator.generate(self.policy)
+            episode = self.episode_generator.generate(self.policy, False)
             G = 0
             # For each step in the episode
             for i, step in enumerate(reversed(episode)):
