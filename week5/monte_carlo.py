@@ -17,72 +17,69 @@ import matplotlib.pyplot as plt
 class EpisodeGenerator:
     """Generates episodes for the Monte Carlo algorithms,
     as given in Example 2.2 of the textbook"""
-    def __init__(self, episode_length=1000, num_states=6, num_actions=2):
+    def __init__(self, policy, episode_length=1000, num_states=6, num_actions=2):
         self.episode_length = episode_length
         self.num_states = num_states
         self.num_actions = num_actions
         self.expected_dir_prob = 0.8
         self.opposite_dir_prob = 0.05
         self.stay_prob = 0.15
+        self.policy = policy
         
     def generate(self):
         """Generates an episode for the Monte Carlo algorithm"""
         episode = []
-        # Choose random starting state and action
-        start_state = np.random.randint(self.num_states)
-        start_action = np.random.randint(self.num_actions)
-        # Initialize the current state and action
-        current_state = start_state
-        current_action = start_action
+
+        # Initialize the current state and action as a random start state
+        current_state = np.random.randint(self.num_states)
+
         # For each step in the episode
         for _ in range(self.episode_length):
-            # Generate a random number
+
+            # Get action from policy
+            current_action = self.policy[current_state]
+
+            # Generate a random number for the direction the robot moves
             random_number = np.random.rand()
-            # If the random number is less than expected direction probability
+
             if random_number < self.expected_dir_prob:
                 # The robot moves in the direction it chooses
-                next_state = current_state + current_action
-            # If the random number is less than expected + opposite direction probability
+                next_state = self.transition(current_state, current_action)
             elif random_number < self.expected_dir_prob + self.opposite_dir_prob:
                 # The robot moves in the opposite direction
-                next_state = current_state - current_action
-            # If the random number is less than 1
+                current_action *= -1
+                next_state = self.transition(current_state, current_action)
             else:
                 # The robot stays in the same place
                 next_state = current_state
-            # If the robot is in state 0
-            if next_state == 0:
+
+            if next_state == 0 and current_state != 0:
                 # The robot receives a reward of 1
                 reward = 1
-            # If the robot is in rightmost state
-            elif next_state == self.num_states - 1:
+            elif next_state == self.num_states - 1 and current_state != self.num_states - 1:
                 # The robot receives a reward of 5
                 reward = 5
-            # If the robot is in any other state
             else:
                 # The robot receives a reward of 0
                 reward = 0
+
             # Add the step to the episode
             episode.append((current_state, current_action, reward))
+
             # Update the current state and action
             current_state = next_state
-            current_action = self.choose_action(current_state)
+
         return episode
     
-    def choose_action(self, state):
-        """Chooses an action for the robot to take in the given state"""
-        # If the robot is in state 0
-        if state == 0:
-            # The robot can only move forward
-            return 1
-        # If the robot is in rightmost-state
-        elif state == self.num_states - 1:
-            # The robot can only move backward
+    def transition(self, state, action):
+        """Returns the next state given the current state and action"""
+        if state == 0 and action == 0:
             return 0
-        # If the robot is in any other state
+        elif state == self.num_states - 1 and action == 1:
+            return self.num_states - 1
         else:
-            # The robot can move forward or backward
-            return np.random.randint(2)
+            return state + action
+
 
 class MonteCarloES:
     """Monte Carlo Exploring Starts algorithm for estimating optimal policy,
@@ -104,7 +101,7 @@ class MonteCarloES:
         self.num_episodes = num_episodes
         self.gamma = gamma
         # Initialize episode generator
-        self.episode_generator = EpisodeGenerator(self.episode_length, self.num_states, self.num_actions)
+        self.episode_generator = EpisodeGenerator(self.policy, self.episode_length, self.num_states, self.num_actions)
     
     def run(self):
         """Runs the Monte Carlo algorithm for the specified number of episodes"""
