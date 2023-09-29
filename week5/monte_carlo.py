@@ -180,6 +180,9 @@ class OnPolicyFirstVisitMC:
         # Initialize Q(s,a) arbitrarily to real numbers
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
+        # Initialize a Q over time array
+        self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
         for i in range(self.returns.shape[0]):
@@ -196,7 +199,7 @@ class OnPolicyFirstVisitMC:
         # Set verbose flag to False
         self.show_pi_q = False
 
-    def show_pi_q(self, show):
+    def set_show_pi_q(self, show):
         """Sets flag to show the policy and Q values"""
         self.show_pi_q = show
 
@@ -208,9 +211,9 @@ class OnPolicyFirstVisitMC:
             print("Initial Q values:")
             print(self.Q)
             print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
-        for i in range(self.num_episodes):
+        for e in trange(self.num_episodes):
             # Generate an episode using the current policy
-            episode = self.episode_generator.generate()
+            episode = self.episode_generator.generate(self.policy)
             G = 0
             # For each step in the episode
             for i, step in enumerate(reversed(episode)):
@@ -239,6 +242,9 @@ class OnPolicyFirstVisitMC:
                     # taking non-greedy action
                     else:
                         self.policy[state] = self.epsilon/self.num_actions
+
+            # Add the Q values to the Q over time array
+            self.Q_arr[e, :, :] = self.Q
 
         if self.show_pi_q:
             print(f"Finished running On-policy First-visit MC Control algorithm with {self.num_episodes} episodes")
@@ -279,15 +285,12 @@ def main(algorithm):
         # Plot the Q values over number of episodes
         plot_Qs(mc_es.Q_arr, mc_es.num_episodes, "Monte Carlo ES")
     else:
-        print(f"RunningOn-policy First-visit MC Control repeatedly up to {max_episodes} episodes per run...")
-        for i in trange(max_episodes):
-            op_fv_mc = OnPolicyFirstVisitMC(num_episodes=i, epsilon=0.1)
-            op_fv_mc.run()
-            Q_arr.append(op_fv_mc.Q)
-        Q_arr = np.array(Q_arr)
-        print()
+        # Run On-policy First-visit MC Control for various numbers of episodes
+        op_fv_mc = OnPolicyFirstVisitMC(epsilon=0.1)
+        op_fv_mc.set_show_pi_q(True)
+        op_fv_mc.run()
         # Plot the Q values over number of episodes
-        plot_Qs(Q_arr, max_episodes, "On-policy First-visit MC Control")
+        plot_Qs(op_fv_mc.Q_arr, op_fv_mc.num_episodes, "On-policy First-visit MC Control")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
