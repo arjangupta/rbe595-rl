@@ -193,23 +193,21 @@
 \nobreak\extramarks{Problem 4}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 4]
-    We have an agent in maze-like world. We want the agent to find the goal as soon as possible.
-    We set the reward for reaching the goal equal to $+1$ with $\gamma = 1$. But we notice that the agent
-    does not always reach the goal as soon as possible. How can we fix this?
+    \textbf{(Exercise 5.5, page 105)}
+    Consider an MDP with a single nonterminal state and a single action
+    that transitions back to the nonterminal state with probability p and transitions to the
+    terminal state with probability $1-p$. Let the reward be +1 on all transitions, and let
+    $\gamma = 1$. Suppose you observe one episode that lasts 10 steps, with a return of 10. What
+    are the first-visit and every-visit estimators of the value of the nonterminal state?
 
     \subsection{Answer}
 
-    As stated in the textbook, the \textit{discounted return} (equation 3.8), $G_t$, is defined as,
+    From the textbook, the first-visit MC method is defined as follows,
 
     \[
-    \tag{3.8}
-        G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
+    \tag{5.5}
+        V(S_t) \doteq \frac{\sum_{t \in \mathcal{T}(S)} \rho_{t:T(t)-1} G_t}{\lvert \mathcal{T}(S) \rvert}
     \]
-
-    Here, as $\gamma$ approaches $1$, the discounted return takes far-sighted rewards into account.
-    Therefore, if the agent is not reaching the goal as soon as possible, then the agent is likely
-    too far-sighted. Therefore, we can reduce the value of $\gamma$ to make the agent more near-sighted
-    and reach the goal sooner.\\
 
 \end{homeworkProblem}
 
