@@ -275,6 +275,12 @@ class OnPolicyFirstVisitMC:
 
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
+        # Set the actual policy to the greedy policy
+        for s in range(self.num_states):
+            if np.argmax(self.Q[s]) == 0:
+                self.policy[s] = -1
+            else:
+                self.policy[s] = 1
 
         if self.show_pi_q:
             print(f"Finished running On-policy First-visit MC Control algorithm with {self.num_episodes} episodes")
