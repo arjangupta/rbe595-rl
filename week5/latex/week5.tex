@@ -1,0 +1,472 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{gensymb}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\graphicspath{{./images/}}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{\hmwkClassShort\ \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem {#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{{#1} (continued)}{{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{{#1} (continued)}{{#1} continued on next page\ldots}\nobreak{}
+    % \stepcounter{#1}
+    \nobreak\extramarks{{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+
+\newcommand{\problemNumber}{0.0}
+
+\newenvironment{homeworkProblem}[1][-1]{
+    \renewcommand{\problemNumber}{{#1}}
+    \section{\problemNumber}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{\problemNumber}
+}{
+    \exitProblemHeader{\problemNumber}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Class
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Week\ \#5 Assignment}
+\newcommand{\hmwkClassShort}{RBE 595}
+\newcommand{\hmwkClass}{RBE 595 --- Reinforcement Learning}
+\newcommand{\hmwkAuthorName}{\textbf{Arjan Gupta}}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass}}\\
+    \textmd{\textbf{\hmwkTitle}}\\
+    \vspace{3in}
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[2]{\frac{\mathrm{d}}{\mathrm{d}#2} \left(#1\right)}
+
+% For compact derivatives
+\newcommand{\derivcomp}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #2} \left(#1\right)}
+
+% For compact partial derivatives
+\newcommand{\pderivcomp}[2]{\frac{\partial #1}{\partial #2}}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\begin{document}
+
+\maketitle
+
+\nobreak\extramarks{Problem 1}{}\nobreak{}
+
+\pagebreak
+
+\begin{homeworkProblem}[Problem 1]
+    When is it suited to apply Monte-Carlo to a problem?
+
+    \subsection{Answer}
+
+    Monte-Carlo methods are best suited to be applied to problems where we do not have a
+    model of the environment (i.e., the dynamics of the environment are unknown).
+    For example, sometimes it is simply not practical to model
+    the complexity of the environment.
+    In such cases, the agent must learn about the environment by interacting
+    with it and using the obtained rewards to update its policy via the action-value function.\\
+
+\end{homeworkProblem}
+
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\begin{homeworkProblem}[Problem 2]
+    When does the Monte-carlo prediction performs the first update?
+
+    \subsection{Answer}
+
+    The Monte-Carlo prediction performs the first update after an episode terminates. This is because
+    the Monte-Carlo method is an episodic method, i.e., it learns from a series of state, action, and reward
+    tuples that occur in an episode.\\
+\end{homeworkProblem}
+
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 3}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 3]
+    What is off-policy learning and why it is useful?
+
+    \subsection{Answer}
+
+    Off-policy learning is a method of reinforcement learning where the agent learns about the environment
+    by observing the behavior of another agent, called the \textit{behavior policy}, which is the policy
+    responsible for exploration and interaction. However, the agent
+    performs evaluation and optimization using a different policy, called the \textit{target policy}.\\
+
+    Off-policy learning is useful because it allows the agent to learn about the environment
+    without having to directly interact with it. This way the agent can build upon existing knowledge
+    and learn from the behavior of other agents.\\
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 4}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 4]
+    We have an agent in maze-like world. We want the agent to find the goal as soon as possible.
+    We set the reward for reaching the goal equal to $+1$ with $\gamma = 1$. But we notice that the agent
+    does not always reach the goal as soon as possible. How can we fix this?
+
+    \subsection{Answer}
+
+    As stated in the textbook, the \textit{discounted return} (equation 3.8), $G_t$, is defined as,
+
+    \[
+    \tag{3.8}
+        G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
+    \]
+
+    Here, as $\gamma$ approaches $1$, the discounted return takes far-sighted rewards into account.
+    Therefore, if the agent is not reaching the goal as soon as possible, then the agent is likely
+    too far-sighted. Therefore, we can reduce the value of $\gamma$ to make the agent more near-sighted
+    and reach the goal sooner.\\
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 5}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 5]
+    What is the difference between policy and action?
+
+    \subsection{Answer}
+    An \textit{action} is a choice made by the agent at a given state. It is an attempted modification
+    of the environment which leads to a new state or the same state. We give an agent an associated
+    reward for each action.\\
+
+    In contrast, a policy determines how good it is for the agent to perform an action in
+    a given state. Formally, a \textit{policy} is a mapping from states to probabilities of selecting
+    each possible action. It defines a probability distribution over actions for each state.\\
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 6}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 6]
+
+    \textbf{(Exercise 3.14)}
+    The Bellman equation must hold for each state for the value function
+    $v_{\pi}$ shown in Figure 3.2 (right-side) of Example 3.5. Show numerically that this equation holds
+    for the center state, valued at +0.7, with respect to its four neighboring states, valued at
+    +2.3, +0.4, -0.4, and +0.7. (These numbers are accurate only to one decimal place.)
+
+    % \begin{figure}[h!]
+    %     \centering
+    %     \includegraphics[scale=0.45]{images/suttonbook-fig3.2.png}
+    % \end{figure}
+
+    \subsection{Answer}
+
+    From the textbook, the state-value function for a policy $\pi$ is defined as,
+    \begin{align*}
+        v_{\pi}(s) &\doteq \mathbb{E}_{\pi} \left[ G_t \mid S_t = s \right]\\
+                   &= \sum_{a} \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]
+    \end{align*}
+
+    From Example 3.5, we also know the following given information:
+    \begin{itemize}
+        \item The action set $A =\{\text{up}, \text{down}, \text{left}, \text{right}\}$ in each state.
+        \item An equiprobable random policy is used. Therefore, $\pi(a \mid s) = 0.25$ for all $a \in A$ and $s \in S$.
+        \item The reward is always $0$ for all transitions. 
+        \item $\gamma = 0.9$.
+        \item Any action taken deterministically leads to the expected state, so $p = 1$.
+    \end{itemize}
+        
+    Hence, the state-value function for the center state is,
+    \vspace{-0.25cm}\\
+    \begin{align*}
+        v_{\pi}(s_{\text{center}}) &= \sum_{a} \pi(a \mid s) \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]\\
+                   &= \pi(\text{up} \mid s) p(s_{\text{up}}, r \mid s, \text{up}) \left[ r + \gamma v_{\pi}(s_{\text{up}}) \right] + 
+                   \pi(\text{down} \mid s) p(s_{\text{down}}, r \mid s, \text{down}) \left[ r + \gamma v_{\pi}(s_{\text{down}}) \right]\\
+                    & \;\;\; + \pi(\text{left} \mid s) p(s_{\text{left}}, r \mid s, \text{left}) \left[ r + \gamma v_{\pi}(s_{\text{left}}) \right]
+                    + \pi(\text{right} \mid s) p(s_{\text{right}}, r \mid s, \text{right}) \left[ r + \gamma v_{\pi}(s_{\text{right}}) \right]\\
+                    &= 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot 2.3 \right] + 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot 0.4 \right] + 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot (-0.4) \right] + 0.25 \cdot 1 \cdot \left[ 0 + 0.9 \cdot 0.7 \right]\\
+                    &= 0.25 \cdot 0.9 \cdot \left[ 2.3 + 0.4 - 0.4 + 0.7 \right]\\
+                    &= 0.25 \cdot 0.9 \cdot 3.0\\
+                    &= 0.675 \approx 0.7 \text{ (rounded to one decimal place, as mentioned in prompt)}
+    \end{align*}
+
+    Therefore, we see that the Bellman equation holds for the center state, valued at $+0.7$.
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 7}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 7]
+
+    \textbf{(Exercise 3.17)}
+    What is the Bellman equation for action values, that
+    is, for $q_{\pi}$? It must give the action value $q_{\pi}(s, a)$ in terms of the action
+    values, $q_{\pi}(s', a')$, of possible successors to the state-action pair $(s, a)$.\\
+    Hint: the backup diagram below corresponds to this equation.
+    Show the sequence of equations analogous to (3.14), but for action
+    values.
+
+    % \begin{figure}[h!]
+    %     \centering
+    %     \includegraphics[scale=0.45]{images/suttonbook-qpi-backup-diag.png}
+    % \end{figure}
+
+    \subsection{Answer}
+
+    From the textbook, the action-value function for a policy $\pi$ is defined as,
+
+    \begin{align*}
+        q_{\pi}(s, a) &\doteq \mathbb{E}_{\pi} \left[ G_t \mid S_t = s, A_t = a \right]\\
+                   &= \mathbb{E}_{\pi} \left[ \sum_{k=0}^{\infty} \gamma^k R_{t+k+1} \mid S_t = s, A_t = a \right]\\
+                   &= \mathbb{E}_{\pi} \left[ R_{t+1} + \gamma \sum_{k=0}^{\infty} \gamma^k R_{t+k+2} \mid S_t = s, A_t = a \right]\\
+                   &= \mathbb{E}_{\pi} \left[ R_{t+1} + \gamma G_{t+1} \mid S_t = s, A_t = a \right]\\
+                     &= \mathbb{E}_{\pi} \left[ R_{t+1} \mid S_t = s, A_t = a \right] + \gamma \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_t = s, A_t = a \right]\\
+    \end{align*}
+
+    Now, let us consider the first and second terms of the above equation separately.\\
+
+    \textbf{First Term}\\
+    \vspace{-0.25cm}
+    \begin{align*}
+        \mathbb{E}_{\pi} \left[ R_{t+1} \mid S_t = s, A_t = a \right] &= \sum_{r \in \mathcal{R}} r \cdot p(r \mid s, a)
+        = \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} r \cdot p(s', r \mid s, a)
+    \end{align*}
+
+    \textbf{Second Term}\\
+    \vspace{-0.25cm}
+    \begin{align*}
+        \gamma \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_t = s, A_t = a \right] &= \gamma \sum_{g \in \mathcal{G}} g \cdot p(g \mid s, a)\\
+        &= \gamma \sum_{g \in \mathcal{G}} \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} g \cdot p(g \mid s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
+    \end{align*}
+    Where, $\sum_{g \in \mathcal{G}} g \cdot p(g \mid s', a') = \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_{t+1} = s', A_{t+1} = a' \right] = q_{\pi}(s', a')$\\
+
+    Therefore the second term is,
+
+    \begin{align*}
+        \gamma \mathbb{E}_{\pi} \left[ G_{t+1} \mid S_t = s, A_t = a \right] &= \gamma\sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} q_{\pi}(s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
+    \end{align*}
+
+    Now, combining the first and second terms, we get,
+
+    \begin{align*}
+        q_{\pi}(s, a) &=  \sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} r \cdot p(s', r \mid s, a) + \gamma\sum_{r \in \mathcal{R}} \sum_{s' \in \mathcal{S}} \sum_{a' \in \mathcal{A}} q_{\pi}(s', a') \cdot p(s', r \mid s, a) \cdot \pi(a' \mid s')\\
+        q_{\pi}(s, a) &= \sum_{s',r} p(s', r \mid s, a) \left[ r + \gamma\sum_{a'} \pi(a' \mid s') q_{\pi}(s', a') \right]\\
+    \end{align*}
+
+    Which is the Bellman equation for action values, i.e., for $q_{\pi}$.
+
+    \subsubsection{Backup Diagram Confirmation}
+
+    This equation can be verified by looking at the backup diagram given in the prompt. The backup diagram
+    shows that we start with the state-action pair $(s, a)$. To get to the next state, we are subjected
+    to the environment $p(s', r \mid s, a)$. The reward $r$ is added to the discounted return $G_{t+1}$.
+    This brings us to our new state, $s'$. At this point, the equation would look as follows,
+
+    \begin{align*}
+        q_{\pi}(s, a) &= \sum_{s',r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]\\
+    \end{align*}
+
+    However we still need to eliminate the $v_{\pi}(s')$ term. To do this, we go through our
+    policy, $\pi$, to get the action $a'$ that we would take in the state $s'$. Now the equation
+    becomes,
+
+    \begin{align*}
+        q_{\pi}(s, a) &= \sum_{s',r} p(s', r \mid s, a) \left[ r + \gamma\sum_{a'} \pi(a'\mid s') q_{\pi}(s', a') \right]\\
+    \end{align*}
+
+    So, the Bellman equation for action values, i.e., for $q_{\pi}$, is confirmed by the backup diagram.
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 8}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 8]
+
+    \textbf{(Exercise 3.22)}
+    Consider the continuing MDP shown below. The only decision to be made is that in the top state,
+    where two actions are available, left and right. The numbers
+    show the rewards that are received deterministically after
+    each action. There are exactly two deterministic policies,
+    $\pi_{\text{left}}$ and $\pi_{\text{right}}$.
+    What policy is optimal if $\gamma = 0$? If $\gamma = 0.9$?
+    If  $\gamma = 0.5$?
+
+    % \begin{figure}[h!]
+    %     \centering
+    %     \includegraphics[scale=0.45]{images/suttonbook-ex3.22-fig.png}
+    % \end{figure}
+
+    \subsection{Answer}
+
+    The discounted return is defined as,
+
+    \[
+    \tag{3.8}
+        G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \cdots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
+    \]
+
+    \subsubsection{Case 1: $\gamma = 0$}
+
+    When $\gamma = 0$, the left policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{left}} &= 1 + 0 + 0 + \cdots = 1
+    \end{align*}
+
+    Similarly, the right policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{right}} &= 0 + 0 + \cdots = 0
+    \end{align*}
+
+    In this case, the \textbf{left} policy is optimal.
+
+    \subsubsection{Case 2: $\gamma = 0.9$}
+
+    When $\gamma = 0.9$, the left policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{left}} &= 1 + 0.9 \cdot 0 + 0.9^2 \cdot 1 + \cdots\\
+                        &= 1 + 0.9^2 + 0.9^4 + \cdots\\
+                        &= \sum_{k=0}^{\infty} 0.9^{2k}\\
+                        &= \sum_{k=0}^{\infty} 0.81^{k}\\
+                        &= \frac{1}{1 - 0.81}
+                        = \frac{1}{0.19}\\
+                        &= 5.263
+    \end{align*}
+
+    Similarly, the right policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{right}} &= 0 + 0.9 \cdot 2 + 0 + 0.9^3 \cdot 2 + \cdots \\
+                        &= 0.9 \cdot 2 + 0.9^3 \cdot 2 + \cdots\\
+                        &= 2 \cdot \sum_{k=0}^{\infty} 0.9^{2k+1}
+                        = 2 \cdot \sum_{k=0}^{\infty} (0.9)(0.81)^{k}
+                        = 2 \cdot \frac{0.9}{1 - 0.81}\\
+                        &= \frac{1.8}{0.19} = 9.474
+    \end{align*}
+
+    In this case, the \textbf{right} policy is optimal.
+
+    \subsubsection{Case 3: $\gamma = 0.5$}
+
+    When $\gamma = 0.5$, the left policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{left}} &= 1 + 0.5 \cdot 0 + 0.5^2 \cdot 1 + \cdots\\
+                        &= 1 + 0.5^2 + 0.5^4 + \cdots\\
+                        &= \sum_{k=0}^{\infty} 0.5^{2k}
+                        = \sum_{k=0}^{\infty} 0.25^{k}\\
+                        &= \frac{1}{1 - 0.25}
+                        = \frac{1}{0.75}\\
+                        &= 1.333
+    \end{align*}
+
+    Similarly, the right policy rewards are calculated as follows,
+
+    \begin{align*}
+        G_{\text{right}} &= 0 + 0.5 \cdot 2 + 0 + 0.5^3 \cdot 2 + \cdots \\
+                        &= 0.5 \cdot 2 + 0.5^3 \cdot 2 + \cdots\\
+                        &= 2 \cdot \sum_{k=0}^{\infty} 0.5^{2k+1}
+                        = 2 \cdot \sum_{k=0}^{\infty} (0.5)(0.25)^{k}
+                        = 2 \cdot \frac{0.5}{1 - 0.25}\\
+                        &= \frac{1}{0.75} = 1.333
+    \end{align*}
+
+    In this case, both the \textbf{left} and \textbf{right} policies are optimal.
+
+\end{homeworkProblem}
+
+\end{document}
