@@ -180,6 +180,7 @@ class OnPolicyFirstVisitMC:
         self.num_states = 6
         self.num_actions = 2
         self.epsilon = epsilon
+        self.action_set = [-1, 1]
 
         # Initialize Q(s,a) arbitrarily to real numbers
         self.Q = np.random.rand(self.num_states, self.num_actions)
@@ -189,9 +190,12 @@ class OnPolicyFirstVisitMC:
         for s in range(self.num_states):
             exploration_decision = np.random.uniform(0, 1)
             if exploration_decision <= epsilon:
-                self.policy[s] = np.random.randint(self.num_actions, size=self.num_states)
+                self.policy[s] = np.random.choice(self.action_set)
             else:
-                self.policy[s] = self.Q[s]
+                if np.argmax(self.Q[s]) == 0:
+                    self.policy[s] = -1
+                else:
+                    self.policy[s] = 1
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
