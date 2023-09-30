@@ -186,7 +186,7 @@ class OnPolicyFirstVisitMC:
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
         # Initialize the policy epsilon-greedily
-        self.policy = np.zeros(self.num_states)
+        self.policy = np.zeros(self.num_states, dtype=int)
         for s in range(self.num_states):
             exploration_decision = np.random.uniform(0, 1)
             if exploration_decision <= epsilon:
