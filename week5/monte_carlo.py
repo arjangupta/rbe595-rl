@@ -275,7 +275,7 @@ class OnPolicyFirstVisitMC:
 
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
-        # Set the actual policy to the greedy policy
+        # Once we're done running the actual policy to the greedy policy
         for s in range(self.num_states):
             if np.argmax(self.Q[s]) == 0:
                 self.policy[s] = -1
