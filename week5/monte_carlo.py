@@ -20,7 +20,6 @@ class EpisodeGenerator:
     """Generates episodes for the Monte Carlo algorithms,
     as given in Example 2.2 of the textbook"""
     def __init__(self, num_states=6, num_actions=2, stochastic=True):
-        self.max_episode_length = 1000
         self.num_states = num_states
         self.num_actions = num_actions
         self.stochastic = stochastic
@@ -44,8 +43,8 @@ class EpisodeGenerator:
             # Initialize the current state to 3, as in the diagram, so we begin at start of environment interaction
             current_state = 3
 
-        # For each step in the episode
-        for _ in range(self.max_episode_length):
+        # Keep running until we reach a terminal state (0 or 5)
+        while True:
             # Get action from policy
             current_action = policy[current_state]
 
@@ -92,7 +91,7 @@ class EpisodeGenerator:
 class MonteCarloES:
     """Monte Carlo Exploring Starts algorithm for estimating optimal policy,
     as given on page 99 of the textbook"""
-    def __init__(self, num_episodes=7000, gamma=0.7, stochastic=True):
+    def __init__(self, num_episodes=5000, gamma=0.95, stochastic=True):
         self.num_states = 6
         self.num_actions = 2
         self.action_set = [-1, 1]
