@@ -176,7 +176,7 @@ class MonteCarloES:
 class OnPolicyFirstVisitMC:
     """On-policy first visit monte-carlo for estimating optimal policy,
     as given on page 101 of the textbook"""
-    def __init__(self, num_episodes=500, gamma=0.7, epsilon = 0.1, stochastic=True):
+    def __init__(self, num_episodes=5000, gamma=0.95, epsilon = 0.1, stochastic=True):
         self.num_states = 6
         self.num_actions = 2
         self.epsilon = epsilon
