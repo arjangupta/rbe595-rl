@@ -221,7 +221,7 @@ class OnPolicyFirstVisitMC:
         self.show_pi_q = show
 
     def run(self):
-        """Runs the Monte Carlo algorithm for the specified number of episodes"""
+        """Runs the On-Policy First-Visit MC algorithm for the specified number of episodes"""
         if self.show_pi_q:
             print("Initial policy:")
             print(self.policy)
@@ -253,21 +253,23 @@ class OnPolicyFirstVisitMC:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Epsilon-greedy policy improvement
-                    A_star = np.argmax(self.Q[state, :])
+                    A_star = 1
+                    if np.argmax(self.Q[state, :]) == 0:
+                        A_star = -1
                     policy_action = self.policy[state]
                     exploration_decision = np.random.uniform(0, 1)
-                    #FIXME: is this how policy should be updated? - no prof will explain later
+                    #FIXME: is this how policy should be updated? - prof will explain later
                     if policy_action == A_star:
                         if exploration_decision <= 1 - self.epsilon + (self.epsilon/self.num_actions):
                             #randomly choose any of the other actions
-                            self.policy[state] = np.random.randint(self.num_actions)
+                            self.policy[state] = np.random.choice(self.action_set)
                         else:
                             self.policy[state] = A_star
                     # taking non-greedy action
                     else:
                         if exploration_decision <= self.epsilon/self.num_actions:
                             #randomly choose any of the other actions
-                            self.policy[state] = np.random.randint(self.num_actions)
+                            self.policy[state] = np.random.choice(self.action_set)
                         else:
                             self.policy[state] = A_star
 
