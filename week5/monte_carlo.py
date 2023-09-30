@@ -20,7 +20,6 @@ class EpisodeGenerator:
     """Generates episodes for the Monte Carlo algorithms,
     as given in Example 2.2 of the textbook"""
     def __init__(self, num_states=6, num_actions=2, stochastic=True):
-        self.max_episode_length = 1000
         self.num_states = num_states
         self.num_actions = num_actions
         self.stochastic = stochastic
@@ -44,8 +43,8 @@ class EpisodeGenerator:
             # Initialize the current state to 3, as in the diagram, so we begin at start of environment interaction
             current_state = 3
 
-        # For each step in the episode
-        for _ in range(self.max_episode_length):
+        # Keep running until we reach a terminal state (0 or 5)
+        while True:
             # Get action from policy
             current_action = policy[current_state]
 
@@ -81,7 +80,7 @@ class EpisodeGenerator:
     
     def transition(self, state, action):
         """Returns the next state given the current state and action"""
-        if state == 0 and action == 0:
+        if state == 0 and action == -1:
             return 0
         elif state == self.num_states - 1 and action == 1:
             return self.num_states - 1
@@ -92,12 +91,13 @@ class EpisodeGenerator:
 class MonteCarloES:
     """Monte Carlo Exploring Starts algorithm for estimating optimal policy,
     as given on page 99 of the textbook"""
-    def __init__(self, num_episodes=500, gamma=0.7, stochastic=True):
+    def __init__(self, num_episodes=5000, gamma=0.95, stochastic=True):
         self.num_states = 6
         self.num_actions = 2
+        self.action_set = [-1, 1]
 
-        # Arbitrarily assign policy(s) in A(s), for all s in S
-        self.policy = np.random.randint(self.num_actions, size=self.num_states)
+        # Arbitrarily assign policy(s) in action_set for all states
+        self.policy = np.random.choice(self.action_set, self.num_states)
 
         # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
@@ -158,7 +158,10 @@ class MonteCarloES:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the policy
-                    self.policy[state] = np.argmax(self.Q[state, :])
+                    if np.argmax(self.Q[state, :]) == 0:
+                        self.policy[state] = -1
+                    else:
+                        self.policy[state] = 1
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
 
