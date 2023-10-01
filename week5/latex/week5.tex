@@ -183,9 +183,20 @@
     responsible for exploration and interaction. However, the agent
     performs evaluation and optimization using a different policy, called the \textit{target policy}.\\
 
-    Off-policy learning is useful because it allows the agent to learn about the environment
-    without having to directly interact with it. This way the agent can build upon existing knowledge
-    and learn from the behavior of other agents.\\
+    Off-policy learning is useful for the following reasons,
+    \begin{itemize}
+        \item It avoids the unlikely assumption of exploring starts. In some Monte Carlo algorithms, the
+        exploratory behavior comes from random starting states, however this is not always possible. Off-policy
+        learning allows the agent to learn about the environment without this assumption.
+        \item Existing knowledge can be leveraged by learning from the behavior of other agents. The behavior
+        policy can be a simple random policy, or it can be a policy that has been learned from past experience.
+        \item It avoids the situation where the agent is stuck in a suboptimal policy because it is not 
+        exploring enough. This would happen if the agent is using a greedy and deterministic policy to learn about the
+        environment.
+        \item It avoids unexpected actions that may occur during exploration. 
+        Instead, the behavior policy can continuously explore while the target policy learns. This is particularly
+        useful in cases where the environment is dangerous or expensive to explore, or if humans are involved.
+    \end{itemize}
 \end{homeworkProblem}
 
 \pagebreak
