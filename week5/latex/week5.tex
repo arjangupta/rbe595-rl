@@ -382,12 +382,17 @@
 
 \begin{homeworkProblem}[Problem 8]
 
-    \textbf{(Exercise 5.11)}
+    \textbf{(Exercise 5.11, page 111)}
     In the boxed algorithm for off-policy MC control, you may have been expecting
     the $W$ update to have involved the importance-sampling ratio $\frac{\pi(A_t|S_t)}{b(A_t|S_t)}$,
     but instead it involves $\frac{1}{b(A_t|S_t)}$. Why is this nevertheless correct?
 
     \subsection{Answer}
+
+    In the algorithm, the assumption is that $\pi(A_t|S_t) = 1$ because the target policy is
+    deterministic. In other words, in state $S_t$, the target policy $\pi$ will always choose
+    action $A_t$.
+    Therefore, the importance-sampling ratio becomes $\frac{1}{b(A_t|S_t)}$.
 
 \end{homeworkProblem}
 
