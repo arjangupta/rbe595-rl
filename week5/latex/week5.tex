@@ -213,12 +213,39 @@
 
     \subsection{Answer}
 
-    From the textbook, the first-visit MC method is defined as follows,
+    Since this problem does not involve a behavior and target policy, we will not use the
+    importance sampling ratio. Instead, we can manually calculate the first-visit and every-visit
+    estimators of the value of the nonterminal state.\\
 
-    \[
-    \tag{5.5}
-        V(S_t) \doteq \frac{\sum_{t \in \mathcal{T}(S)} \rho_{t:T(t)-1} G_t}{\lvert \mathcal{T}(S) \rvert}
-    \]
+    \textbf{Given episode}\\
+    
+    Let the nonterminal state be $s$ (and let $s_i$ denote the $i^{th}$ time s was visited) 
+    and the terminal state be $s'$. Let the action be $a$ (and let $a_i$ denote the $i^{th}$ time s was visited).
+    The reward is $r = 1$ for all transitions. Also, $\gamma = 1$.\\
+
+    The given episode is as follows,
+
+    \begin{align*}
+        s_0 \xrightarrow{a_1} s_1 \xrightarrow{a_2} s_2 \xrightarrow{a_3} s_3 \xrightarrow{a_4} s_4 \xrightarrow{a_5} s_5 \xrightarrow{a_6} s_6 \xrightarrow{a_7} s_7 \xrightarrow{a_8} s_8 \xrightarrow{a_9} s_9 \xrightarrow{a_{10}} s'
+    \end{align*}
+
+    As we can see by the subscript of $a$, there are 10 rewards of $1$ each. Therefore, the total return is $10$.\\
+
+    \textbf{First-Visit Estimator}\\
+    The first-visit estimator of the value of the nonterminal state is calculated as follows,
+
+    \begin{align*}
+        V(s) &= 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1\\
+             &= 1(10) = 10
+    \end{align*}
+
+    \textbf{Every-Visit Estimator}\\
+    The every-visit estimator of the value of the nonterminal state is calculated as follows,
+
+    \begin{align*}
+        V(s) &= \frac{1}{10}(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10)\\
+             &= \frac{1}{10}(55) = 5.5
+    \end{align*}
 
 \end{homeworkProblem}
 
