@@ -254,16 +254,35 @@
 \nobreak\extramarks{Problem 5}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 5]
-    What is the difference between policy and action?
+    \textbf{(Exercise 5.7, page 108)}
+    In learning curves such as those shown in Figure 5.3 error generally decreases
+    with training, as indeed happened for the ordinary importance-sampling method. But for
+    the weighted importance-sampling method error first increased and then decreased. Why
+    do you think this happened?
 
     \subsection{Answer}
-    An \textit{action} is a choice made by the agent at a given state. It is an attempted modification
-    of the environment which leads to a new state or the same state. We give an agent an associated
-    reward for each action.\\
 
-    In contrast, a policy determines how good it is for the agent to perform an action in
-    a given state. Formally, a \textit{policy} is a mapping from states to probabilities of selecting
-    each possible action. It defines a probability distribution over actions for each state.\\
+    As shown in the lectures by Dr. Navid Dadkhah Tehrani, here is a table showing the bias
+    and variance comparison between the ordinary importance-sampling method and the weighted
+    importance-sampling method.\\
+
+    \begin{center}
+        \begin{tabular}{ |c|c|c| } 
+            \hline
+            & \textbf{Ordinary Importance-Sampling} & \textbf{Weighted Importance-Sampling}\\
+            \hline
+            Bias & Un-biased & Biased (eventually unbiased)\\
+            \hline
+            Variance & Large & Low\\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    For weighted importance-sampling, the bias is initially high, but it eventually becomes
+    unbiased. That initial bias is what causes the error to increase initially. However, after
+    a large number of episodes, the bias decreases and the error decreases as well.\\
+
+    
 \end{homeworkProblem}
 
 \pagebreak
