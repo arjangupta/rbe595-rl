@@ -113,6 +113,9 @@ class MonteCarloES:
         # Initialize a V over time array
         self.V_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
 
+        # Initialize a policy over time array
+        self.policy_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
         for i in range(self.returns.shape[0]):
@@ -176,6 +179,8 @@ class MonteCarloES:
             self.Q_arr[e, :, :] = self.Q
             # Add the V values to the V over time array
             self.V_arr[e, :, :] = self.V
+            # Add the policy values to the policy over time array
+            self.policy_arr[e, :, :] = self.policy
 
         if self.show_pi_q:
             print(f"Finished running Monte Carlo ES algorithm with {self.num_episodes} episodes")
@@ -216,6 +221,9 @@ class OnPolicyFirstVisitMC:
         # Initialize a V over time array
         self.V_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
 
+        # Initialize a policy over time array
+        self.policy_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
         for i in range(self.returns.shape[0]):
@@ -248,7 +256,6 @@ class OnPolicyFirstVisitMC:
             # Generate an episode using the current policy
             episode = self.episode_generator.generate(self.policy, False)
             G = 0
-            V = 0
             # For each step in the episode
             for i, step in enumerate(reversed(episode)):
                 # Get the state, action, and reward
@@ -270,7 +277,7 @@ class OnPolicyFirstVisitMC:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
-                    self.V[state, action] = self.policy[state][action] * self.Q[state][action]
+                    self.V[state, action] = self.policy[state][action] * self.Q[state, action]
                     # Epsilon-greedy policy improvement
                     A_star = 1
                     if np.argmax(self.Q[state, :]) == 0:
@@ -288,6 +295,8 @@ class OnPolicyFirstVisitMC:
             self.Q_arr[e, :, :] = self.Q
             # Add the V values to the V over time array
             self.V_arr[e, :, :] = self.V
+            # Add the policy values to the policy over time array
+            self.policy_arr[e, :, :] = self.policy
         # Once we're done running the actual policy to the greedy policy
         for s in range(self.num_states):
             if np.argmax(self.Q[s]) == 0:
@@ -335,6 +344,8 @@ def main(algorithm):
         plot_values(mc_es.V_arr, "V", mc_es.num_episodes, "Monte Carlo ES")
         # Plot the Q values over number of episodes
         plot_values(mc_es.Q_arr, "Q", mc_es.num_episodes, "Monte Carlo ES")
+        # Plot the policy values over number of episodes
+        plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "On-policy First-visit MC Control")
     else:
         # Run On-policy First-visit MC Control for various numbers of episodes
         op_fv_mc = OnPolicyFirstVisitMC(epsilon=0.1)
@@ -344,6 +355,8 @@ def main(algorithm):
         plot_values(op_fv_mc.V_arr, "V", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
         # Plot the Q values over number of episodes
         plot_values(op_fv_mc.Q_arr, "Q", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
+        # Plot the policy values over number of episodes
+        plot_values(op_fv_mc.policy_arr, "pi", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
