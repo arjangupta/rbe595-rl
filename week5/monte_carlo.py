@@ -218,7 +218,7 @@ class OnPolicyFirstVisitMC:
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Initialize V(s,a) arbitrarily to real numbers
-        self.V = np.random.rand(self.num_states, self.num_actions)
+        self.V = np.random.rand(self.num_states)
 
         # Initialize the policy
         self.policy = np.full(fill_value=0.5, shape=(self.num_states, self.num_actions))
@@ -227,7 +227,7 @@ class OnPolicyFirstVisitMC:
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
 
         # Initialize a V over time array
-        self.V_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+        self.V_arr = np.zeros((num_episodes, self.num_states))
 
         # Initialize a policy over time array
         self.policy_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
@@ -285,7 +285,8 @@ class OnPolicyFirstVisitMC:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
-                    self.V[state, action] = self.policy[state][action] * self.Q[state, action]
+                    for a in range(self.num_actions):
+                        self.V[state] = self.policy[state][a] * self.Q[state, a]
                     # Epsilon-greedy policy improvement
                     A_star = np.argmax(self.Q[state, :])
                     policy_action = np.argmax(self.policy[state], axis=0)
@@ -299,7 +300,7 @@ class OnPolicyFirstVisitMC:
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
             # Add the V values to the V over time array
-            self.V_arr[e, :, :] = self.V
+            self.V_arr[e, :] = self.V
             # Add the policy values to the policy over time array
             self.policy_arr[e, :, :] = self.policy
 
@@ -316,9 +317,8 @@ class OnPolicyFirstVisitMC:
 
 def plot_values(arr, type, max_episodes, algo_name):
     """For each of the 6 states do the following:
-     1. Iterate through arr for that state
-    2. Sub-plot the arr value for both actions over the number of episodes
-    3. Show the episodes in multiples of 5"""
+    1. Iterate through arr for that state
+    2. Sub-plot the arr value for both actions over the number of episodes"""
     fig, axs = plt.subplots(3, 2, figsize=(10, 10))
     # Set title for entire figure
     fig.suptitle(f"{algo_name}: {type} Values over {max_episodes} Episodes")
@@ -328,6 +328,24 @@ def plot_values(arr, type, max_episodes, algo_name):
         # Plot actions with labels
         axs[row, col].plot(arr[:, i, 0], label="Back")
         axs[row, col].plot(arr[:, i, 1], label="Forward")
+        # Set subplot title
+        axs[row, col].set_title(f"State {i}")
+        # Show legend
+        axs[row, col].legend()
+    plt.show()
+
+def plot_V(arr, max_episodes, algo_name):
+    """For each of the 6 states do the following:
+    1. Iterate through arr for that state
+    2. Sub-plot the arr value over the number of episodes"""
+    fig, axs = plt.subplots(3, 2, figsize=(10, 10))
+    # Set title for entire figure
+    fig.suptitle(f"{algo_name}: V Values over {max_episodes} Episodes")
+    for i in range(6):
+        row = i // 2
+        col = i % 2
+        # Plot actions with labels
+        axs[row, col].plot(arr[:, i], label="V", color="green")
         # Set subplot title
         axs[row, col].set_title(f"State {i}")
         # Show legend
@@ -355,7 +373,7 @@ def main(algorithm):
         op_fv_mc.set_show_pi_q(True)
         op_fv_mc.run()
         # Plot the V values over number of episodes
-        plot_values(op_fv_mc.V_arr, "V", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
+        plot_V(op_fv_mc.V_arr, op_fv_mc.num_episodes, "On-policy First-visit MC Control")
         # Plot the Q values over number of episodes
         plot_values(op_fv_mc.Q_arr, "Q", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
         # Plot the policy values over number of episodes
