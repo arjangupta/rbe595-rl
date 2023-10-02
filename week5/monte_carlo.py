@@ -98,14 +98,20 @@ class MonteCarloES:
         self.num_actions = 2
         self.action_set = [-1, 1]
 
-        # Arbitrarily assign policy(s) in action_set for all states
-        self.policy = np.random.choice(self.action_set, self.num_states)
+        # Initialize the policy
+        self.policy = np.zeros((self.num_states, self.num_actions), dtype=int)
 
         # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
+        # Initialize V(s,a) arbitrarily to real numbers
+        self.V = np.random.rand(self.num_states, self.num_actions)
+
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+
+        # Initialize a V over time array
+        self.V_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
 
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
@@ -161,9 +167,9 @@ class MonteCarloES:
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the policy
                     if np.argmax(self.Q[state, :]) == 0:
-                        self.policy[state] = -1
+                        self.policy[state][0] = 1
                     else:
-                        self.policy[state] = 1
+                        self.policy[state][1] = 1
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
 
@@ -253,7 +259,8 @@ class OnPolicyFirstVisitMC:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
-                    self.V[state, action] = np.mean(self.returns[state, action])
+                    self.V[state, action] = self.policy[state][action] * (
+                                reward + self.gamma * self.V[state, action])
                     # Epsilon-greedy policy improvement
                     A_star = 1
                     if np.argmax(self.Q[state, :]) == 0:
@@ -261,7 +268,6 @@ class OnPolicyFirstVisitMC:
                     policy_action = np.argmax(self.policy[state])
                     if policy_action == 0:
                         policy_action = -1
-                    exploration_decision = np.random.uniform(0, 1)
                     if policy_action == A_star:
                         self.policy[state][action] = 1 - self.epsilon + (self.epsilon/self.num_actions)
                     # taking non-greedy action
@@ -286,34 +292,20 @@ class OnPolicyFirstVisitMC:
             print("Final Q values:")
             print(self.Q)
 
-    def calculate_value_function(self, state):
-
-        value_summation += self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
-        if (1 - self.probability[i,j]) > 0:
-            # Get actions that are +/-45 degrees current action
-            stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
-            reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
-            # Add to total value summation
-            minority_prob = 1 - self.probability[i,j]
-            value_summation += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
-            value_summation += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
-        # Print the value summation
-        return value_summation
-
-def plot_Qs(Q_arr, max_episodes, algo_name):
+def plot_values(arr, type, max_episodes, algo_name):
     """For each of the 6 states do the following:
-    1. Iterate through Q_arr for that state
-    2. Sub-plot the Q value for both actions over the number of episodes
+    1. Iterate through arr for that state
+    2. Sub-plot the arr value for both actions over the number of episodes
     3. Show the episodes in multiples of 5"""
     fig, axs = plt.subplots(3, 2, figsize=(10, 10))
     # Set title for entire figure
-    fig.suptitle(f"{algo_name}: Q Values over {max_episodes} Episodes")
+    fig.suptitle(f"{algo_name}: {type} Values over {max_episodes} Episodes")
     for i in range(6):
         row = i // 2
         col = i % 2
         # Plot actions with labels
-        axs[row, col].plot(Q_arr[:, i, 0], label="Back")
-        axs[row, col].plot(Q_arr[:, i, 1], label="Forward")
+        axs[row, col].plot(arr[:, i, 0], label="Back")
+        axs[row, col].plot(arr[:, i, 1], label="Forward")
         # Set subplot title
         axs[row, col].set_title(f"State {i}")
         # Show legend
@@ -329,15 +321,19 @@ def main(algorithm):
         mc_es = MonteCarloES()
         mc_es.set_show_pi_q(True)
         mc_es.run()
+        # Plot the V values over number of episodes
+        plot_values(mc_es.V_arr, "V", mc_es.num_episodes, "Monte Carlo ES")
         # Plot the Q values over number of episodes
-        plot_Qs(mc_es.Q_arr, mc_es.num_episodes, "Monte Carlo ES")
+        plot_values(mc_es.Q_arr, "Q", mc_es.num_episodes, "Monte Carlo ES")
     else:
         # Run On-policy First-visit MC Control for various numbers of episodes
         op_fv_mc = OnPolicyFirstVisitMC(epsilon=0.1)
         op_fv_mc.set_show_pi_q(True)
         op_fv_mc.run()
+        # Plot the V values over number of episodes
+        plot_values(op_fv_mc.V_arr, "V", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
         # Plot the Q values over number of episodes
-        plot_Qs(op_fv_mc.Q_arr, op_fv_mc.num_episodes, "On-policy First-visit MC Control")
+        plot_values(op_fv_mc.Q_arr, "Q", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
