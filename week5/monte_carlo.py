@@ -205,6 +205,8 @@ class MonteCarloES:
             for i in range(self.returns.shape[0]):
                 for j in range(self.returns.shape[1]):
                     print(f"({i}, {j}): {len(self.returns[i, j])}")
+            print("Final V values:")
+            print(self.V)
 
 
 class OnPolicyFirstVisitMC:
@@ -315,6 +317,8 @@ class OnPolicyFirstVisitMC:
             for i in range(self.returns.shape[0]):
                 for j in range(self.returns.shape[1]):
                     print(f"({i}, {j}): {len(self.returns[i, j])}")
+            print("Final V values:")
+            print(self.V)
 
 def plot_values(arr, type, max_episodes, algo_name):
     """For each of the 6 states do the following:
