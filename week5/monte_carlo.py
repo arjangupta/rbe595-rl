@@ -46,7 +46,9 @@ class EpisodeGenerator:
         # Keep running until we reach a terminal state (0 or 5)
         while True:
             # Get action from policy
-            current_action = policy[current_state]
+            current_action = np.argmax(policy[current_state])
+            if current_action == 0:
+                current_action = -1
 
             # Generate a random number for the direction the robot moves
             random_number = np.random.rand()
@@ -185,20 +187,17 @@ class OnPolicyFirstVisitMC:
         # Initialize Q(s,a) arbitrarily to real numbers
         self.Q = np.random.rand(self.num_states, self.num_actions)
 
+        # Initialize V(s,a) arbitrarily to real numbers
+        self.V = np.random.rand(self.num_states, self.num_actions)
+
         # Initialize the policy epsilon-greedily
-        self.policy = np.zeros(self.num_states, dtype=int)
-        for s in range(self.num_states):
-            exploration_decision = np.random.uniform(0, 1)
-            if exploration_decision <= epsilon:
-                self.policy[s] = np.random.choice(self.action_set)
-            else:
-                if np.argmax(self.Q[s]) == 0:
-                    self.policy[s] = -1
-                else:
-                    self.policy[s] = 1
+        self.policy = np.zeros((self.num_states, self.num_actions), dtype=int)
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+
+        # Initialize a V over time array
+        self.V_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
 
         # Initialize returns to shape of Q, with empty lists
         self.returns = np.empty_like(self.Q, dtype=list)
@@ -232,6 +231,7 @@ class OnPolicyFirstVisitMC:
             # Generate an episode using the current policy
             episode = self.episode_generator.generate(self.policy, False)
             G = 0
+            V = 0
             # For each step in the episode
             for i, step in enumerate(reversed(episode)):
                 # Get the state, action, and reward
@@ -252,29 +252,26 @@ class OnPolicyFirstVisitMC:
                     self.returns[state, action].append(G)
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
+                    # Update the V value
+                    self.V[state, action] = np.mean(self.returns[state, action])
                     # Epsilon-greedy policy improvement
                     A_star = 1
                     if np.argmax(self.Q[state, :]) == 0:
                         A_star = -1
-                    policy_action = self.policy[state]
+                    policy_action = np.argmax(self.policy[state])
+                    if policy_action == 0:
+                        policy_action = -1
                     exploration_decision = np.random.uniform(0, 1)
-                    #FIXME: is this how policy should be updated? - prof will explain later
                     if policy_action == A_star:
-                        if exploration_decision <= 1 - self.epsilon + (self.epsilon/self.num_actions):
-                            #randomly choose any of the other actions
-                            self.policy[state] = np.random.choice(self.action_set)
-                        else:
-                            self.policy[state] = A_star
+                        self.policy[state][action] = 1 - self.epsilon + (self.epsilon/self.num_actions)
                     # taking non-greedy action
                     else:
-                        if exploration_decision <= self.epsilon/self.num_actions:
-                            #randomly choose any of the other actions
-                            self.policy[state] = np.random.choice(self.action_set)
-                        else:
-                            self.policy[state] = A_star
+                        self.policy[state][action] = self.epsilon/self.num_actions
 
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
+            # Add the V values to the V over time array
+            self.V_arr[e, :, :] = self.V
         # Once we're done running the actual policy to the greedy policy
         for s in range(self.num_states):
             if np.argmax(self.Q[s]) == 0:
@@ -288,6 +285,20 @@ class OnPolicyFirstVisitMC:
             print(self.policy)
             print("Final Q values:")
             print(self.Q)
+
+    def calculate_value_function(self, state):
+
+        value_summation += self.probability[i,j] * (reward + self.gamma * self.value_function[new_i, new_j])
+        if (1 - self.probability[i,j]) > 0:
+            # Get actions that are +/-45 degrees current action
+            stochastic_rewards = self.robot.get_stochastic_action_rewards(action, i, j)
+            reward_plus_45, i_plus_45, j_plus_45, reward_minus_45, i_minus_45, j_minus_45 = stochastic_rewards
+            # Add to total value summation
+            minority_prob = 1 - self.probability[i,j]
+            value_summation += minority_prob/2 * (reward_plus_45 + self.gamma * self.value_function[i_plus_45, j_plus_45])
+            value_summation += minority_prob/2 * (reward_minus_45 + self.gamma * self.value_function[i_minus_45, j_minus_45])
+        # Print the value summation
+        return value_summation
 
 def plot_Qs(Q_arr, max_episodes, algo_name):
     """For each of the 6 states do the following:
