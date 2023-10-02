@@ -114,13 +114,13 @@ class MonteCarloES:
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Initialize V(s,a) arbitrarily to real numbers
-        self.V = np.random.rand(self.num_states, self.num_actions)
+        self.V = np.random.rand(self.num_states)
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
 
         # Initialize a V over time array
-        self.V_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
+        self.V_arr = np.zeros((num_episodes, self.num_states))
 
         # Initialize a policy over time array
         self.policy_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
@@ -178,7 +178,8 @@ class MonteCarloES:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
-                    self.V[state, action] = self.policy[state][action] * self.Q[state][action]
+                    for a in range(self.num_actions):
+                        self.V[state] = self.policy[state][a] * self.Q[state, a]
                     # Update the policy
                     if np.argmax(self.Q[state, :]) == 0:
                         self.policy[state][0] = 1.0
@@ -190,7 +191,7 @@ class MonteCarloES:
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
             # Add the V values to the V over time array
-            self.V_arr[e, :, :] = self.V
+            self.V_arr[e, :] = self.V
             # Add the policy values to the policy over time array
             self.policy_arr[e, :, :] = self.policy
 
@@ -362,7 +363,7 @@ def main(algorithm):
         mc_es.set_show_pi_q(True)
         mc_es.run()
         # Plot the V values over number of episodes
-        plot_values(mc_es.V_arr, "V", mc_es.num_episodes, "Monte Carlo ES")
+        plot_V(mc_es.V_arr, mc_es.num_episodes, "Monte Carlo ES")
         # Plot the Q values over number of episodes
         plot_values(mc_es.Q_arr, "Q", mc_es.num_episodes, "Monte Carlo ES")
         # Plot the policy values over number of episodes
@@ -377,7 +378,7 @@ def main(algorithm):
         # Plot the Q values over number of episodes
         plot_values(op_fv_mc.Q_arr, "Q", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
         # Plot the policy values over number of episodes
-        plot_values(op_fv_mc.policy_arr, "pi", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
+        # plot_values(op_fv_mc.policy_arr, "pi", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
