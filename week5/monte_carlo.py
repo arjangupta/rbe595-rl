@@ -39,24 +39,29 @@ class EpisodeGenerator:
         if exploring_start:
             # Initialize the current state and action as a random start state
             current_state = np.random.randint(self.num_states)
+            current_action = np.random.randint(self.num_actions)
         else:
             # Initialize the current state to 3, as in the diagram, so we begin at start of environment interaction
             current_state = 3
+            current_action = policy[current_state]
 
         # Keep running until we reach a terminal state (0 or 5)
         while True:
-            # Get action from policy
-            current_action = policy[current_state]
+
+            # Set direction
+            direction = 1
+            if current_action == 0:
+                direction = -1
 
             # Generate a random number for the direction the robot moves
             random_number = np.random.rand()
             if random_number < self.expected_dir_prob:
                 # The robot moves in the direction it chooses
-                next_state = self.transition(current_state, current_action)
+                next_state = self.transition(current_state, direction)
             elif random_number < self.expected_dir_prob + self.opposite_dir_prob:
                 # The robot moves in the opposite direction
-                current_action *= -1
-                next_state = self.transition(current_state, current_action)
+                direction *= -1
+                next_state = self.transition(current_state, direction)
             else:
                 # The robot stays in the same place
                 next_state = current_state
@@ -78,14 +83,14 @@ class EpisodeGenerator:
                 break
         return episode
     
-    def transition(self, state, action):
-        """Returns the next state given the current state and action"""
-        if state == 0 and action == -1:
+    def transition(self, state, direction):
+        """Returns the next state given the current state and direction"""
+        if state == 0 and direction == -1:
             return 0
-        elif state == self.num_states - 1 and action == 1:
+        elif state == self.num_states - 1 and direction == 1:
             return self.num_states - 1
         else:
-            return state + action
+            return state + direction
 
 
 class MonteCarloES:
@@ -94,10 +99,9 @@ class MonteCarloES:
     def __init__(self, num_episodes=5000, gamma=0.95, stochastic=True):
         self.num_states = 6
         self.num_actions = 2
-        self.action_set = [-1, 1]
 
         # Arbitrarily assign policy(s) in action_set for all states
-        self.policy = np.random.choice(self.action_set, self.num_states)
+        self.policy = np.random.randint(self.num_actions, size=self.num_states)
 
         # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
@@ -158,10 +162,7 @@ class MonteCarloES:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the policy
-                    if np.argmax(self.Q[state, :]) == 0:
-                        self.policy[state] = -1
-                    else:
-                        self.policy[state] = 1
+                    self.policy[state] = np.argmax(self.Q[state, :])
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
 
@@ -171,6 +172,10 @@ class MonteCarloES:
             print(self.policy)
             print("Final Q values:")
             print(self.Q)
+            print("List sizes in returns:")
+            for i in range(self.returns.shape[0]):
+                for j in range(self.returns.shape[1]):
+                    print(f"({i}, {j}): {len(self.returns[i, j])}")
 
 
 class OnPolicyFirstVisitMC:
