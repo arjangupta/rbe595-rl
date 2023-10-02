@@ -214,35 +214,14 @@ class OnPolicyFirstVisitMC:
         self.num_actions = 2
         self.epsilon = epsilon
 
-        # Initialize Q(s,a) arbitrarily to real numbers
-        self.Q = np.random.rand(self.num_states, self.num_actions)
-        # Set state 0 and 5 to 0
-        self.Q[0, :] = 0
-        self.Q[self.num_states - 1, :] = 0
+        # Initialize Q(s,a)
+        self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Initialize V(s,a) arbitrarily to real numbers
         self.V = np.random.rand(self.num_states, self.num_actions)
 
-        # Initialize the policy epsilon-greedily
-        self.policy = np.zeros((self.num_states, self.num_actions))
-        for s in range(self.num_states):
-            for a in range(self.num_actions):
-                A_star = np.argmax(self.Q[s, :])
-                policy_action = np.argmax(self.policy[s], axis=0)
-                # taking the greedy action
-                if policy_action == A_star:
-                    self.policy[s][a] = 1 - self.epsilon + (self.epsilon / self.num_actions)
-                # taking non-greedy action
-                else:
-                    self.policy[s][a] = self.epsilon / self.num_actions
-
-        for s in range(self.num_states):
-            if np.argmax(self.Q[s, :]) == 0:
-                self.policy[s][0] = 1.0
-                self.policy[s][1] = 0.0
-            else:
-                self.policy[s][0] = 0.0
-                self.policy[s][1] = 1.0
+        # Initialize the policy
+        self.policy = np.full(fill_value=0.5, shape=(self.num_states, self.num_actions))
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
