@@ -152,7 +152,7 @@ class MonteCarloES:
             print(self.policy)
             print("Initial Q values:")
             print(self.Q)
-            print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
+        print(f"Running Monte Carlo ES algorithm with {self.num_episodes} episodes...")
         for e in trange(self.num_episodes):
             # Generate an episode using the current policy
             episode = self.episode_generator.generate(self.policy)
@@ -206,8 +206,8 @@ class MonteCarloES:
             for i in range(self.returns.shape[0]):
                 for j in range(self.returns.shape[1]):
                     print(f"({i}, {j}): {len(self.returns[i, j])}")
-            print("Final V values:")
-            print(self.V)
+        print("Final V values:")
+        print(self.V)
 
 
 class OnPolicyFirstVisitMC:
@@ -263,7 +263,7 @@ class OnPolicyFirstVisitMC:
             print(self.policy)
             print("Initial Q values:")
             print(self.Q)
-            print(f"Running On-policy First-visit MC Control with {self.num_episodes} episodes...")
+        print(f"Running On-policy First-visit MC Control with {self.num_episodes} episodes...")
         for e in trange(self.num_episodes):
             # Generate an episode using the current policy
             episode = self.episode_generator.generate(self.policy, False)
@@ -320,8 +320,8 @@ class OnPolicyFirstVisitMC:
             for i in range(self.returns.shape[0]):
                 for j in range(self.returns.shape[1]):
                     print(f"({i}, {j}): {len(self.returns[i, j])}")
-            print("Final V values:")
-            print(self.V)
+        print("Final V values:")
+        print(self.V)
 
 def plot_values(arr, type, max_episodes, algo_name):
     """For each of the 6 states do the following:
@@ -365,25 +365,27 @@ def main(algorithm):
     if algorithm == "1":
         # Run Monte Carlo ES for various numbers of episodes
         mc_es = MonteCarloES(num_episodes=10000)
-        mc_es.set_show_pi_q(True)
+        mc_es.set_show_pi_q(False)
         mc_es.run()
         # Plot the V values over number of episodes
         plot_V(mc_es.V_arr, mc_es.num_episodes, "Monte Carlo ES")
-        # Plot the Q values over number of episodes
-        plot_values(mc_es.Q_arr, "Q", mc_es.num_episodes, "Monte Carlo ES")
-        # Plot the policy values over number of episodes
-        # plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "Monte Carlo ES")
+        if mc_es.show_pi_q:
+            # Plot the Q values over number of episodes
+            plot_values(mc_es.Q_arr, "Q", mc_es.num_episodes, "Monte Carlo ES")
+            # Plot the policy values over number of episodes
+            plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "Monte Carlo ES")
     else:
         # Run On-policy First-visit MC Control for various numbers of episodes
         op_fv_mc = OnPolicyFirstVisitMC(num_episodes=50000, epsilon=0.01)
-        op_fv_mc.set_show_pi_q(True)
+        op_fv_mc.set_show_pi_q(False)
         op_fv_mc.run()
         # Plot the V values over number of episodes
         plot_V(op_fv_mc.V_arr, op_fv_mc.num_episodes, "On-policy First-visit MC Control")
-        # Plot the Q values over number of episodes
-        plot_values(op_fv_mc.Q_arr, "Q", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
-        # Plot the policy values over number of episodes
-        # plot_values(op_fv_mc.policy_arr, "pi", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
+        if op_fv_mc.show_pi_q:
+            # Plot the Q values over number of episodes
+            plot_values(op_fv_mc.Q_arr, "Q", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
+            # Plot the policy values over number of episodes
+            plot_values(op_fv_mc.policy_arr, "pi", op_fv_mc.num_episodes, "On-policy First-visit MC Control")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
