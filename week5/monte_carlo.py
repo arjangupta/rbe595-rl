@@ -44,8 +44,6 @@ class EpisodeGenerator:
             # Initialize the current state to 3, as in the diagram, so we begin at start of environment interaction
             current_state = 3
             current_action = np.argmax(policy[current_state], axis=0)
-            if current_action == 0:
-                current_action = -1
 
         # Keep running until we reach a terminal state (0 or 5)
         while True:
@@ -290,12 +288,8 @@ class OnPolicyFirstVisitMC:
                     # Update the V value
                     self.V[state, action] = self.policy[state][action] * self.Q[state, action]
                     # Epsilon-greedy policy improvement
-                    A_star = 1
-                    if np.argmax(self.Q[state, :]) == 0:
-                        A_star = -1
+                    A_star = np.argmax(self.Q[state, :])
                     policy_action = np.argmax(self.policy[state], axis=0)
-                    if policy_action == 0:
-                        policy_action = -1
                     if policy_action == A_star:
                         self.policy[state][action] = 1 - self.epsilon + (self.epsilon / self.num_actions)
                     # taking non-greedy action
