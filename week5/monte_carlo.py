@@ -99,7 +99,7 @@ class MonteCarloES:
         self.action_set = [-1, 1]
 
         # Initialize the policy
-        self.policy = np.zeros((self.num_states, self.num_actions), dtype=int)
+        self.policy = np.random.rand(self.num_states, self.num_actions)
 
         # Initialize Q(s,a) arbitrarily to real numbers, for all s in S, a in A(s)
         self.Q = np.random.rand(self.num_states, self.num_actions)
@@ -200,8 +200,15 @@ class OnPolicyFirstVisitMC:
         # Initialize V(s,a) arbitrarily to real numbers
         self.V = np.random.rand(self.num_states, self.num_actions)
 
+        self.policy = np.zeros((self.num_states, self.num_actions))
         # Initialize the policy epsilon-greedily
-        self.policy = np.zeros((self.num_states, self.num_actions), dtype=int)
+        for s in range(self.num_states):
+            if np.argmax(self.Q[s, :]) == 0:
+                self.policy[s][0] = 1.0
+                self.policy[s][1] = 0.0
+            else:
+                self.policy[s][0] = 0.0
+                self.policy[s][1] = 1.0
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
