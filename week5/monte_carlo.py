@@ -309,7 +309,12 @@ class OnPolicyFirstVisitMC:
                     self.V[state, action] = self.policy[state][action] * self.Q[state, action]
                     # Epsilon-greedy policy improvement
                     A_star = np.argmax(self.Q[state, :])
-                    policy_action = np.argmax(self.policy[state], axis=0)
+                    # arbitrarily break ties
+                    if len(np.unique(self.policy[state], return_counts=True)[0])==1:
+                        numbers = [0, 1]
+                        policy_action = random.choices(numbers, [.5,.5], k=1)[0]
+                    else:
+                        policy_action = np.argmax(self.policy[state], axis=0)
                     # taking the greedy action
                     if policy_action == A_star:
                         self.policy[state][action] = 1 - self.epsilon + (self.epsilon / self.num_actions)
@@ -372,7 +377,7 @@ def main(algorithm):
         plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "On-policy First-visit MC Control")
     else:
         # Run On-policy First-visit MC Control for various numbers of episodes
-        op_fv_mc = OnPolicyFirstVisitMC(num_episodes=10000, epsilon=0.01)
+        op_fv_mc = OnPolicyFirstVisitMC(num_episodes=10000, epsilon=0.1)
         op_fv_mc.set_show_pi_q(True)
         op_fv_mc.run()
         # Plot the V values over number of episodes
