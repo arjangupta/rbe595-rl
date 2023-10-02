@@ -229,12 +229,13 @@ class OnPolicyFirstVisitMC:
             for a in range(self.num_actions):
                 A_star = np.argmax(self.Q[s, :])
                 policy_action = np.argmax(self.policy[s], axis=0)
+                # taking the greedy action
                 if policy_action == A_star:
                     self.policy[s][a] = 1 - self.epsilon + (self.epsilon / self.num_actions)
                 # taking non-greedy action
                 else:
                     self.policy[s][a] = self.epsilon / self.num_actions
-            
+
         for s in range(self.num_states):
             if np.argmax(self.Q[s, :]) == 0:
                 self.policy[s][0] = 1.0
@@ -309,6 +310,7 @@ class OnPolicyFirstVisitMC:
                     # Epsilon-greedy policy improvement
                     A_star = np.argmax(self.Q[state, :])
                     policy_action = np.argmax(self.policy[state], axis=0)
+                    # taking the greedy action
                     if policy_action == A_star:
                         self.policy[state][action] = 1 - self.epsilon + (self.epsilon / self.num_actions)
                     # taking non-greedy action
@@ -321,12 +323,6 @@ class OnPolicyFirstVisitMC:
             self.V_arr[e, :, :] = self.V
             # Add the policy values to the policy over time array
             self.policy_arr[e, :, :] = self.policy
-        # Once we're done running the actual policy to the greedy policy
-        for s in range(self.num_states):
-            if np.argmax(self.Q[s]) == 0:
-                self.policy[s] = -1
-            else:
-                self.policy[s] = 1
 
         if self.show_pi_q:
             print(f"Finished running On-policy First-visit MC Control algorithm with {self.num_episodes} episodes")
