@@ -185,22 +185,21 @@ class OnPolicyFirstVisitMC:
         self.num_states = 6
         self.num_actions = 2
         self.epsilon = epsilon
-        self.action_set = [-1, 1]
 
         # Initialize Q(s,a) arbitrarily to real numbers
         self.Q = np.random.rand(self.num_states, self.num_actions)
+        # Set state 0 and 5 to 0
+        self.Q[0, :] = 0
+        self.Q[self.num_states - 1, :] = 0
 
         # Initialize the policy epsilon-greedily
         self.policy = np.zeros(self.num_states, dtype=int)
         for s in range(self.num_states):
             exploration_decision = np.random.uniform(0, 1)
             if exploration_decision <= epsilon:
-                self.policy[s] = np.random.choice(self.action_set)
+                self.policy[s] = np.random.randint(self.num_actions)
             else:
-                if np.argmax(self.Q[s]) == 0:
-                    self.policy[s] = -1
-                else:
-                    self.policy[s] = 1
+                self.policy[s] = np.argmax(self.Q[s])
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
@@ -267,14 +266,14 @@ class OnPolicyFirstVisitMC:
                     if policy_action == A_star:
                         if exploration_decision <= 1 - self.epsilon + (self.epsilon/self.num_actions):
                             #randomly choose any of the other actions
-                            self.policy[state] = np.random.choice(self.action_set)
+                            self.policy[state] = np.random.randint(self.num_actions)
                         else:
                             self.policy[state] = A_star
                     # taking non-greedy action
                     else:
                         if exploration_decision <= self.epsilon/self.num_actions:
                             #randomly choose any of the other actions
-                            self.policy[state] = np.random.choice(self.action_set)
+                            self.policy[state] = np.random.randint(self.num_actions)
                         else:
                             self.policy[state] = A_star
 
@@ -293,6 +292,10 @@ class OnPolicyFirstVisitMC:
             print(self.policy)
             print("Final Q values:")
             print(self.Q)
+            print("List sizes in returns:")
+            for i in range(self.returns.shape[0]):
+                for j in range(self.returns.shape[1]):
+                    print(f"({i}, {j}): {len(self.returns[i, j])}")
 
 def plot_Qs(Q_arr, max_episodes, algo_name):
     """For each of the 6 states do the following:
