@@ -77,10 +77,10 @@ class EpisodeGenerator:
             # Add the step to the episode
             episode.append((current_state, current_action, reward))
             # Update the current state and action
+            current_state = next_state
             if exploring_start:
-                current_action = np.argmax(policy[next_state], axis=0)
+                current_action = np.argmax(policy[current_state], axis=0)
             else:
-                current_state = next_state
                 distributions = policy[current_state]
                 numbers = [0, 1]
                 current_action = random.choices(numbers, distributions, k=1)[0]
@@ -181,9 +181,12 @@ class MonteCarloES:
                     self.V[state, action] = self.policy[state][action] * self.Q[state][action]
                     # Update the policy
                     if np.argmax(self.Q[state, :]) == 0:
-                        self.policy[state][0] = 1
+                        self.policy[state][0] = 1.0
+                        self.policy[state][1] = 0.0
                     else:
-                        self.policy[state][1] = 1
+                        self.policy[state][1] = 1.0
+                        self.policy[state][0] = 0.0
+
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
             # Add the V values to the V over time array
