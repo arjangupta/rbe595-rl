@@ -77,10 +77,13 @@ class EpisodeGenerator:
             # Add the step to the episode
             episode.append((current_state, current_action, reward))
             # Update the current state and action
-            current_state = next_state
-            distributions = policy[current_state]
-            numbers = [0, 1]
-            current_action = random.choices(numbers, distributions, k=1)[0]
+            if exploring_start:
+                current_action = np.argmax(policy[next_state], axis=0)
+            else:
+                current_state = next_state
+                distributions = policy[current_state]
+                numbers = [0, 1]
+                current_action = random.choices(numbers, distributions, k=1)[0]
 
             # If we have reached one of the terminal states, stop generating the episode
             if current_state == 0 or current_state == self.num_states - 1:
