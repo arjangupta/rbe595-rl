@@ -369,7 +369,7 @@ def main(algorithm):
         # Plot the Q values over number of episodes
         plot_values(mc_es.Q_arr, "Q", mc_es.num_episodes, "Monte Carlo ES")
         # Plot the policy values over number of episodes
-        plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "On-policy First-visit MC Control")
+        # plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "Monte Carlo ES")
     else:
         # Run On-policy First-visit MC Control for various numbers of episodes
         op_fv_mc = OnPolicyFirstVisitMC(num_episodes=10000, epsilon=0.01)
