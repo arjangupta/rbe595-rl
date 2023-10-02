@@ -164,7 +164,23 @@
 
     The Monte-Carlo prediction performs the first update after an episode terminates. This is because
     the Monte-Carlo method is an episodic method, i.e., it learns from a series of state, action, and reward
-    tuples that occur in an episode.\\
+    tuples that occur in an episode. Here are the main steps of the algorithm,
+
+    \begin{enumerate}
+        \item Initialize $V(s)$ and $Returns(s)$ arbitrarily for all $s \in \mathcal{S}$
+        \item Loop for the number of episodes:
+        \begin{enumerate}
+            \item Generate an episode following the policy $\pi$
+            \item (\textbf{Here is where the update happens}) For each state $S_t$ (visited only once) in the episode:
+            \begin{enumerate}
+                \item Compute $G$
+                \item Append $G$ to $Returns(S_t)$
+                \item $V(S_t) \leftarrow$ average($Returns(S_t)$)
+            \end{enumerate}
+        \end{enumerate}
+    \end{enumerate}
+
+    So the first update happens when the algorithm enters step 2(b) for the first time.
 \end{homeworkProblem}
 
 \nobreak\extramarks{Problem 2}{}\nobreak{}
