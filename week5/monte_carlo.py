@@ -114,7 +114,7 @@ class MonteCarloES:
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Initialize V(s,a) arbitrarily to real numbers
-        self.V = np.random.rand(self.num_states)
+        self.V = np.zeros(self.num_states)
 
         # Initialize a Q over time array
         self.Q_arr = np.zeros((num_episodes, self.num_states, self.num_actions))
@@ -222,7 +222,7 @@ class OnPolicyFirstVisitMC:
         self.Q = np.zeros((self.num_states, self.num_actions))
 
         # Initialize V(s,a) arbitrarily to real numbers
-        self.V = np.random.rand(self.num_states)
+        self.V = np.zeros(self.num_states)
 
         # Initialize the policy
         self.policy = np.full(fill_value=0.5, shape=(self.num_states, self.num_actions))
