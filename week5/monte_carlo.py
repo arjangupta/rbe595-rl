@@ -165,6 +165,8 @@ class MonteCarloES:
                     self.returns[state, action].append(G)
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
+                    # Update the V value
+                    self.V[state, action] = self.policy[state][action] * self.Q[state][action]
                     # Update the policy
                     if np.argmax(self.Q[state, :]) == 0:
                         self.policy[state][0] = 1
@@ -172,6 +174,8 @@ class MonteCarloES:
                         self.policy[state][1] = 1
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
+            # Add the V values to the V over time array
+            self.V_arr[e, :, :] = self.V
 
         if self.show_pi_q:
             print(f"Finished running Monte Carlo ES algorithm with {self.num_episodes} episodes")
@@ -259,8 +263,7 @@ class OnPolicyFirstVisitMC:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
-                    self.V[state, action] = self.policy[state][action] * (
-                                reward + self.gamma * self.V[state, action])
+                    self.V[state, action] = self.policy[state][action] * self.Q[state][action]
                     # Epsilon-greedy policy improvement
                     A_star = 1
                     if np.argmax(self.Q[state, :]) == 0:
