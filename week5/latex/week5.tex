@@ -314,10 +314,26 @@
 
     \subsection{Answer}
 
-    No, the variance of the estimator would not be infinite. In fact, after the first episode
-    that ends with the left action, the value of the state $V(s)$ would be $1$ and would remain
-    so for all subsequent episodes.  
+    Yes, the variance of the estimator will still be infinite. This is because the every-visit
+    MC method will still visit the same state multiple times in an episode, so this will just
+    sum over the same returns $j$ times (which is the number of times that state was visited)
+    and then divide by $k$ to get the average. As given
+    in the book, the variance of the first-visit estimator can be written in the form of
+    a series as follows,
 
+    \begin{align}
+        \label{eq:variance}
+        0.2 \sum_{k=0}^{\infty} (1.8)^{k} = \infty
+    \end{align}
+
+    To write the variance of the every-visit estimator, we modify the left hand side of 
+    equation \ref{eq:variance} as follows,
+
+    \begin{align}
+        \sum_{k=1}^{\infty} \frac{1}{k} \sum_{j=0}^{k-1} 0.2 (1.8)^{j}
+    \end{align}
+
+    Which should still tend to infinity as $k \rightarrow \infty$.
 
 \end{homeworkProblem}
 
