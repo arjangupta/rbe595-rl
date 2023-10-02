@@ -10,6 +10,7 @@
 # a reward of 5 in state 5, where there is a can. The robot receives a reward of
 # 1 if it reaches state 0, where there is a charger for its battery. The robot
 # receives a reward of 0 everywhere else.
+import random
 import sys
 
 import numpy as np
@@ -77,7 +78,9 @@ class EpisodeGenerator:
             episode.append((current_state, current_action, reward))
             # Update the current state and action
             current_state = next_state
-            current_action = np.argmax(policy[next_state], axis=0)
+            distributions = policy[current_state]
+            numbers = [0, 1]
+            current_action = random.choices(numbers, distributions, k=1)[0]
 
             # If we have reached one of the terminal states, stop generating the episode
             if current_state == 0 or current_state == self.num_states - 1:
@@ -215,7 +218,7 @@ class OnPolicyFirstVisitMC:
         self.V = np.random.rand(self.num_states, self.num_actions)
 
         # Initialize the policy epsilon-greedily
-        self.policy = np.zeros((self.num_states, self.num_actions), dtype=int)
+        self.policy = np.zeros((self.num_states, self.num_actions))
         for s in range(self.num_states):
             if np.argmax(self.Q[s, :]) == 0:
                 self.policy[s][0] = 1.0
