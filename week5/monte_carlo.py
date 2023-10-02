@@ -85,9 +85,9 @@ class EpisodeGenerator:
     
     def transition(self, state, direction):
         """Returns the next state given the current state and direction"""
-        if state == 0 and direction == -1:
+        if state == 0:
             return 0
-        elif state == self.num_states - 1 and direction == 1:
+        elif state == self.num_states - 1:
             return self.num_states - 1
         else:
             return state + direction
