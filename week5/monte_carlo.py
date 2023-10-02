@@ -362,8 +362,6 @@ def plot_V(arr, max_episodes, algo_name):
 
 def main(algorithm):
     # Run Monte Carlo ES for various numbers of episodes
-    Q_arr = []
-    max_episodes = 100
     if algorithm == "1":
         # Run Monte Carlo ES for various numbers of episodes
         mc_es = MonteCarloES(num_episodes=10000)
@@ -377,7 +375,7 @@ def main(algorithm):
         # plot_values(mc_es.policy_arr, "pi", mc_es.num_episodes, "Monte Carlo ES")
     else:
         # Run On-policy First-visit MC Control for various numbers of episodes
-        op_fv_mc = OnPolicyFirstVisitMC(num_episodes=10000, epsilon=0.01)
+        op_fv_mc = OnPolicyFirstVisitMC(num_episodes=50000, epsilon=0.01)
         op_fv_mc.set_show_pi_q(True)
         op_fv_mc.run()
         # Plot the V values over number of episodes
