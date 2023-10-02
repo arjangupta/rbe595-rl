@@ -178,8 +178,9 @@ class MonteCarloES:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
+                    self.V[state] = 0
                     for a in range(self.num_actions):
-                        self.V[state] = self.policy[state][a] * self.Q[state, a]
+                        self.V[state] += self.policy[state][a] * self.Q[state, a]
                     # Update the policy
                     if np.argmax(self.Q[state, :]) == 0:
                         self.policy[state][0] = 1.0
@@ -288,17 +289,19 @@ class OnPolicyFirstVisitMC:
                     # Update the Q value
                     self.Q[state, action] = np.mean(self.returns[state, action])
                     # Update the V value
+                    self.V[state] = 0
                     for a in range(self.num_actions):
-                        self.V[state] = self.policy[state][a] * self.Q[state, a]
+                        self.V[state] += self.policy[state][a] * self.Q[state, a]
                     # Epsilon-greedy policy improvement
                     A_star = np.argmax(self.Q[state, :])
-                    policy_action = np.argmax(self.policy[state], axis=0)
-                    # taking the greedy action
-                    if policy_action == A_star:
-                        self.policy[state][action] = 1 - self.epsilon + (self.epsilon / self.num_actions)
-                    # taking non-greedy action
-                    else:
-                        self.policy[state][action] = self.epsilon/self.num_actions
+                    # Break ties arbitrarily
+                    A_star = random.choice([i for i, x in enumerate(self.Q[state, :]) if x == self.Q[state, A_star]])
+                    # Update the policy
+                    for a in range(self.num_actions):
+                        if a == A_star:
+                            self.policy[state][a] = 1 - self.epsilon + self.epsilon / self.num_actions
+                        else:
+                            self.policy[state][a] = self.epsilon / self.num_actions
 
             # Add the Q values to the Q over time array
             self.Q_arr[e, :, :] = self.Q
