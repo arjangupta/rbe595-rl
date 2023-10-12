@@ -31,7 +31,7 @@ def generate_gridworld():
         gridworld.append(row)
     return gridworld
 
-def plot_gridworld(gridworld):
+def plot_gridworld(gridworld, path1, path2):
     """
     Plots a gridworld for the cliff-walking problem.
 
@@ -47,18 +47,34 @@ def plot_gridworld(gridworld):
     plt.xticks(np.arange(0, 12, 1))
     plt.yticks(np.arange(0, 4, 1))
     plt.grid(True)
-    for i in range(4):
-        for j in range(12):
-            plt.text(j + 0.5, i + 0.5, str(gridworld[i][j]), ha="center", va="center")
-            # If we're in the cliff region, shade the state grey
-            if i == 0 and j != 0 and j != 11:
-                plt.gca().add_patch(plt.Rectangle((j, i), 1, 1, facecolor="grey"))
+    for j in range(12):
+        if j != 0 and j != 11:
+            plt.gca().add_patch(plt.Rectangle((j, 0), 1, 1, facecolor="grey"))
+    # Plot the path
+    for i in range(len(path1) - 1):
+        plt.plot([path1[i][1] + 0.5, path1[i + 1][1] + 0.5], [path1[i][0] + 0.5, path1[i + 1][0] + 0.5], color="blue")
+    for i in range(len(path2) - 1):
+        plt.plot([path2[i][1] + 0.5, path2[i + 1][1] + 0.5], [path2[i][0] + 0.5, path2[i + 1][0] + 0.5], color="red")
+    # Show legend
+    plt.plot([], [], color="blue", label="SARSA")
+    plt.plot([], [], color="red", label="Q-learning")
+    # Put a big S at the start state
+    plt.text(0.5, 0.5, "S", ha="center", va="center", fontsize=20)
+    # Put a big G at the goal state
+    plt.text(11.5, 0.5, "G", ha="center", va="center", fontsize=20)
     plt.show()
 
 def main():
     print("TD Programming Assignment")
+
+    # Generate 2 example paths, taking different routes to the goal
+    path1 = [(0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (2, 3), (3, 3), (3, 4), (3, 5), (3, 6),
+             (3, 7), (3, 8), (3, 9), (3, 10), (3, 11)]
+    path2 = [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6),
+             (3, 7), (3, 8), (3, 9), (3, 10), (3, 11)]
+
     gridworld = generate_gridworld()
-    plot_gridworld(gridworld)
+    plot_gridworld(gridworld, path1, path2)
 
 if __name__ == "__main__":
     main()
