@@ -41,8 +41,6 @@ def plot_gridworld(gridworld, path1, path2):
     plt.figure()
     plt.gcf().set_size_inches(12, 4)
     plt.title("Cliff-Walking Gridworld")
-    plt.xlabel("Column")
-    plt.ylabel("Row")
     plt.xlim(0, 12)
     plt.ylim(0, 4)
     plt.xticks(np.arange(0, 12, 1))
@@ -65,8 +63,8 @@ def main():
     print("TD Programming Assignment")
 
     # Generate 2 example paths, starting at (0.5, 0.5) and ending at (11.5, 0.5), make them take different routes
-    path1 = [(0.5, 0.5), (1.5, 0.5), (2.5, 0.5), (3.5, 0.5), (3.5, 1.5), (3.5, 2.5), (3.5, 3.5), (2.5, 3.5), (1.5, 3.5), (0.5, 3.5), (0.5, 2.5), (0.5, 1.5), (0.5, 0.5)]
-    path2 = [(0.5, 0.5), (1.5, 0.5), (2.5, 0.5), (3.5, 0.5), (3.5, 1.5), (3.5, 2.5), (3.5, 3.5), (2.5, 3.5), (1.5, 3.5), (0.5, 3.5), (0.5, 2.5), (1.5, 2.5), (2.5, 2.5), (3.5, 2.5), (3.5, 1.5), (3.5, 0.5), (2.5, 0.5), (1.5, 0.5), (0.5, 0.5)]
+    path1 = [[0.5,0.5], [1.5,2.5], [2.5,2.5], [2.5,2.5], [4.5,2.5], [5.5,2.5], [6.5,2.5], [7.5,2.5], [8.5,2.5], [9.5,2.5], [10.5,2.5], [11.5,0.5]]
+    path2 = [[0.5,0.5], [0.5,1.5], [2.5,2.5], [3.5,3.5], [4.5,3.5], [5.5,3.5], [6.5,3.5], [7.5,3.5], [8.5,3.5], [9.5,3.5], [10.5,3.5], [11.5,0.5]]
 
     gridworld = generate_gridworld()
     plot_gridworld(gridworld, path1, path2)
