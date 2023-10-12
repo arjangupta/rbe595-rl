@@ -50,6 +50,9 @@ def plot_gridworld(gridworld):
     for i in range(4):
         for j in range(12):
             plt.text(j + 0.5, i + 0.5, str(gridworld[i][j]), ha="center", va="center")
+            # If we're in the cliff region, shade the state grey
+            if i == 0 and j != 0 and j != 11:
+                plt.gca().add_patch(plt.Rectangle((j, i), 1, 1, facecolor="grey"))
     plt.show()
 
 def main():
