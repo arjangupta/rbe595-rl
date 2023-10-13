@@ -140,6 +140,8 @@ def plot_gridworld(path1, path2):
     plt.yticks(np.arange(-0.5, Y_DIM, 1))
     # Draw gridlines
     plt.grid(True)
+    # Do not show numbers on axes
+    plt.tick_params(axis="both", which="both", bottom=False, top=False, left=False, right=False, labelbottom=False, labelleft=False)
     # Draw the cliff as between x=0.5 and x=10.5, y=-0.5 and y=0.5
     plt.fill_between([0.5, 10.5], [-0.5, -0.5], [0.5, 0.5], color="gray")
     # Plot the paths and show the legend
