@@ -16,22 +16,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def generate_gridworld():
-    """
-    Generates a gridworld for the cliff-walking problem.
-
-    Returns:
-        gridworld (list): A 4x12 grid of states, represented as a list of lists.
-    """
-    gridworld = []
-    for i in range(4):
-        row = []
-        for j in range(12):
-            row.append((i, j))
-        gridworld.append(row)
-    return gridworld
-
-def plot_gridworld(gridworld, path1, path2):
+def plot_gridworld(path1, path2):
     """
     Plots a gridworld for the cliff-walking problem.
 
@@ -66,8 +51,7 @@ def main():
     path1 = [[0.5,0.5], [1.5,2.5], [2.5,2.5], [2.5,2.5], [4.5,2.5], [5.5,2.5], [6.5,2.5], [7.5,2.5], [8.5,2.5], [9.5,2.5], [10.5,2.5], [11.5,0.5]]
     path2 = [[0.5,0.5], [0.5,1.5], [2.5,2.5], [3.5,3.5], [4.5,3.5], [5.5,3.5], [6.5,3.5], [7.5,3.5], [8.5,3.5], [9.5,3.5], [10.5,3.5], [11.5,0.5]]
 
-    gridworld = generate_gridworld()
-    plot_gridworld(gridworld, path1, path2)
+    plot_gridworld(path1, path2)
 
 if __name__ == "__main__":
     main()
