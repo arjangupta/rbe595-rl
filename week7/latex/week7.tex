@@ -195,20 +195,11 @@
 
     \subsection{Answer}
 
-    The textbook states the \textit{reward hypothesis} as follows,
-    \begin{quote}
-        ``That all of what we mean by goals and purposes can be well thought of as the maximization
-        of the expected value of the cumulative sum of a received scalar signal (called reward).''
-    \end{quote}
+    The similarities between TD and MC are as follows:
 
-    Here is a simplified break-down of what the reward hypothesis means:
     \begin{itemize}
-        \item In RL, we talk about goals and purposes, which is to find best way to solve a problem.
-        \item Any solution to a complex problem can be broken down into a series of steps, and each step can have
-        a value associated with it.
-        \item We design this `value' associated with each step as a scalar signal which is received from the environment. This scalar signal is called the \textit{reward}.
-        \item Therefore, \textbf{we hypothesize that} our all goals can be achieved by the maximization of the expected cumulative reward.
-        \item A paper from 2021 titled ``Reward is enough'' by David Silver, Satinder Singh, Doina Precup, and Richard S. Sutton discusses this hypothesis in detail.
+        \item Both TD and MC are model-free.
+        \item Both TD and MC are used for prediction and control.
     \end{itemize}
 \end{homeworkProblem}
 
