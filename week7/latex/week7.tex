@@ -256,16 +256,14 @@
 \nobreak\extramarks{Problem 5}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 5]
-    What is the difference between policy and action?
+    Can we consider TD an online (real-time) method and MC an offline method? Why?
 
     \subsection{Answer}
-    An \textit{action} is a choice made by the agent at a given state. It is an attempted modification
-    of the environment which leads to a new state or the same state. We give an agent an associated
-    reward for each action.\\
-
-    In contrast, a policy determines how good it is for the agent to perform an action in
-    a given state. Formally, a \textit{policy} is a mapping from states to probabilities of selecting
-    each possible action. It defines a probability distribution over actions for each state.\\
+    
+    Yes, we can consider TD an online (real-time) method and MC an offline method. This is because
+    TD learns during the episode, whereas MC learns after the episode has ended. TD updates the
+    value of a state based on the value of the next state (during the episode), whereas MC updates
+    the value of a state based on the actual return value (after the entire episode has ended).
 \end{homeworkProblem}
 
 \pagebreak
