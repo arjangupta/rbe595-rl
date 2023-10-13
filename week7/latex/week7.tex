@@ -141,62 +141,24 @@
 \pagebreak
 
 \begin{homeworkProblem}[Problem 1]
-    Suppose $\gamma = 0.8$ and we get the following sequence of rewards\\
-    \[R_1 = -2,\ R_2 = 1,\ R_3 = 3,\ R_4 = 4,\ R_5 = 1.0\]
-    Calculate the value of $G_0$ by using the equation 3.8 (work forward) and 3.9 (work backward) and
-    show they yield the same results.
+    Between DP (Dynamic Programming), MC (Monte-Carlo) and TD (Temporal Difference), which
+    one of these algorithms use bootstrapping? Explain.
 
     \subsection{Answer}
 
-    \subsubsection{Work Forward}
-    From the the book, the \textit{discounted return} (equation 3.8), $G_t$, is defined as,
+    Bootstrapping is the process of updating the value of a state based on the value of a future state.
+    
+    \begin{itemize}
+        \item \textbf{Dynamic Programming} (DP) uses bootstrapping. This is because DP uses the Bellman
+        equation to update the value of a state based on the value of a future state.
+        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. This is because MC does not use the
+        Bellman equation to update the value of a state based on the value of a future state. Instead,
+        MC uses the actual return value to update the value of a state.
+        \item \textbf{Temporal Difference} (TD) uses bootstrapping. This is because TD uses the Bellman
+        equation to update the value of a state based on the value of a future state.
+    \end{itemize}
 
-    \[
-    \tag{3.8}
-        G_t \doteq R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \ldots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}
-    \]
 
-    Plugging in the values from this problem, we get,
-    \vspace{-0.1cm}
-    \begin{align*}
-        G_0 &= R_1 + \gamma R_2 + \gamma^2 R_3 + \gamma^3 R_4 + \gamma^4 R_5\\
-        &= -2 + 0.8 \cdot 1 + 0.8^2 \cdot 3 + 0.8^3 \cdot 4 + 0.8^4 \cdot 1\\
-        &= - 2 + 0.8 + 0.64 \cdot 3 + 0.512 \cdot 4 + 0.4096\\
-        &= 3.1776
-    \end{align*}
-
-    \subsubsection{Work Backward}
-    From the book, the ``recursive'' representation of \textit{discounted return} (equation 3.9), $G_t$, is defined as,
-
-    \[
-    \tag{3.9}
-        G_t \doteq R_{t+1} + \gamma G_{t+1}
-    \]
-
-    Plugging in the values from this problem, we get,
-    \vspace{-0.1cm}
-    \begin{align*}
-        G_0 &= R_1 + \gamma G_1\\
-        &= -2 + 0.8 \cdot G_1
-    \end{align*}
-    \vspace{-0.3cm}
-    Where we apply 3.8 to $G_1$,
-    \vspace{-0.1cm}
-    \begin{align*}
-        G_1 &= R_2 + \gamma R_3 + \gamma^2 R_4 + \gamma^3 R_5\\
-        &= 1 + 0.8 \cdot 3 + 0.8^2 \cdot 4 + 0.8^3 \cdot 1\\
-        &= 6.472
-    \end{align*}
-    \vspace{-0.3cm}
-    Therefore,
-    \begin{align*}
-        G_0 &= -2 + 0.8 \cdot G_1\\
-        &= -2 + 0.8 \cdot 6.472\\
-        &= 3.1776
-    \end{align*}
-
-    \subsubsection{Conclusion}
-    We see that both methods yield the same result, $G_0 = 3.1776$.
 \end{homeworkProblem}
 
 \nobreak\extramarks{Problem 2}{}\nobreak{}
