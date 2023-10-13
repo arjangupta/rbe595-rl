@@ -133,7 +133,7 @@ def plot_gridworld(path1, path2):
         gridworld (list): A 4x12 grid of states, represented as a list of lists.
     """
     plt.figure()
-    plt.gcf().set_size_inches(Y_DIM, X_DIM)
+    plt.gcf().set_size_inches(X_DIM, Y_DIM)
     plt.title("Cliff-Walking Gridworld")
     plt.xlim(0, X_DIM)
     plt.ylim(0, Y_DIM)
