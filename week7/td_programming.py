@@ -144,7 +144,7 @@ def plot_gridworld(path1, path2):
     plt.fill_between([0.5, 10.5], [-0.5, -0.5], [0.5, 0.5], color="gray")
     # Plot the paths and show the legend
     plt.plot([x for x, _ in path1], [y for _, y in path1], "r-", label="Q-learning Path")
-    plt.plot([x for x, _ in path2], [y for _, y in path2], "b-", label="Path 2")
+    plt.plot([x for x, _ in path2], [y for _, y in path2], "b-", label="Path 2 (example)")
     plt.legend()
     # Put a big S at the start state (0, 0)
     plt.text(0, 0, "S", ha="center", va="center", fontsize=20)
@@ -161,7 +161,7 @@ def main():
 
     # Generate 2 example paths, starting at (0.5, 0.5) and ending at (11.5, 0.5), make them take different routes
     path1 = [[0.5,0.5], [1.5,2.5], [2.5,2.5], [2.5,2.5], [4.5,2.5], [5.5,2.5], [6.5,2.5], [7.5,2.5], [8.5,2.5], [9.5,2.5], [10.5,2.5], [11.5,0.5]]
-    path2 = [[0.5,0.5], [0.5,1.5], [2.5,2.5], [3.5,3.5], [4.5,3.5], [5.5,3.5], [6.5,3.5], [7.5,3.5], [8.5,3.5], [9.5,3.5], [10.5,3.5], [11.5,0.5]]
+    path2 = [[0,0], [1,2], [2,2], [3,3], [4,3], [5,3], [6,3], [7,3], [8,3], [9,3], [10,3], [11,0]]
 
     # Get Q-learning agent's path
     path1 = ql_agent.get_path()
