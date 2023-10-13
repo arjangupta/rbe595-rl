@@ -15,6 +15,96 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import trange
+
+# Constants for the cliff-walking problem
+NUM_ACTIONS = 4
+X_DIM = 12
+Y_DIM = 4
+
+class QLearningAgent:
+    """
+    A Q-learning agent that learns to navigate the cliff-walking problem.
+    """
+
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=1000):
+        """Initializes the Q-learning agent.
+            alpha (float): The learning rate.
+            epsilon (float): The probability of taking a random action.
+            gamma (float): The discount factor.
+            num_episodes (int): The number of episodes to train for."""
+        self.alpha = alpha
+        self.epsilon = epsilon
+        self.gamma = gamma
+        self.num_episodes = num_episodes
+        self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
+
+    def choose_action(self, state):
+        """
+        Chooses an action for the agent to take derived from the Q-table.
+        """
+        if np.random.rand() < self.epsilon:
+            # Take a random action
+            return np.random.randint(NUM_ACTIONS)
+        else:
+            # Take the action with the highest Q-value
+            return np.argmax(self.Q[state])
+    
+    def take_action(self, state, action):
+        """
+        Takes an action and returns the new state and reward.
+        """
+        if action == 0:
+            # Move right
+            new_state = (state[0] + 1, state[1])
+        elif action == 1:
+            # Move up
+            new_state = (state[0], state[1] + 1)
+        elif action == 2:
+            # Move left
+            new_state = (state[0] - 1, state[1])
+        elif action == 3:
+            # Move down
+            new_state = (state[0], state[1] - 1)
+        else:
+            raise ValueError("Invalid action: {}".format(action))
+        # Check if the new state is out of bounds
+        if new_state[0] < 0 or new_state[0] >= X_DIM or new_state[1] < 0 or new_state[1] >= Y_DIM:
+            # Stay in the same state and get a reward of -1
+            return state, -1
+        # Check if the new state is in the cliff
+        if new_state[1] == 0 and new_state[0] != 0 and new_state[0] != X_DIM - 1:
+            # Go back to the start and get a reward of -100
+            return (0, 0), -100
+        # Otherwise, return the new state and a reward of -1
+        return new_state, -1
+    
+    def episode_finished(self, state):
+        """
+        Checks if the episode is finished - i.e. if the agent has reached the goal state or fallen off the cliff.
+        """
+        x = state[0]
+        y = state[1]
+        if x == X_DIM - 1 and y == 0:
+            # Reached the goal state
+            return True
+        if x != 0 and x != X_DIM - 1 and y == 0:
+            # Fell off the cliff
+            return True
+        return False
+
+    def learn(self):
+        """Trains the agent using the Q-learning algorithm."""
+        print("Training Q-learning agent...")
+        for _ in trange(self.num_episodes):
+            S = (0, 0)
+            A = self.choose_action(S)
+            while not self.episode_finished(S):
+                S_prime, R = self.take_action(S, A)
+                A_prime = self.choose_action(S_prime)
+                self.Q[S][A] += self.alpha * (R + self.gamma * np.max(self.Q[S_prime]) - self.Q[S][A])
+                S = S_prime
+                A = A_prime
 
 def plot_gridworld(path1, path2):
     """
@@ -24,12 +114,12 @@ def plot_gridworld(path1, path2):
         gridworld (list): A 4x12 grid of states, represented as a list of lists.
     """
     plt.figure()
-    plt.gcf().set_size_inches(12, 4)
+    plt.gcf().set_size_inches(Y_DIM, X_DIM)
     plt.title("Cliff-Walking Gridworld")
-    plt.xlim(0, 12)
-    plt.ylim(0, 4)
-    plt.xticks(np.arange(0, 12, 1))
-    plt.yticks(np.arange(0, 4, 1))
+    plt.xlim(0, X_DIM)
+    plt.ylim(0, Y_DIM)
+    plt.xticks(np.arange(0, X_DIM, 1))
+    plt.yticks(np.arange(0, Y_DIM, 1))
     plt.grid(True)
     for j in range(12):
         if j != 0 and j != 11:
