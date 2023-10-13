@@ -133,8 +133,8 @@ def plot_gridworld(path1, path2):
     plt.gcf().set_size_inches(X_DIM, Y_DIM)
     plt.title("Cliff-Walking Gridworld")
     # Set limits
-    plt.xlim(0, X_DIM)
-    plt.ylim(0, Y_DIM)
+    plt.xlim(-0.5, X_DIM - 0.5)
+    plt.ylim(-0.5, Y_DIM - 0.5)
     # Show ticks at -0.5, 0.5, 1.5, etc.
     plt.xticks(np.arange(-0.5, X_DIM, 1))
     plt.yticks(np.arange(-0.5, Y_DIM, 1))
