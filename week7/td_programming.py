@@ -26,7 +26,7 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=20000):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -38,6 +38,7 @@ class QLearningAgent:
         self.num_episodes = num_episodes
         self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
         self.path = []
+        self.sum_of_rewards_during_episodes = []
 
     def choose_action(self, state, learning=True):
         """
@@ -103,13 +104,16 @@ class QLearningAgent:
         for _ in trange(self.num_episodes):
             S = (0, 0)
             A = self.choose_action(S)
+            current_episode_reward_sum = 0
             while not self.episode_finished(S):
                 S_prime, R = self.take_action(S, A)
                 A_prime = self.choose_action(S_prime)
                 self.Q[S][A] += self.alpha * (R + self.gamma * np.max(self.Q[S_prime]) - self.Q[S][A])
                 S = S_prime
                 A = A_prime
-    
+                current_episode_reward_sum += R
+            self.sum_of_rewards_during_episodes.append(current_episode_reward_sum)
+
     def get_path(self, start_state=(0, 0), end_state=(11, 0)):
         """
         Returns a path that the agent takes from the start state to the end state.
@@ -124,6 +128,12 @@ class QLearningAgent:
             self.path.append(S)
         self.path.append(end_state)
         return self.path
+
+    def get_sum_of_rewards_during_episodes(self):
+        """
+        Returns the sum of rewards during each episode.
+        """
+        return self.sum_of_rewards_during_episodes
 
 def plot_gridworld(path1, path2):
     """
@@ -154,6 +164,17 @@ def plot_gridworld(path1, path2):
     plt.text(11, 0, "G", ha="center", va="center", fontsize=20)
     plt.show()
 
+def plot_sum_of_rewards(sum_of_rewards_during_episodes):
+    """
+    Plots the sum of rewards during each episode vs the episode number.
+    """
+    plt.figure()
+    plt.title("Sum of Rewards During Each Episode")
+    plt.xlabel("Episode Number")
+    plt.ylabel("Sum of Rewards")
+    plt.plot(sum_of_rewards_during_episodes)
+    plt.show()
+
 def main():
     print("TD Programming Assignment")
 
@@ -169,6 +190,8 @@ def main():
     path1 = ql_agent.get_path()
 
     plot_gridworld(path1, path2)
+
+    plot_sum_of_rewards(ql_agent.get_sum_of_rewards_during_episodes())
 
 if __name__ == "__main__":
     main()
