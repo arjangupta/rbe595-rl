@@ -26,8 +26,7 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=1000):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=10000):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -38,6 +37,7 @@ class QLearningAgent:
         self.gamma = gamma
         self.num_episodes = num_episodes
         self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
+        self.path = []
 
     def choose_action(self, state):
         """
@@ -47,9 +47,13 @@ class QLearningAgent:
             # Take a random action
             return np.random.randint(NUM_ACTIONS)
         else:
+            # If state contains non integer values, show them and report error
+            if not isinstance(state[0], int) or not isinstance(state[1], int):
+                print("State: {}".format(state))
+                raise ValueError("State should be an integer tuple")
             # Take the action with the highest Q-value
             return np.argmax(self.Q[state])
-    
+
     def take_action(self, state, action):
         """
         Takes an action and returns the new state and reward.
@@ -78,7 +82,7 @@ class QLearningAgent:
             return (0, 0), -100
         # Otherwise, return the new state and a reward of -1
         return new_state, -1
-    
+
     def episode_finished(self, state):
         """
         Checks if the episode is finished - i.e. if the agent has reached the goal state or fallen off the cliff.
@@ -105,6 +109,21 @@ class QLearningAgent:
                 self.Q[S][A] += self.alpha * (R + self.gamma * np.max(self.Q[S_prime]) - self.Q[S][A])
                 S = S_prime
                 A = A_prime
+    
+    def get_path(self, start_state=(0, 0), end_state=(11, 0)):
+        """
+        Returns a path that the agent takes from the start state to the end state.
+        """
+        self.path = []
+        S = start_state
+        self.path.append(S)
+        while not self.episode_finished(S):
+            A = self.choose_action(S)
+            S_prime, _ = self.take_action(S, A)
+            S = S_prime
+            self.path.append(S)
+        self.path.append(end_state)
+        return self.path
 
 def plot_gridworld(path1, path2):
     """
@@ -125,8 +144,8 @@ def plot_gridworld(path1, path2):
         if j != 0 and j != 11:
             plt.gca().add_patch(plt.Rectangle((j, 0), 1, 1, facecolor="grey"))
     # Plot the paths and show the legend
-    plt.plot([x for x, _ in path1], [y for _, y in path1], "b-", label="Path 1")
-    plt.plot([x for x, _ in path2], [y for _, y in path2], "r-", label="Path 2")
+    plt.plot([x for x, _ in path1], [y for _, y in path1], "r-", label="Q-learning Path")
+    plt.plot([x for x, _ in path2], [y for _, y in path2], "b-", label="Path 2")
     plt.legend()
     # Put a big S at the start state
     plt.text(0.5, 0.5, "S", ha="center", va="center", fontsize=20)
@@ -137,9 +156,16 @@ def plot_gridworld(path1, path2):
 def main():
     print("TD Programming Assignment")
 
+    # Train a Q-learning agent
+    ql_agent = QLearningAgent()
+    ql_agent.learn()
+
     # Generate 2 example paths, starting at (0.5, 0.5) and ending at (11.5, 0.5), make them take different routes
     path1 = [[0.5,0.5], [1.5,2.5], [2.5,2.5], [2.5,2.5], [4.5,2.5], [5.5,2.5], [6.5,2.5], [7.5,2.5], [8.5,2.5], [9.5,2.5], [10.5,2.5], [11.5,0.5]]
     path2 = [[0.5,0.5], [0.5,1.5], [2.5,2.5], [3.5,3.5], [4.5,3.5], [5.5,3.5], [6.5,3.5], [7.5,3.5], [8.5,3.5], [9.5,3.5], [10.5,3.5], [11.5,0.5]]
+
+    # Get Q-learning agent's path
+    path1 = ql_agent.get_path()
 
     plot_gridworld(path1, path2)
 
