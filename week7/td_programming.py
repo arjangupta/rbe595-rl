@@ -169,6 +169,7 @@ def plot_sum_of_rewards(sum_of_rewards_during_episodes):
     Plots the sum of rewards during each episode vs the episode number.
     """
     plt.figure()
+    plt.ylim(-600, 0)
     plt.title("Sum of Rewards During Each Episode")
     plt.xlabel("Episode Number")
     plt.ylabel("Sum of Rewards")
