@@ -26,7 +26,7 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=10000):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=20000):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -39,11 +39,11 @@ class QLearningAgent:
         self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
         self.path = []
 
-    def choose_action(self, state):
+    def choose_action(self, state, learning=True):
         """
         Chooses an action for the agent to take derived from the Q-table.
         """
-        if np.random.rand() < self.epsilon:
+        if np.random.rand() < self.epsilon and learning:
             # Take a random action
             return np.random.randint(NUM_ACTIONS)
         else:
@@ -118,7 +118,7 @@ class QLearningAgent:
         S = start_state
         self.path.append(S)
         while not self.episode_finished(S):
-            A = self.choose_action(S)
+            A = self.choose_action(S, learning=False)
             S_prime, _ = self.take_action(S, A)
             S = S_prime
             self.path.append(S)
