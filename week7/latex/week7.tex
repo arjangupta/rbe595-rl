@@ -1,0 +1,308 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{gensymb}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\graphicspath{{./images/}}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{\hmwkClassShort\ \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem {#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{{#1} (continued)}{{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{{#1} (continued)}{{#1} continued on next page\ldots}\nobreak{}
+    % \stepcounter{#1}
+    \nobreak\extramarks{{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+
+\newcommand{\problemNumber}{0.0}
+
+\newenvironment{homeworkProblem}[1][-1]{
+    \renewcommand{\problemNumber}{{#1}}
+    \section{\problemNumber}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{\problemNumber}
+}{
+    \exitProblemHeader{\problemNumber}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Class
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Week\ \#7 Assignment}
+\newcommand{\hmwkClassShort}{RBE 595}
+\newcommand{\hmwkClass}{RBE 595 --- Reinforcement Learning}
+\newcommand{\hmwkAuthorName}{\textbf{Arjan Gupta}}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass}}\\
+    \textmd{\textbf{\hmwkTitle}}\\
+    \textmd{\textbf{Temporal Difference Learning}}\\
+    \vspace{3in}
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[2]{\frac{\mathrm{d}}{\mathrm{d}#2} \left(#1\right)}
+
+% For compact derivatives
+\newcommand{\derivcomp}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #2} \left(#1\right)}
+
+% For compact partial derivatives
+\newcommand{\pderivcomp}[2]{\frac{\partial #1}{\partial #2}}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\begin{document}
+
+\maketitle
+
+\nobreak\extramarks{Problem 1}{}\nobreak{}
+
+\pagebreak
+
+\begin{homeworkProblem}[Problem 1]
+    Between DP (Dynamic Programming), MC (Monte-Carlo) and TD (Temporal Difference), which
+    one of these algorithms use bootstrapping? Explain.
+
+    \subsection{Answer}
+
+    Bootstrapping is the process of updating the value of a state based on the value of a future state.
+    
+    \begin{itemize}
+        \item \textbf{Dynamic Programming} (DP) uses bootstrapping. This is because DP uses the Bellman
+        equation to update the value of a state based on the value of a future state.
+        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. This is because MC does not use the
+        Bellman equation to update the value of a state based on the value of a future state. Instead,
+        MC uses the actual return value to update the value of a state.
+        \item \textbf{Temporal Difference} (TD) uses bootstrapping. This is because TD uses the Bellman
+        equation to update the value of a state based on the value of a future state.
+    \end{itemize}
+
+
+\end{homeworkProblem}
+
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\begin{homeworkProblem}[Problem 2]
+    We mentioned that the target value for TD is $[R_{t+1} + \gamma V(s_{t+1})]$. What is the target value for
+    Monte-carlo, Q-learning, SARSA and Expected-SARSA?
+
+    \subsection{Answer}
+
+    \begin{itemize}
+        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. Therefore, the target value is the
+        actual return value, $G_t$.
+        \item \textbf{Q-Learning} is an off-policy TD control algorithm. Therefore, the target value is
+        $R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a)$.
+        \item \textbf{SARSA} is an on-policy TD control algorithm. Therefore, the target value is
+        $R_{t+1} + \gamma Q(S_{t+1}, A_{t+1})$.
+        \item \textbf{Expected-SARSA} is an on-policy TD control algorithm. Therefore, the target value is
+        $R_{t+1} + \gamma \mathbb{E}_{\pi} \left[ Q(S_{t+1}, A_{t+1}) \mid S_{t+1} \right]$.
+    \end{itemize}
+
+\end{homeworkProblem}
+
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 3}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 3]
+    What are the similarities of TD and MC?
+
+    \subsection{Answer}
+
+    The similarities between TD and MC are as follows:
+
+    \begin{itemize}
+        \item Both TD and MC are model-free.
+        \item Both TD and MC are used for prediction and control.
+    \end{itemize}
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 4}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 4]
+    Assume that we have two states $x$ and $y$ with the current value of $V(x) = 10$, $V(y) = 1$. We
+    run an episode of $\{x, 3, y, 0, y, 5, T\}$. What's the new estimate of $V(x)$, $V(y)$ using TD (assume
+    step size $\alpha = 0.1$ and discount rate $\gamma = 0.9$).
+
+    \subsection{Answer}
+
+    The new estimate of $V(x)$ is as follows:
+
+    \begin{align*}
+        V(x) &= V(x) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(x) \right]\\
+             &= 10 + 0.1 \left[ 3 + 0.9 \cdot 1 - 10 \right]\\
+             &= 10 + 0.1 \left[ 3.9 - 10 \right]\\
+             &= 10 + 0.1 \left[ -6.1 \right]\\
+             &= 10 - 0.61\\
+             &= 9.39
+    \end{align*}
+
+    However, $V(y)$ gets updated twice in this episode. The first update is as follows:
+
+    \begin{align*}
+        V(y) &= V(y) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(y) \right]\\
+             &= 1 + 0.1 \left[ 0 + 0.9 \cdot 1 - 1 \right]\\
+                &= 1 + 0.1 \left[ 0.9 - 1 \right]\\
+                &= 1 + 0.1 \left[ -0.1 \right]\\
+                &= 1 - 0.01\\
+                &= 0.99
+    \end{align*}
+
+    The second update is as follows:
+
+    \begin{align*}
+        V(y) &= V(y) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(y) \right]\\
+             &= 0.99 + 0.1 \left[ 5 + 0.9 \cdot 0 - 0.99 \right]\\
+                &= 0.99 + 0.1 \left[ 5 - 0.99 \right]\\
+                &= 0.99 + 0.1 \left[ 4.01 \right]\\
+                &= 0.99 + 0.401\\
+                &= 1.391
+    \end{align*}
+
+    Therefore, the new estimate of $V(x)$ is $9.39$ and the new estimate of $V(y)$ is $1.391$.
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 5}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 5]
+    Can we consider TD an online (real-time) method and MC an offline method? Why?
+
+    \subsection{Answer}
+    
+    Yes, we can consider TD an online (real-time) method and MC an offline method. This is because
+    TD learns during the episode, whereas MC learns after the episode has ended. TD updates the
+    value of a state based on the value of the next state (during the episode), whereas MC updates
+    the value of a state based on the actual return value (after the entire episode has ended).
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 6}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 6]
+
+    Does Q-learning learn the outcome of exploratory actions? (Refer to the Cliff walking example).
+
+    \subsection{Answer}
+
+    Yes, Q-learning learns the outcome of exploratory actions. This is because Q-learning is an
+    off-policy TD control algorithm. Therefore, Q-learning learns the optimal policy, $\pi_*$, which
+    is the policy that maximizes the value function, $q_*$, i.e., $\pi_* = \arg\max_{\pi} q_*(s, a)$.
+    This means that Q-learning learns the optimal policy, $\pi_*$, even if the behavior policy, $b$,
+    is exploratory.
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 7}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 7]
+
+    What is the advantage of Double Q-learning over Q-learning?
+
+    \subsection{Answer}
+
+    The advantage of Double Q-learning over Q-learning is that Double Q-learning is less prone to
+    bias than Q-learning. This is because Q-learning chooses the action with the maximum value
+    according to the current value function, $Q$, whereas Double Q-learning chooses the action
+    with the maximum value according to the current value function, $Q_1$, and the current value
+    function, $Q_2$. The $Q_2$ action-value function usually will not be the maximum value in the
+    current state, and therefore, Double Q-learning is less prone to bias than Q-learning.
+
+    TODO: Watch lecture again to rewrite this better.
+
+\end{homeworkProblem}
+
+\end{document}
