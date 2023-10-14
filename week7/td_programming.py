@@ -293,6 +293,7 @@ def plot_sum_of_rewards(sum_of_q_learning_rewards_during_episodes, sum_of_sarsa_
     plt.ylabel("Sums")
     plt.plot(sum_of_q_learning_rewards_during_episodes, 'r-', label="Q-learning Rewards")
     plt.plot(sum_of_sarsa_rewards_during_episodes, 'b-', label="SARSA Rewards")
+    plt.legend()
     plt.show()
 
 def main():
