@@ -1,6 +1,6 @@
 # Authors: Taylor Bergeron and Arjan Gupta
 # RBE 595 Reinforcement Learning, Week 7
-# Programming Assignment for Temporary-Difference Learning
+# Programming Assignment for Temporal-Difference Learning
 
 # In this assignment, we will implement both the SARSA and Q-learning algorithms for the
 # cliff-walking problem described in Example 6.6 of the textbook (page 132).
@@ -12,6 +12,7 @@
 # off and be sent back to the start. The agent receives a reward of -1 for each step it takes
 # that does not result in falling off the cliff. The agent receives a reward of -100 for falling
 # off the cliff. The agent receives a reward of 0 for reaching the goal state.
+import sys
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,13 +27,14 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=1000, num_runs=10):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=40000, num_runs=5, decay_rate=0.9, use_epsilon_decay=False):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
             gamma (float): The discount factor.
             num_episodes (int): The number of episodes to train for."""
         self.alpha = alpha
+        self.start_epsilon = epsilon
         self.epsilon = epsilon
         self.gamma = gamma
         self.num_episodes = num_episodes
@@ -40,6 +42,8 @@ class QLearningAgent:
         self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
         self.path = []
         self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
+        self.use_epsilon_decay = use_epsilon_decay
+        self.decay_rate = decay_rate
 
     def choose_action(self, state, learning=True):
         """
@@ -55,6 +59,10 @@ class QLearningAgent:
                 raise ValueError("State should be an integer tuple")
             # Take the action with the highest Q-value
             return np.argmax(self.Q[state])
+
+    def epsilon_decay(self, ep):
+        if self.use_epsilon_decay:
+            self.epsilon = self.start_epsilon * ((1-self.decay_rate) ** ep)
 
     def take_action(self, state, action):
         """
@@ -102,7 +110,8 @@ class QLearningAgent:
     def learn(self):
         """Trains the agent using the Q-learning algorithm."""
         print("Training Q-learning agent...")
-        for _ in trange(self.num_runs):
+        for run in trange(self.num_runs):
+            self.epsilon = self.start_epsilon
             for episode in range(self.num_episodes):
                 S = (0, 0)
                 A = self.choose_action(S)
@@ -115,6 +124,7 @@ class QLearningAgent:
                     A = A_prime
                     current_episode_reward_sum += R
                 self.sum_of_rewards_during_episodes[episode] += current_episode_reward_sum
+                self.epsilon_decay(episode)
         self.sum_of_rewards_during_episodes /= self.num_runs
 
     def get_path(self, start_state=(0, 0), end_state=(11, 0)):
@@ -142,13 +152,14 @@ class SARSAAgent:
     """
     A SARSA agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=1000, num_runs=10):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=40000, num_runs=5, decay_rate=0.9, use_epsilon_decay=False):
         """Initializes the SARSA agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
             gamma (float): The discount factor.
             num_episodes (int): The number of episodes to train for."""
         self.alpha = alpha
+        self.start_epsilon = epsilon
         self.epsilon = epsilon
         self.gamma = gamma
         self.num_episodes = num_episodes
@@ -156,6 +167,8 @@ class SARSAAgent:
         self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
         self.path = []
         self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
+        self.use_epsilon_decay = use_epsilon_decay
+        self.decay_rate = decay_rate
 
     def choose_action(self, state, learning=True):
         """
@@ -171,6 +184,10 @@ class SARSAAgent:
                 raise ValueError("State should be an integer tuple")
             # Take the action with the highest Q-value
             return np.argmax(self.Q[state])
+
+    def epsilon_decay(self, ep):
+        if self.use_epsilon_decay:
+            self.epsilon = self.start_epsilon * ((1-self.decay_rate) ** ep)
 
     def take_action(self, state, action):
         """
@@ -218,7 +235,8 @@ class SARSAAgent:
     def learn(self):
         """Trains the agent using the SARSA algorithm."""
         print("Training SARSA agent...")
-        for _ in trange(self.num_runs):
+        for run in trange(self.num_runs):
+            self.epsilon = self.start_epsilon
             for episode in range(self.num_episodes):
                 S = (0, 0)
                 A = self.choose_action(S)
@@ -231,6 +249,7 @@ class SARSAAgent:
                     A = A_prime
                     current_episode_reward_sum += R
                 self.sum_of_rewards_during_episodes[episode] += current_episode_reward_sum
+                self.epsilon_decay(episode)
         self.sum_of_rewards_during_episodes /= self.num_runs
 
     def get_path(self, start_state=(0, 0), end_state=(11, 0)):
@@ -296,15 +315,15 @@ def plot_sum_of_rewards(sum_of_q_learning_rewards_during_episodes, sum_of_sarsa_
     plt.legend()
     plt.show()
 
-def main():
+def main(epsilon_decay):
     print("TD Programming Assignment")
 
     # Train a Q-learning agent
-    ql_agent = QLearningAgent()
+    ql_agent = QLearningAgent(use_epsilon_decay=epsilon_decay)
     ql_agent.learn()
 
     # Train a SARSA agent
-    sarsa_agent = SARSAAgent()
+    sarsa_agent = SARSAAgent(use_epsilon_decay=epsilon_decay)
     sarsa_agent.learn()
 
     # Get Q-learning agent's path
@@ -317,4 +336,7 @@ def main():
 
 if __name__ == "__main__":
 
-    main()
+    if len(sys.argv) < 2:
+        print("Please specify if you want epsilon decay via True or False")
+    else:
+        main(eval(sys.argv[1]))
