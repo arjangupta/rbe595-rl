@@ -26,7 +26,7 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500, num_runs=10):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -36,9 +36,10 @@ class QLearningAgent:
         self.epsilon = epsilon
         self.gamma = gamma
         self.num_episodes = num_episodes
+        self.num_runs = num_runs
         self.Q = np.zeros((X_DIM, Y_DIM, NUM_ACTIONS))
         self.path = []
-        self.sum_of_rewards_during_episodes = []
+        self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
 
     def choose_action(self, state, learning=True):
         """
@@ -101,18 +102,20 @@ class QLearningAgent:
     def learn(self):
         """Trains the agent using the Q-learning algorithm."""
         print("Training Q-learning agent...")
-        for _ in trange(self.num_episodes):
-            S = (0, 0)
-            A = self.choose_action(S)
-            current_episode_reward_sum = 0
-            while not self.episode_finished(S):
-                S_prime, R = self.take_action(S, A)
-                A_prime = self.choose_action(S_prime)
-                self.Q[S][A] += self.alpha * (R + self.gamma * np.max(self.Q[S_prime]) - self.Q[S][A])
-                S = S_prime
-                A = A_prime
-                current_episode_reward_sum += R
-            self.sum_of_rewards_during_episodes.append(current_episode_reward_sum)
+        for _ in trange(self.num_runs):
+            for episode in range(self.num_episodes):
+                S = (0, 0)
+                A = self.choose_action(S)
+                current_episode_reward_sum = 0
+                while not self.episode_finished(S):
+                    S_prime, R = self.take_action(S, A)
+                    A_prime = self.choose_action(S_prime)
+                    self.Q[S][A] += self.alpha * (R + self.gamma * np.max(self.Q[S_prime]) - self.Q[S][A])
+                    S = S_prime
+                    A = A_prime
+                    current_episode_reward_sum += R
+                self.sum_of_rewards_during_episodes[episode] += current_episode_reward_sum
+        self.sum_of_rewards_during_episodes /= self.num_runs
 
     def get_path(self, start_state=(0, 0), end_state=(11, 0)):
         """
@@ -169,7 +172,6 @@ def plot_sum_of_rewards(sum_of_rewards_during_episodes):
     Plots the sum of rewards during each episode vs the episode number.
     """
     plt.figure()
-    plt.ylim(-600, 0)
     plt.title("Sum of Rewards During Each Episode")
     plt.xlabel("Episodes")
     plt.ylabel("Sums")
