@@ -43,6 +43,8 @@ class QLearningAgent:
         self.path = []
         self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
         self.use_epsilon_decay = use_epsilon_decay
+        if self.use_epsilon_decay and self.alpha > 0.05:
+            self.alpha = 0.01
         self.decay_rate = decay_rate
 
     def choose_action(self, state, learning=True):
@@ -168,6 +170,8 @@ class SARSAAgent:
         self.path = []
         self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
         self.use_epsilon_decay = use_epsilon_decay
+        if self.use_epsilon_decay and self.alpha > 0.05:
+            self.alpha = 0.01
         self.decay_rate = decay_rate
 
     def choose_action(self, state, learning=True):
@@ -319,11 +323,11 @@ def main(epsilon_decay):
     print("TD Programming Assignment")
 
     # Train a Q-learning agent
-    ql_agent = QLearningAgent(alpha=0.01, num_runs=20, use_epsilon_decay=epsilon_decay)
+    ql_agent = QLearningAgent(num_runs=20, use_epsilon_decay=epsilon_decay)
     ql_agent.learn()
 
     # Train a SARSA agent
-    sarsa_agent = SARSAAgent(alpha=0.01, num_runs=20, use_epsilon_decay=epsilon_decay)
+    sarsa_agent = SARSAAgent(num_runs=20, use_epsilon_decay=epsilon_decay)
     sarsa_agent.learn()
 
     # Get Q-learning agent's path
