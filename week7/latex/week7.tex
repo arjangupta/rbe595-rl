@@ -148,7 +148,7 @@
 
     \subsection{Answer}
 
-    Bootstrapping is the process of updating the value of a state based on the value of another state.
+    Bootstrapping is the process of updating the estimate value of a state based on the estimate value of another state.
     
     \begin{itemize}
         \item \textbf{Dynamic Programming} (DP) uses bootstrapping. This is because DP uses the Bellman
@@ -175,14 +175,19 @@
 
     \subsection{Answer}
 
+    The Target is shown as part of the following equation:
+    \begin{align*}
+        NewEstimate \leftarrow OldEstimate + StepSize \left[ Target - OldEstimate \right]
+    \end{align*}
+
     \begin{itemize}
-        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. Therefore, the target value is the
+        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. Its target value is the
         actual return value, $G_t$.
-        \item \textbf{Q-Learning} is an off-policy TD control algorithm. Therefore, the target value is
+        \item \textbf{Q-Learning} --- As given in the algorithm, the target value is
         $R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a)$.
-        \item \textbf{SARSA} is an on-policy TD control algorithm. Therefore, the target value is
+        \item \textbf{SARSA} --- As shown in the algorithm, the target value is
         $R_{t+1} + \gamma Q(S_{t+1}, A_{t+1})$.
-        \item \textbf{Expected-SARSA} is an on-policy TD control algorithm. Therefore, the target value is
+        \item \textbf{Expected-SARSA} --- As described in the book, the target value is
         $R_{t+1} + \gamma \mathbb{E}_{\pi} \left[ Q(S_{t+1}, A_{t+1}) \mid S_{t+1} \right]$.
     \end{itemize}
 
