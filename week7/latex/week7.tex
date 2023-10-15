@@ -10,9 +10,11 @@
 \usepackage{algpseudocode}
 \usepackage{graphicx}
 \usepackage{gensymb}
-\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
-\usepackage{listings}
 \usepackage{hyperref}
+
+\DeclareRobustCommand{\bbone}{\text{\usefont{U}{bbold}{m}{n}1}}
+
+\DeclareMathOperator{\EX}{\mathbb{E}}% expected value
 
 \graphicspath{{./images/}}
 
@@ -146,16 +148,18 @@
 
     \subsection{Answer}
 
-    Bootstrapping is the process of updating the value of a state based on the value of a future state.
+    Bootstrapping is the process of updating the value of a state based on the value of another state.
     
     \begin{itemize}
         \item \textbf{Dynamic Programming} (DP) uses bootstrapping. This is because DP uses the Bellman
         equation to update the value of a state based on the value of a future state.
         \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. This is because MC does not use the
         Bellman equation to update the value of a state based on the value of a future state. Instead,
-        MC uses the actual return value to update the value of a state.
-        \item \textbf{Temporal Difference} (TD) uses bootstrapping. This is because TD uses the Bellman
-        equation to update the value of a state based on the value of a future state.
+        MC uses the expected return value, $\EX_{\pi}[G_t \mid S_t = s]$, to update the value of a state.
+        \item \textbf{Temporal Difference} (TD) uses bootstrapping. This is because uses a combination of
+        DP and MC to update the value of a state based on the value of a future state. TD uses a target value
+        of $[R_{t+1} + \gamma V(s_{t+1})]$ to update the value of a state. Since this depends on a future
+        state, TD uses bootstrapping.
     \end{itemize}
 
 
