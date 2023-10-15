@@ -64,7 +64,7 @@ class QLearningAgent:
 
     def epsilon_decay(self, ep):
         if self.use_epsilon_decay:
-            self.epsilon = self.start_epsilon * ((1-self.decay_rate) ** ep)
+            self.epsilon = self.start_epsilon * (self.decay_rate ** ep)
 
     def take_action(self, state, action):
         """
@@ -191,7 +191,7 @@ class SARSAAgent:
 
     def epsilon_decay(self, ep):
         if self.use_epsilon_decay:
-            self.epsilon = self.start_epsilon * ((1-self.decay_rate) ** ep)
+            self.epsilon = self.start_epsilon * (self.decay_rate ** ep)
 
     def take_action(self, state, action):
         """
