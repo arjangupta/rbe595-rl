@@ -323,11 +323,11 @@ def main(epsilon_decay):
     print("TD Programming Assignment")
 
     # Train a Q-learning agent
-    ql_agent = QLearningAgent(num_runs=20, use_epsilon_decay=epsilon_decay)
+    ql_agent = QLearningAgent(use_epsilon_decay=epsilon_decay)
     ql_agent.learn()
 
     # Train a SARSA agent
-    sarsa_agent = SARSAAgent(num_runs=20, use_epsilon_decay=epsilon_decay)
+    sarsa_agent = SARSAAgent(use_epsilon_decay=epsilon_decay)
     sarsa_agent.learn()
 
     # Get Q-learning agent's path
