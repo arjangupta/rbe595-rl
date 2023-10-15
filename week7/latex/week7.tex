@@ -200,15 +200,17 @@
 \nobreak\extramarks{Problem 3}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 3]
-    What are the similarities of TD and MC?
+    What are the similarities of TD and MC\@?
 
     \subsection{Answer}
 
     The similarities between TD and MC are as follows:
 
     \begin{itemize}
-        \item Both TD and MC are model-free.
-        \item Both TD and MC are used for prediction and control.
+        \item Both TD and MC are model-free, i.e. they do not require a model of the environment.
+        \item Both TD and MC are \textit{sample updates}, i.e., they involve looking ahead at a sample
+        successor state (or state-action pair), using the value of that state to compute a backed-up value, and then updating
+        the value of the original state (or state-action pair) accordingly.
     \end{itemize}
 \end{homeworkProblem}
 
