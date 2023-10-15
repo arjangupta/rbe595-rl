@@ -27,7 +27,7 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=40000, num_runs=5, decay_rate=0.9, use_epsilon_decay=False):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500, num_runs=50, decay_rate=0.9, use_epsilon_decay=False):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -43,6 +43,8 @@ class QLearningAgent:
         self.path = []
         self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
         self.use_epsilon_decay = use_epsilon_decay
+        if self.use_epsilon_decay and self.alpha > 0.05:
+            self.alpha = 0.01
         self.decay_rate = decay_rate
 
     def choose_action(self, state, learning=True):
@@ -62,7 +64,7 @@ class QLearningAgent:
 
     def epsilon_decay(self, ep):
         if self.use_epsilon_decay:
-            self.epsilon = self.start_epsilon * ((1-self.decay_rate) ** ep)
+            self.epsilon = self.start_epsilon * (self.decay_rate ** ep)
 
     def take_action(self, state, action):
         """
@@ -152,7 +154,7 @@ class SARSAAgent:
     """
     A SARSA agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=40000, num_runs=5, decay_rate=0.9, use_epsilon_decay=False):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500, num_runs=50, decay_rate=0.9, use_epsilon_decay=False):
         """Initializes the SARSA agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -168,6 +170,8 @@ class SARSAAgent:
         self.path = []
         self.sum_of_rewards_during_episodes = np.zeros(num_episodes)
         self.use_epsilon_decay = use_epsilon_decay
+        if self.use_epsilon_decay and self.alpha > 0.05:
+            self.alpha = 0.01
         self.decay_rate = decay_rate
 
     def choose_action(self, state, learning=True):
@@ -187,7 +191,7 @@ class SARSAAgent:
 
     def epsilon_decay(self, ep):
         if self.use_epsilon_decay:
-            self.epsilon = self.start_epsilon * ((1-self.decay_rate) ** ep)
+            self.epsilon = self.start_epsilon * (self.decay_rate ** ep)
 
     def take_action(self, state, action):
         """
