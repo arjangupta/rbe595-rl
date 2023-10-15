@@ -27,7 +27,7 @@ class QLearningAgent:
     """
     A Q-learning agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=40000, num_runs=5, decay_rate=0.9, use_epsilon_decay=False):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500, num_runs=50, decay_rate=0.9, use_epsilon_decay=False):
         """Initializes the Q-learning agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
@@ -152,7 +152,7 @@ class SARSAAgent:
     """
     A SARSA agent that learns to navigate the cliff-walking problem.
     """
-    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=40000, num_runs=5, decay_rate=0.9, use_epsilon_decay=False):
+    def __init__(self, alpha=0.2, epsilon=0.1, gamma=0.95, num_episodes=500, num_runs=50, decay_rate=0.9, use_epsilon_decay=False):
         """Initializes the SARSA agent.
             alpha (float): The learning rate.
             epsilon (float): The probability of taking a random action.
