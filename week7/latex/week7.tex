@@ -288,10 +288,17 @@
     \subsection{Answer}
 
     Yes, Q-learning learns the outcome of exploratory actions. This is because Q-learning is an
-    off-policy TD control algorithm. Therefore, Q-learning learns the optimal policy, $\pi_*$, which
-    is the policy that maximizes the value function, $q_*$, i.e., $\pi_* = \arg\max_{\pi} q_*(s, a)$.
-    This means that Q-learning learns the optimal policy, $\pi_*$, even if the behavior policy, $b$,
-    is exploratory.
+    off-policy TD control algorithm. In the context of the Cliff walking example, this means that
+    Q-learning learns the optimal action-value function, $q_*$, which is closest to the cliff. 
+    The behavior policy takes exploratory actions, and the target policy is greedy. This
+    causes makes it so that initially, the agent falls off the cliff a lot, but eventually, the agent
+    learns to avoid the cliff and converges to the optimal action-value function, $q_*$. This is why the
+    graph of the sum of rewards per episode for Q-learning is initially very low, but eventually
+    converges to a high value. The graph is shown below:
+
+    \begin{center}
+        \includegraphics[scale=0.5]{q_learning_cliff_walking.png}
+    \end{center}
 
 \end{homeworkProblem}
 
