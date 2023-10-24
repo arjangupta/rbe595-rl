@@ -164,7 +164,7 @@
 
     The estimates of $q_{\pi}(X, U1)$ and $q_{\pi}(X, U2)$ using 2-step SARSA are as follows:
 
-    \subsubsection{Timestep 1}
+    \subsubsection{Timestep 0}
     \begin{align*}
         q_{\pi}(X, U1) &= q_{\pi}(X, U1) + \alpha \left[ R_{t+1} + \gamma R_{t+2} + \gamma^2 q_{\pi}(S_{t+2}, A_{t+2}) - q_{\pi}(X, U1) \right]\\
                       &= 0 + 0.1 \left[ 16 + 0.5 \cdot 12 + 0.5^2 \cdot 0 - 0 \right]\\
@@ -174,7 +174,7 @@
                       &= 2.2\\
     \end{align*}
 
-    \subsubsection{Timestep 2}
+    \subsubsection{Timestep 1}
     \begin{align*}
         q_{\pi}(X, U2) &= q_{\pi}(X, U2) + \alpha \left[ R_{t+1} + \gamma R_{t+2} + \gamma^2 q_{\pi}(S_{t+2}, A_{t+2}) - q_{\pi}(X, U2) \right]\\
                       &= 0 + 0.1 \left[ 12 + 0.5 \cdot 24 + 0.5^2 \cdot 0 - 0 \right]\\
@@ -184,7 +184,7 @@
                       &= 2.4
     \end{align*}
 
-    \subsubsection{Timestep 3}
+    \subsubsection{Timestep 2}
     \begin{align*}
         q_{\pi}(X, U1) &= q_{\pi}(X, U1) + \alpha \left[ R_{t+1} + \gamma R_{t+2} + \gamma^2 q_{\pi}(S_{t+2}, A_{t+2}) - q_{\pi}(X, U1) \right]\\
                       &= 2.2 + 0.1 \left[ 24 + 0.5 \cdot 16 + 0.5^2 \cdot 0 - 2.2 \right]\\
@@ -194,6 +194,8 @@
                       &= 5.28\\
     \end{align*}
 
+    Therefore, the estimate of $q_{\pi}(X, U1)$ is $5.28$ and the estimate of $q_{\pi}(X, U2)$ is $2.4$.
+
 
 \end{homeworkProblem}
 
@@ -202,26 +204,19 @@
 \pagebreak
 
 \begin{homeworkProblem}[Problem 2]
-    We mentioned that the target value for TD is $[R_{t+1} + \gamma V(s_{t+1})]$. What is the target value for
-    Monte-carlo, Q-learning, SARSA and Expected-SARSA?
+    What is the purpose of introducing Control Variates in per-decision importance sampling?
 
     \subsection{Answer}
 
-    The Target is shown as part of the following equation:
-    \begin{align*}
-        NewEstimate \leftarrow OldEstimate + StepSize \left[ Target - OldEstimate \right]
-    \end{align*}
+    The purpose of introducing Control Variates in per-decision importance sampling is to reduce the 
+    variance of $G$. This is done by using a linear combination of the original estimate and a
+    control variate term. The updated equation is shown below:
 
-    \begin{itemize}
-        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. Its target value is the
-        actual return value, $G_t$.
-        \item \textbf{Q-Learning} --- As given in the algorithm, the target value is
-        $R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a)$.
-        \item \textbf{SARSA} --- As shown in the algorithm, the target value is
-        $R_{t+1} + \gamma Q(S_{t+1}, A_{t+1})$.
-        \item \textbf{Expected-SARSA} --- As described in the book, the target value is
-        $R_{t+1} + \gamma \mathbb{E}_{\pi} \left[ Q(S_{t+1}, A_{t+1}) \mid S_{t+1} \right]$.
-    \end{itemize}
+    \[
+        G_{t:h} = \rho_t (R_{t+1} + \gamma G_{t+1:h}) + (1-\rho_t) V_{h-1} (S_t)
+    \]
+
+    Where the second term is the control variate term.
 
 \end{homeworkProblem}
 
@@ -232,17 +227,19 @@
 \nobreak\extramarks{Problem 3}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 3]
-    What are the similarities of TD and MC\@?
+    In off-policy learning, what are the pros and cons of the Tree-Backup algorithm versus off-policy
+    SARSA (comment on the complexity, exploration, variance, and bias, and others)?
 
     \subsection{Answer}
 
-    The similarities between TD and MC are as follows:
+    The pros and cons of the Tree-Backup algorithm versus off-policy SARSA are as follows:
 
     \begin{itemize}
-        \item Both TD and MC are model-free, i.e. they do not require a model of the environment.
-        \item Both TD and MC are \textit{sample updates}, i.e., they involve looking ahead at a sample
-        successor state (or state-action pair), using the value of that state to compute a backed-up value, and then updating
-        the value of the original state (or state-action pair) accordingly.
+        \item \textbf{Complexity:} The complexity of the Tree-Backup algorithm is $O(n)$, where $n$ is the number of steps. The complexity of off-policy SARSA is $O(1)$.
+        \item \textbf{Exploration:} The Tree-Backup algorithm explores the environment by following the policy $\pi$ and then following the behavior policy $\mu$ for the remaining steps. Off-policy SARSA explores the environment by following the behavior policy $\mu$ for all steps.
+        \item \textbf{Variance:} The variance of the Tree-Backup algorithm is lower than that of off-policy SARSA\@. This is because the Tree-Backup algorithm uses a control variate term to reduce the variance of the estimate.
+        \item \textbf{Bias:} The bias of the Tree-Backup algorithm is higher than that of off-policy SARSA\@. This is because the Tree-Backup algorithm uses a control variate term to reduce the variance of the estimate.
+        \item \textbf{Others:} The Tree-Backup algorithm is an on-policy algorithm, while off-policy SARSA is an off-policy algorithm.
     \end{itemize}
 \end{homeworkProblem}
 
