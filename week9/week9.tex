@@ -171,28 +171,36 @@
                       &= 0 + 0.1 \left[ 16 + 6 - 0 \right]\\
                       &= 0 + 0.1 \left[ 22 \right]\\
                       &= 0 + 2.2\\
-                      &= 2.2\\
+                      &= 2.2
     \end{align*}
 
     \subsubsection{Timestep 1}
     \begin{align*}
         q_{\pi}(X, U2) &= q_{\pi}(X, U2) + \alpha \left[ R_{t+1} + \gamma R_{t+2} + \gamma^2 q_{\pi}(S_{t+2}, A_{t+2}) - q_{\pi}(X, U2) \right]\\
                       &= 0 + 0.1 \left[ 12 + 0.5 \cdot 24 + 0.5^2 \cdot q_{\pi}(X, U1) - 0 \right]\\
-                      &= 0 + 0.1 \left[ 12 + 12 - 2.2 \right]\\
-                      &= 0 + 0.1 \left[ 24 - 2.2 \right]\\
-                      &= 0 + 0.1 \left[ 21.8 \right]\\
-                    &= 2.18\\
+                      &= 0 + 0.1 \left[ 12 + 12 + 0.25*2.2 \right]\\
+                        &= 0 + 0.1 \left[ 24 + 0.55 \right]\\
+                        &= 0 + 0.1 \left[ 24.55 \right]\\
+                        &= 2.455
     \end{align*}
     \subsubsection{Timestep 2}
     \begin{align*}
         q_{\pi}(X, U1) &= q_{\pi}(X, U1) + \alpha \left[ R_{t+1} + \gamma R_{t+2} + \gamma^2 q_{\pi}(S_{t+2}, A_{t+2}) - q_{\pi}(X, U1) \right]\\
-                      &= 2.2 + 0.1 \left[ 24 + 0.5 \cdot 16 + 0.5^2 \cdot 0 - 2.2 \right]\\
-                      &= 2.2 + 0.1 \left[ 24 + 8 - 2.2 \right]\\
-                      &= 2.2 + 0.1 \left[ 30.8 \right]\\
-                      &= 5.18\\
+                      &= 2.2 + 0.1 \left[ 24 + 0.5 \cdot 16 + 0.5^2 \cdot q_{\pi}(T) - 2.2 \right]\\
+                      &= 2.2 + 0.1 \left[ 24 + 8 + 0 - 2.2 \right]\\
+                      &= 2.2 + 0.1 \left[ 29.8 \right]\\
+                        &= 2.2 + 2.98\\
+                        &= 5.18
     \end{align*}
+    \subsubsection{Timestep 3}
 
-    Therefore, the estimate of $q_{\pi}(X, U1)$ is $5.18$ and the estimate of $q_{\pi}(X, U2)$ is $2.18$.
+    \begin{align*}
+        q_{\pi}(X, U1) &= q_{\pi}(X, U1) + \alpha \left[ R_{t+1} + \gamma q_{\pi}(S_{t+1}, A_{t+1}) - q_{\pi}(X, U1) \right]\\
+                        &= 5.18 + 0.1 \left[ 16 + 0.5 \cdot q_{\pi}(T) - 5.18 \right]\\
+                        &= 5.18 + 0.1 \left[ 16 + 0 - 5.18 \right]\\
+                        &= 5.18 + 0.1 \left[ 10.82 \right]\\
+                        &= 6.262
+    \end{align*}
 
 
 \end{homeworkProblem}
