@@ -288,9 +288,18 @@
             is better than the other.
         \item \textbf{Exploration:} Both the Tree-Backup algorithm and off-policy SARSA are off-policy
             algorithms. Therefore, both algorithms can be used to explore the environment. 
-        \item \textbf{Variance:} The variance of the Tree-Backup algorithm is lower than that of off-policy SARSA\@. This is because the Tree-Backup algorithm uses a control variate term to reduce the variance of the estimate.
-        \item \textbf{Bias:} The bias of the Tree-Backup algorithm is higher than that of off-policy SARSA\@. This is because the Tree-Backup algorithm uses a control variate term to reduce the variance of the estimate.
-        \item \textbf{Others:} The Tree-Backup algorithm is an on-policy algorithm, while off-policy SARSA is an off-policy algorithm.
+        \item \textbf{Variance:} The variance of the Tree-Backup algorithm is lower than that of 
+        off-policy SARSA\@. This is because the off-policy SARSA algorithm uses the importance sampling
+        ratio, which can cause the variance of the estimate of the return to increase, especially
+        when control variates are not used. The Tree-Backup algorithm does not use the importance
+        sampling ratio, and therefore does not have this problem.
+        \item \textbf{Bias:} As a trade-off for lower variance, the Tree-Backup algorithm has
+            higher bias than off-policy SARSA\@.
+        \item \textbf{Others:} One benefit of using Tree-Backup algorithm over off-policy SARSA is
+        that the Tree-Backup algorithm can be used when we have no knowledge of the underlying
+        distribution of the behavior policy. This can be useful depending on the application, for
+        example, if the behavior policy is a human, and we have no knowledge of the human's
+        decision-making process.
     \end{itemize}
 \end{homeworkProblem}
 
