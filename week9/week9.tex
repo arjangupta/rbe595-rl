@@ -214,15 +214,51 @@
 
     \subsection{Answer}
 
-    The purpose of introducing Control Variates in per-decision importance sampling is to reduce the 
-    variance of $G$. This is done by using a linear combination of the original estimate and a
-    control variate term. The updated equation is shown below:
+    The purpose of introducing Control Variates in per-decision importance sampling is
+    to further reduce the variance of the estimate of the return.\\
+    
+    Plain per-decision importance
+    sampling reduces the variance of the estimate of the return by making sure that the estimate
+    of the whole return is not 0 every time the behavior policy takes an action
+    that the target policy would not have taken. However, the variance of the estimate of the
+    return can be decreased even further by using Control Variates. This is done
+    by using a `control variate term' in the equation for $G_{t:h}$. Without
+    control variates, the equation for $G_{t:h}$ is as follows:
 
-    \[
-        G_{t:h} = \rho_t (R_{t+1} + \gamma G_{t+1:h}) + (1-\rho_t) V_{h-1} (S_t)
-    \]
+    \begin{align*}
+        G_{t:h} = R_{t+1} + \gamma G_{t+1:h}, \quad t < h < T
+    \end{align*}
 
-    Where the second term is the control variate term.
+    With control variates, the equation for $G_{t:h}$ is as follows:
+
+    \begin{align*}
+        G_{t:h} \doteq \rho_{t} \left[ R_{t+1} + \gamma G_{t+1:h}] + (1 - \rho_{t}) V_{h-1}(S_t) \right], \quad t < h < T
+    \end{align*}
+
+    Where the control variate term is $(1 - \rho_{t}) V_{h-1}(S_t)$.\\
+
+    This equation uses a `convex combination' of the estimate of the two terms. This way, 
+    when $\rho_{t} = 0$, we have $G_{t:h} = V_{h-1}(S_t)$, which is the current
+    estimate of the return for the current state. Overall this reduces the `jaggedness' in the
+    plot of the estimate of the return over time, which reduces the variance of the estimate
+    of the return.\\
+
+    It is also possible to prove that the control variate term does not add bias
+    to the estimate of the return.
+
+    \subsubsection{Control variates for action-value estimation}
+
+    With control-estimates, the equation for $G_{t:h}$ in action-value estimation is as follows:
+
+    \begin{align*}
+        G_{t:h} = R_{t+1} + \gamma \rho_{t+1} (G_{t+1:h} - Q(S_{t+1}, A_{t+1})) + \gamma V_{h-1}(S_{t+1})
+    \end{align*}
+
+    Where $V(S) = \sum_{a} \pi(a|S) Q(S, a)$.\\
+
+    Here, when $\rho_{t} = 0$, we have $G_{t:h} = R_{t+1} + \gamma V_{h-1}(S_{t+1})$, instead
+    of simply $G_{t:h} = R_{t+1}$, which would be the case without control variates. This also
+    reduces the variance of the estimate of the return.\\
 
 \end{homeworkProblem}
 
