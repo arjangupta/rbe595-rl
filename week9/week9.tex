@@ -405,6 +405,17 @@
                   &= \sum_{i=1}^{n-x} \gamma^{i-1} R_{t+i} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x})
     \end{align*}
 
+    And as we assumed, $x$ is the number of steps by which $t+n$ overshoots $T$. Therefore, $n-x$ is
+    the `reduced horizon' of the $n$-step return of Sarsa (7.4). So, in general, as the horizon
+    shrinks, we can keep taking $n-x = n$ steps, and thus the equation above can simply be written
+    generally as:
+
+    \begin{align*}
+        G_{t:t+n} &= \sum_{i=1}^{n} \gamma^{i-1} R_{t+i} + \gamma^{n} Q_{t+n-1}(S_{t+n}, A_{t+n})
+    \end{align*}
+
+    Which is the same as the rewritten form of the $n$-step return of Sarsa (7.4), as shown in
+    equation 1 of this Problem. Therefore, this case is also proven.\\
 
 \end{homeworkProblem}
 
