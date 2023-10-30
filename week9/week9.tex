@@ -311,9 +311,9 @@
     \textbf{(Exercise 7.4)} Prove that the $n$-step return of Sarsa (7.4) can be written 
     exactly in terms of a novel TD error, as
 
-    \begin{align*}
+    \begin{align}\tag{7.6}
         G_{t:t+n} = Q_{t-1}(S_t, A_t) + \sum_{k=t}^{min(t+n, T)-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
-    \end{align*}
+    \end{align}
 
     \subsection{Answer}
 
@@ -325,10 +325,86 @@
 
     We can rewrite this as follows:
 
+    \begin{align}\tag{Equation 1, Problem 4}
+        G_{t:t+n} &= \sum_{i=1}^{n} \gamma^{i-1} R_{t+i} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})
+    \end{align}
+
+    Now we take two cases of equation 7.6 --- one where $t+n < T$, and one where $t+n \geq T$.
+
+    \subsubsection{Case 1: $t+n < T$}
+
+    In this case, we have $min(t+n, T) = t+n$. Therefore, equation 7.6 becomes:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \sum_{k=t}^{t+n-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
+    \end{align*}
+
+    Let us expand the summation in the above equation:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \gamma^{0} [R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)]\\
+                  &+ \gamma^{1} [R_{t+2} + \gamma Q_{t+1}(S_{t+2}, A_{t+2}) - Q_{t}(S_{t+1}, A_{t+1})]\\
+                  &+ \gamma^{2} [R_{t+3} + \gamma Q_{t+2}(S_{t+3}, A_{t+3}) - Q_{t+1}(S_{t+2}, A_{t+2})]\\
+                  &+ \gamma^{3} [R_{t+4} + \gamma Q_{t+3}(S_{t+4}, A_{t+4}) - Q_{t+2}(S_{t+3}, A_{t+3})]\\
+                  &+ \ldots\\
+                  &+ \gamma^{n-1} [R_{t+n} + \gamma Q_{t+n-1}(S_{t+n}, A_{t+n}) - Q_{t+n-2}(S_{t+n-1}, A_{t+n-1})]\\
+                  &= Q_{t-1}(S_t, A_t)\\
+                  &+ R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)\\
+                &+ \gamma R_{t+2} + \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2}) - \gamma Q_{t}(S_{t+1}, A_{t+1})\\
+                &+ \gamma^2 R_{t+3} + \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3}) - \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2})\\
+                &+ \gamma^3 R_{t+4} + \gamma^4 Q_{t+3}(S_{t+4}, A_{t+4}) - \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3})\\
+                &+ \ldots\\
+                &+ \gamma^{n-1} R_{t+n} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n}) - \gamma^{n-1} Q_{t+n-2}(S_{t+n-1}, A_{t+n-1})\\
+    \end{align*}
+
+    However, we can see that the terms in the above equation cancel out. The cancellation
+    pattern is, $Q_{t-1}(S_t, A_t)$ from the first line gets cancelled by the last term in the second line,
+    $\gamma Q_{t}(S_{t+1}, A_{t+1})$ gets cancelled by the last term in the third line, and so on.\\
+
+    Therefore, we are left with the following:
+
     \begin{align*}
         G_{t:t+n} &= R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})\\
-                  &= R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n}) - \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n}) + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})
+                  &= \sum_{i=1}^{n} \gamma^{i-1} R_{t+i} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})
     \end{align*}
+
+    Which is the same as the rewritten form of the $n$-step return of Sarsa (7.4), as shown in
+    equation 1 of this Problem. Therefore, this case is proven.\\
+
+    \subsubsection{Case 2: $t+n \geq T$}
+
+    In this case, we have $min(t+n, T) = T$. Let us assume that $t+n$ overshoots $T$ by $x$ steps,
+    where $x \geq 0$. So, $t+n = T + x$, or $T = t+n-x$. Therefore, equation 7.6 becomes:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \sum_{k=t}^{t+n-x-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
+    \end{align*}
+
+    Let us expand the summation in the above equation:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \gamma^{0} [R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)]\\
+                  &+ \gamma^{1} [R_{t+2} + \gamma Q_{t+1}(S_{t+2}, A_{t+2}) - Q_{t}(S_{t+1}, A_{t+1})]\\
+                  &+ \gamma^{2} [R_{t+3} + \gamma Q_{t+2}(S_{t+3}, A_{t+3}) - Q_{t+1}(S_{t+2}, A_{t+2})]\\
+                  &+ \gamma^{3} [R_{t+4} + \gamma Q_{t+3}(S_{t+4}, A_{t+4}) - Q_{t+2}(S_{t+3}, A_{t+3})]\\
+                  &+ \ldots\\
+                  &+ \gamma^{n-x-1} [R_{t+n-x} + \gamma Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x}) - Q_{t+n-x-2}(S_{t+n-x-1}, A_{t+n-x-1})]\\
+                  &= Q_{t-1}(S_t, A_t)\\
+                  &+ R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)\\
+                &+ \gamma R_{t+2} + \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2}) - \gamma Q_{t}(S_{t+1}, A_{t+1})\\
+                &+ \gamma^2 R_{t+3} + \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3}) - \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2})\\
+                &+ \gamma^3 R_{t+4} + \gamma^4 Q_{t+3}(S_{t+4}, A_{t+4}) - \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3})\\
+                &+ \ldots\\
+                &+ \gamma^{n-x-1} R_{t+n-x} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x}) - \gamma^{n-x-1} Q_{t+n-x-2}(S_{t+n-x-1}, A_{t+n-x-1})\\
+    \end{align*}
+
+    However, we can see that the terms in the above equation cancel out in the same way as in Case 1.
+
+    \begin{align*}
+        G_{t:t+n} &= R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-x-1} R_{t+n-x} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x})\\
+                  &= \sum_{i=1}^{n-x} \gamma^{i-1} R_{t+i} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x})
+    \end{align*}
+
 
 \end{homeworkProblem}
 
