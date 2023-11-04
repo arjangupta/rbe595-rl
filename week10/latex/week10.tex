@@ -232,4 +232,63 @@
 
 \end{homeworkProblem}
 
+\pagebreak
+
+\nobreak\extramarks{Problem 5}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 5]
+    What are the 4 steps of the MCTS algorithm? How does MCTS balance exploration and
+    exploitation?
+
+    \subsection{Answer}
+
+    The 4 steps of the MCTS algorithm are:
+
+    \begin{enumerate}
+        \item \textbf{Selection}: Starting from the root node, we select a leaf node
+            with an exploration-exploitation trade-off criteria (UCB1).
+        \item \textbf{Expansion}: We expand the leaf node by adding a child node for each
+            possible action.
+        \item \textbf{Simulation}: We simulate an episode starting from the newly added
+            child node. We use the roll-out policy to select actions during the simulation.
+        \item \textbf{Back-up}: We store action-values for each node in the tree.
+    \end{enumerate}
+
+    Specifically, in the selection step, for balancing exploration and exploitation, we use the UCB1 formula:
+
+    \begin{align*}
+        UCB1(S_i) = \frac{v_i}{n_i} + C \sqrt{\frac{\ln N_i}{n_i}}
+    \end{align*}
+
+    Where,\\
+    $n_i$ is the number of times we have visited node $S_i$,\\
+    $N_i$ is the number of times we have visited the parent of node $S_i$,\\
+    $v_i$ is the value of node $S_i$, and\\
+    $C$ is a constant that we choose.\\
+
+    The flow chart for the MCTS algorithm (tree policy) is shown below:
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.5]{prob5_flow_chart.png}
+    \end{figure}
+
+    Now, let us describe how we use the above flow chart to balance exploration and exploitation.
+    At first, we just have the root node, $S_0$. This technically currently a leaf node, but
+    since it is the root-node, we make an exception and immediately add new child nodes to it,
+    and rollout from the first new child node. Based on the results of the rollout, we update
+    the value of the first new child node and its parent.\\
+
+    Then, we restart the algorithm from the root node. This time, since the root node is no longer
+    a leaf node, we need to use UCB1 to select a leaf node. Now this is where the exploration-exploitation
+    trade-off comes in. We will find that even though the first new child node has a high value (since
+    we rolled out from it previously), it would be the choice in case of greedy selection. However,
+    since we are using UCB1, we will instead consider the second new child node, which has a lower value,
+    because its exploration term is higher. Specifically, the exploration term is higher because $n_i$ is
+    0, making the second term in the UCB1 for that node infinitely large. This shows that in the planning
+    phase, MCTS balances exploration and exploitation by using the UCB1 formula.\\
+
+
+\end{homeworkProblem}
+
 \end{document}
