@@ -156,6 +156,8 @@
     form of an episode. Then we can use this simulated experience to improve the policy. This
     is the process of \textbf{planning}.\\ 
 
+
+
 \end{homeworkProblem}
 
 \nobreak\extramarks{Problem 2}{}\nobreak{}
@@ -163,55 +165,29 @@
 \pagebreak
 
 \begin{homeworkProblem}[Problem 2]
-    What is the purpose of introducing Control Variates in per-decision importance sampling?
+    What is the difference between Dyna-Q and Dyna-Q+ algorithms?
 
     \subsection{Answer}
 
-    The purpose of introducing Control Variates in per-decision importance sampling is
-    to further reduce the variance of the estimate of the return.\\
-    
-    Plain per-decision importance
-    sampling reduces the variance of the estimate of the return by making sure that the estimate
-    of the whole return is not 0 every time the behavior policy takes an action
-    that the target policy would not have taken. However, the variance of the estimate of the
-    return can be decreased even further by using Control Variates. This is done
-    by using a `control variate term' in the equation for $G_{t:h}$. Without
-    control variates, the equation for $G_{t:h}$ is as follows:
+    The problem with Dyna-Q is that it does not balance exploration and exploitation well
+    in the planning phase. This is because the planning phase is greedy. Only the learning
+    phase is $\epsilon$-greedy. The reason that we want to also explore in the planning phase
+    is that the model may need to change if the environment changes over time.\\
+
+    Dyna-Q+ is like Dyna-Q, except that it adds an exploration `bonus' to the planning phase.
+    What this means is that we essentially provide a bonus reward in the planning phase for
+    states that have not been visited in a long time. This encourages the agent to explore
+    in the planning phase. Specifically, the bonus reward is given by:
 
     \begin{align*}
-        G_{t:h} = R_{t+1} + \gamma G_{t+1:h}, \quad t < h < T
+        R = r + \kappa \sqrt{\tau(s, a)}
     \end{align*}
 
-    With control variates, the equation for $G_{t:h}$ is as follows:
-
-    \begin{align*}
-        G_{t:h} \doteq \rho_{t} \left[ R_{t+1} + \gamma G_{t+1:h}] + (1 - \rho_{t}) V_{h-1}(S_t) \right], \quad t < h < T
-    \end{align*}
-
-    Where the control variate term is $(1 - \rho_{t}) V_{h-1}(S_t)$.\\
-
-    This equation uses a `convex combination' of the estimate of the two terms. This way, 
-    when $\rho_{t} = 0$, we have $G_{t:h} = V_{h-1}(S_t)$, which is the current
-    estimate of the return for the current state. Overall this reduces the `jaggedness' in the
-    plot of the estimate of the return over time, which reduces the variance of the estimate
-    of the return.\\
-
-    It is also possible to prove that the control variate term does not add bias
-    to the estimate of the return.
-
-    \subsubsection{Control variates for action-value estimation}
-
-    With control-estimates, the equation for $G_{t:h}$ in action-value estimation is as follows:
-
-    \begin{align*}
-        G_{t:h} = R_{t+1} + \gamma \rho_{t+1} (G_{t+1:h} - Q(S_{t+1}, A_{t+1})) + \gamma V_{h-1}(S_{t+1})
-    \end{align*}
-
-    Where $V(S) = \sum_{a} \pi(a|S) Q(S, a)$.\\
-
-    Here, when $\rho_{t} = 0$, we have $G_{t:h} = R_{t+1} + \gamma V_{h-1}(S_{t+1})$, instead
-    of simply $G_{t:h} = R_{t+1}$, which would be the case without control variates. This also
-    reduces the variance of the estimate of the return.\\
+    Where $r$ is the reward received, $\kappa$ is a constant of our choice,
+    and $\tau(s, a)$ is the number
+    of time steps since the last visit to state $s$ after taking action $a$.
+    It is important to note that the bonus reward is only given in the planning phase,
+    and not during regular interaction with the real environment.\\
 
 \end{homeworkProblem}
 
