@@ -198,37 +198,16 @@
 \nobreak\extramarks{Problem 3}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 3]
-    In off-policy learning, what are the pros and cons of the Tree-Backup algorithm versus off-policy
-    SARSA (comment on the complexity, exploration, variance, and bias, and others)?
+    Model-based RL methods suffer more bias than model-free methods. Is this
+    statement correct? Why or why not?
 
     \subsection{Answer}
 
-    The pros and cons of the Tree-Backup algorithm versus off-policy SARSA are as follows:
-
-    \begin{itemize}
-        \item \textbf{Complexity:} The computational complexity of both the Tree-Backup algorithm and
-            off-policy SARSA over a single episode is $O(n^2)$, where $n$ is the number of steps 
-            in the episode. This is because the outer loop of both algorithms iterates over the
-            steps in the episode, and the inner loop of both algorithms are used to calculate iterative
-            sums for the estimate of the return. In the case of off-policy SARSA, one of the inner loops is
-            also used to calculate the importance sampling ratio. For $k$ episodes, the complexity of
-            both algorithms is $O(kn^2)$. Therefore, from a complexity standpoint, neither algorithm
-            is better than the other.
-        \item \textbf{Exploration:} Both the Tree-Backup algorithm and off-policy SARSA are off-policy
-            algorithms. Therefore, both algorithms can be used to explore the environment. 
-        \item \textbf{Variance:} The variance of the Tree-Backup algorithm is lower than that of 
-        off-policy SARSA\@. This is because the off-policy SARSA algorithm uses the importance sampling
-        ratio, which can cause the variance of the estimate of the return to increase, especially
-        when control variates are not used. The Tree-Backup algorithm does not use the importance
-        sampling ratio, and therefore does not have this problem.
-        \item \textbf{Bias:} As a trade-off for lower variance, the Tree-Backup algorithm has
-            higher bias than off-policy SARSA\@.
-        \item \textbf{Others:} One benefit of using Tree-Backup algorithm over off-policy SARSA is
-        that the Tree-Backup algorithm can be used when we have no knowledge of the underlying
-        distribution of the behavior policy. This can be useful depending on the application, for
-        example, if the behavior policy is a human, and we have no knowledge of the human's
-        decision-making process.
-    \end{itemize}
+    This statement is correct. Model-based RL methods suffer more bias than model-free methods
+    because the design of the model introduces bias. The model is a representation of the
+    environment, and it is not possible to represent the environment perfectly. Therefore,
+    the model will always introduce some bias.\\
+    
 \end{homeworkProblem}
 
 \pagebreak
@@ -236,12 +215,7 @@
 \nobreak\extramarks{Problem 4}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 4]
-    \textbf{(Exercise 7.4)} Prove that the $n$-step return of Sarsa (7.4) can be written 
-    exactly in terms of a novel TD error, as
-
-    \begin{align}\tag{7.6}
-        G_{t:t+n} = Q_{t-1}(S_t, A_t) + \sum_{k=t}^{min(t+n, T)-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
-    \end{align}
+    Model-based RL methods are more sample efficient. Is this statement correct? Why or why not?
 
     \subsection{Answer}
 
