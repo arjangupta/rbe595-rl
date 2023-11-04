@@ -1,0 +1,374 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{gensymb}
+\usepackage{hyperref}
+
+\DeclareRobustCommand{\bbone}{\text{\usefont{U}{bbold}{m}{n}1}}
+
+\DeclareMathOperator{\EX}{\mathbb{E}}% expected value
+
+\graphicspath{{./images/}}
+
+\usetikzlibrary{automata,positioning}
+
+%
+% Basic Document Settings
+%
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\hmwkAuthorName}
+\chead{\hmwkClassShort\ \hmwkTitle}
+\rhead{\firstxmark}
+\lfoot{\lastxmark}
+\cfoot{\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+%
+% Create Problem Sections
+%
+
+\newcommand{\enterProblemHeader}[1]{
+    \nobreak\extramarks{}{Problem {#1} continued on next page\ldots}\nobreak{}
+    \nobreak\extramarks{{#1} (continued)}{{#1} continued on next page\ldots}\nobreak{}
+}
+
+\newcommand{\exitProblemHeader}[1]{
+    \nobreak\extramarks{{#1} (continued)}{{#1} continued on next page\ldots}\nobreak{}
+    % \stepcounter{#1}
+    \nobreak\extramarks{{#1}}{}\nobreak{}
+}
+
+\setcounter{secnumdepth}{0}
+\newcounter{partCounter}
+
+\newcommand{\problemNumber}{0.0}
+
+\newenvironment{homeworkProblem}[1][-1]{
+    \renewcommand{\problemNumber}{{#1}}
+    \section{\problemNumber}
+    \setcounter{partCounter}{1}
+    \enterProblemHeader{\problemNumber}
+}{
+    \exitProblemHeader{\problemNumber}
+}
+
+%
+% Homework Details
+%   - Title
+%   - Class
+%   - Author
+%
+
+\newcommand{\hmwkTitle}{Assignment\ \#6}
+\newcommand{\hmwkClassShort}{RBE 595}
+\newcommand{\hmwkClass}{RBE 595 --- Reinforcement Learning}
+\newcommand{\hmwkAuthorName}{\textbf{Arjan Gupta}}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{2in}
+    \textmd{\textbf{\hmwkClass}}\\
+    \textmd{\textbf{\hmwkTitle}}\\
+    \textmd{\textbf{Model-Based Reinforcement Learning}}\\
+    \vspace{3in}
+}
+
+\author{\hmwkAuthorName}
+\date{}
+
+\renewcommand{\part}[1]{\textbf{\large Part \Alph{partCounter}}\stepcounter{partCounter}\\}
+
+%
+% Various Helper Commands
+%
+
+% Useful for algorithms
+\newcommand{\alg}[1]{\textsc{\bfseries \footnotesize #1}}
+
+% For derivatives
+\newcommand{\deriv}[2]{\frac{\mathrm{d}}{\mathrm{d}#2} \left(#1\right)}
+
+% For compact derivatives
+\newcommand{\derivcomp}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+
+% For partial derivatives
+\newcommand{\pderiv}[2]{\frac{\partial}{\partial #2} \left(#1\right)}
+
+% For compact partial derivatives
+\newcommand{\pderivcomp}[2]{\frac{\partial #1}{\partial #2}}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Probability commands: Expectation, Variance, Covariance, Bias
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+
+\begin{document}
+
+\maketitle
+
+\nobreak\extramarks{Problem 1}{}\nobreak{}
+
+\pagebreak
+
+\begin{homeworkProblem}[Problem 1]
+    What is ``planning'' in the context of Reinforcement Learning?
+
+    \subsection{Answer}
+
+    In the context of Reinforcement Learning, planning is the process of using a model of the
+    environment to improve the policy.\\
+
+    A model of the environment is a representation of the environment that is used to predict
+    what next state and reward will be given a current state and action. Once we have a model,
+    we can use it to simulate the environment and produce a simulated experience, in the
+    form of an episode. Then we can use this simulated experience to improve the policy. This
+    is the process of \textbf{planning}.\\ 
+
+\end{homeworkProblem}
+
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\begin{homeworkProblem}[Problem 2]
+    What is the purpose of introducing Control Variates in per-decision importance sampling?
+
+    \subsection{Answer}
+
+    The purpose of introducing Control Variates in per-decision importance sampling is
+    to further reduce the variance of the estimate of the return.\\
+    
+    Plain per-decision importance
+    sampling reduces the variance of the estimate of the return by making sure that the estimate
+    of the whole return is not 0 every time the behavior policy takes an action
+    that the target policy would not have taken. However, the variance of the estimate of the
+    return can be decreased even further by using Control Variates. This is done
+    by using a `control variate term' in the equation for $G_{t:h}$. Without
+    control variates, the equation for $G_{t:h}$ is as follows:
+
+    \begin{align*}
+        G_{t:h} = R_{t+1} + \gamma G_{t+1:h}, \quad t < h < T
+    \end{align*}
+
+    With control variates, the equation for $G_{t:h}$ is as follows:
+
+    \begin{align*}
+        G_{t:h} \doteq \rho_{t} \left[ R_{t+1} + \gamma G_{t+1:h}] + (1 - \rho_{t}) V_{h-1}(S_t) \right], \quad t < h < T
+    \end{align*}
+
+    Where the control variate term is $(1 - \rho_{t}) V_{h-1}(S_t)$.\\
+
+    This equation uses a `convex combination' of the estimate of the two terms. This way, 
+    when $\rho_{t} = 0$, we have $G_{t:h} = V_{h-1}(S_t)$, which is the current
+    estimate of the return for the current state. Overall this reduces the `jaggedness' in the
+    plot of the estimate of the return over time, which reduces the variance of the estimate
+    of the return.\\
+
+    It is also possible to prove that the control variate term does not add bias
+    to the estimate of the return.
+
+    \subsubsection{Control variates for action-value estimation}
+
+    With control-estimates, the equation for $G_{t:h}$ in action-value estimation is as follows:
+
+    \begin{align*}
+        G_{t:h} = R_{t+1} + \gamma \rho_{t+1} (G_{t+1:h} - Q(S_{t+1}, A_{t+1})) + \gamma V_{h-1}(S_{t+1})
+    \end{align*}
+
+    Where $V(S) = \sum_{a} \pi(a|S) Q(S, a)$.\\
+
+    Here, when $\rho_{t} = 0$, we have $G_{t:h} = R_{t+1} + \gamma V_{h-1}(S_{t+1})$, instead
+    of simply $G_{t:h} = R_{t+1}$, which would be the case without control variates. This also
+    reduces the variance of the estimate of the return.\\
+
+\end{homeworkProblem}
+
+\nobreak\extramarks{Problem 2}{}\nobreak{}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 3}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 3]
+    In off-policy learning, what are the pros and cons of the Tree-Backup algorithm versus off-policy
+    SARSA (comment on the complexity, exploration, variance, and bias, and others)?
+
+    \subsection{Answer}
+
+    The pros and cons of the Tree-Backup algorithm versus off-policy SARSA are as follows:
+
+    \begin{itemize}
+        \item \textbf{Complexity:} The computational complexity of both the Tree-Backup algorithm and
+            off-policy SARSA over a single episode is $O(n^2)$, where $n$ is the number of steps 
+            in the episode. This is because the outer loop of both algorithms iterates over the
+            steps in the episode, and the inner loop of both algorithms are used to calculate iterative
+            sums for the estimate of the return. In the case of off-policy SARSA, one of the inner loops is
+            also used to calculate the importance sampling ratio. For $k$ episodes, the complexity of
+            both algorithms is $O(kn^2)$. Therefore, from a complexity standpoint, neither algorithm
+            is better than the other.
+        \item \textbf{Exploration:} Both the Tree-Backup algorithm and off-policy SARSA are off-policy
+            algorithms. Therefore, both algorithms can be used to explore the environment. 
+        \item \textbf{Variance:} The variance of the Tree-Backup algorithm is lower than that of 
+        off-policy SARSA\@. This is because the off-policy SARSA algorithm uses the importance sampling
+        ratio, which can cause the variance of the estimate of the return to increase, especially
+        when control variates are not used. The Tree-Backup algorithm does not use the importance
+        sampling ratio, and therefore does not have this problem.
+        \item \textbf{Bias:} As a trade-off for lower variance, the Tree-Backup algorithm has
+            higher bias than off-policy SARSA\@.
+        \item \textbf{Others:} One benefit of using Tree-Backup algorithm over off-policy SARSA is
+        that the Tree-Backup algorithm can be used when we have no knowledge of the underlying
+        distribution of the behavior policy. This can be useful depending on the application, for
+        example, if the behavior policy is a human, and we have no knowledge of the human's
+        decision-making process.
+    \end{itemize}
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 4}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 4]
+    \textbf{(Exercise 7.4)} Prove that the $n$-step return of Sarsa (7.4) can be written 
+    exactly in terms of a novel TD error, as
+
+    \begin{align}\tag{7.6}
+        G_{t:t+n} = Q_{t-1}(S_t, A_t) + \sum_{k=t}^{min(t+n, T)-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
+    \end{align}
+
+    \subsection{Answer}
+
+    The $n$-step return of Sarsa (7.4) is as follows:
+
+    \begin{align*}
+        G_{t:t+n} = R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n}), \quad n \geq 1, \quad  0 \leq t < T-n
+    \end{align*}
+
+    We can rewrite this as follows:
+
+    \begin{align}\tag{Equation 1, Problem 4}
+        G_{t:t+n} &= \sum_{i=1}^{n} \gamma^{i-1} R_{t+i} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})
+    \end{align}
+
+    Now we take two cases of equation 7.6 --- one where $t+n < T$, and one where $t+n \geq T$.
+
+    \subsubsection{Case 1: $t+n < T$}
+
+    In this case, we have $min(t+n, T) = t+n$. Therefore, equation 7.6 becomes:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \sum_{k=t}^{t+n-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
+    \end{align*}
+
+    Let us expand the summation in the above equation:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \gamma^{0} [R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)]\\
+                  &+ \gamma^{1} [R_{t+2} + \gamma Q_{t+1}(S_{t+2}, A_{t+2}) - Q_{t}(S_{t+1}, A_{t+1})]\\
+                  &+ \gamma^{2} [R_{t+3} + \gamma Q_{t+2}(S_{t+3}, A_{t+3}) - Q_{t+1}(S_{t+2}, A_{t+2})]\\
+                  &+ \gamma^{3} [R_{t+4} + \gamma Q_{t+3}(S_{t+4}, A_{t+4}) - Q_{t+2}(S_{t+3}, A_{t+3})]\\
+                  &+ \ldots\\
+                  &+ \gamma^{n-1} [R_{t+n} + \gamma Q_{t+n-1}(S_{t+n}, A_{t+n}) - Q_{t+n-2}(S_{t+n-1}, A_{t+n-1})]\\
+                  &= Q_{t-1}(S_t, A_t)\\
+                  &+ R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)\\
+                &+ \gamma R_{t+2} + \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2}) - \gamma Q_{t}(S_{t+1}, A_{t+1})\\
+                &+ \gamma^2 R_{t+3} + \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3}) - \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2})\\
+                &+ \gamma^3 R_{t+4} + \gamma^4 Q_{t+3}(S_{t+4}, A_{t+4}) - \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3})\\
+                &+ \ldots\\
+                &+ \gamma^{n-1} R_{t+n} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n}) - \gamma^{n-1} Q_{t+n-2}(S_{t+n-1}, A_{t+n-1})\\
+    \end{align*}
+
+    However, we can see that the terms in the above equation cancel out. The cancellation
+    pattern is, $Q_{t-1}(S_t, A_t)$ from the first line gets cancelled by the last term in the second line,
+    $\gamma Q_{t}(S_{t+1}, A_{t+1})$ gets cancelled by the last term in the third line, and so on.\\
+
+    Therefore, we are left with the following:
+
+    \begin{align*}
+        G_{t:t+n} &= R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})\\
+                  &= \sum_{i=1}^{n} \gamma^{i-1} R_{t+i} + \gamma^n Q_{t+n-1}(S_{t+n}, A_{t+n})
+    \end{align*}
+
+    Which is the same as the rewritten form of the $n$-step return of Sarsa (7.4), as shown in
+    equation 1 of this Problem. Therefore, this case is proven.\\
+
+    \subsubsection{Case 2: $t+n \geq T$}
+
+    In this case, we have $min(t+n, T) = T$. Let us assume that $t+n$ overshoots $T$ by $x$ steps,
+    where $x \geq 0$. So, $t+n = T + x$, or $T = t+n-x$. Therefore, equation 7.6 becomes:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \sum_{k=t}^{t+n-x-1} \gamma^{k-t} [R_{k+1} + \gamma Q_k(S_{k+1}, A_{k+1}) - Q_{k-1}(S_k, A_k)]
+    \end{align*}
+
+    Let us expand the summation in the above equation:
+
+    \begin{align*}
+        G_{t:t+n} &= Q_{t-1}(S_t, A_t) + \gamma^{0} [R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)]\\
+                  &+ \gamma^{1} [R_{t+2} + \gamma Q_{t+1}(S_{t+2}, A_{t+2}) - Q_{t}(S_{t+1}, A_{t+1})]\\
+                  &+ \gamma^{2} [R_{t+3} + \gamma Q_{t+2}(S_{t+3}, A_{t+3}) - Q_{t+1}(S_{t+2}, A_{t+2})]\\
+                  &+ \gamma^{3} [R_{t+4} + \gamma Q_{t+3}(S_{t+4}, A_{t+4}) - Q_{t+2}(S_{t+3}, A_{t+3})]\\
+                  &+ \ldots\\
+                  &+ \gamma^{n-x-1} [R_{t+n-x} + \gamma Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x}) - Q_{t+n-x-2}(S_{t+n-x-1}, A_{t+n-x-1})]\\
+                  &= Q_{t-1}(S_t, A_t)\\
+                  &+ R_{t+1} + \gamma Q_t(S_{t+1}, A_{t+1}) - Q_{t-1}(S_t, A_t)\\
+                &+ \gamma R_{t+2} + \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2}) - \gamma Q_{t}(S_{t+1}, A_{t+1})\\
+                &+ \gamma^2 R_{t+3} + \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3}) - \gamma^2 Q_{t+1}(S_{t+2}, A_{t+2})\\
+                &+ \gamma^3 R_{t+4} + \gamma^4 Q_{t+3}(S_{t+4}, A_{t+4}) - \gamma^3 Q_{t+2}(S_{t+3}, A_{t+3})\\
+                &+ \ldots\\
+                &+ \gamma^{n-x-1} R_{t+n-x} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x}) - \gamma^{n-x-1} Q_{t+n-x-2}(S_{t+n-x-1}, A_{t+n-x-1})\\
+    \end{align*}
+
+    However, we can see that the terms in the above equation cancel out in the same way as in Case 1.
+
+    \begin{align*}
+        G_{t:t+n} &= R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-x-1} R_{t+n-x} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x})\\
+                  &= \sum_{i=1}^{n-x} \gamma^{i-1} R_{t+i} + \gamma^{n-x} Q_{t+n-x-1}(S_{t+n-x}, A_{t+n-x})
+    \end{align*}
+
+    And as we assumed, $x$ is the number of steps by which $t+n$ overshoots $T$. Therefore, $n-x$ is
+    the `reduced horizon' of the $n$-step return of Sarsa (7.4). So, in general, as the horizon
+    shrinks, we can keep taking $n-x = n$ steps, and thus the equation above can simply be written
+    generally as:
+
+    \begin{align*}
+        G_{t:t+n} &= \sum_{i=1}^{n} \gamma^{i-1} R_{t+i} + \gamma^{n} Q_{t+n-1}(S_{t+n}, A_{t+n})
+    \end{align*}
+
+    Which is the same as the rewritten form of the $n$-step return of Sarsa (7.4), as shown in
+    equation 1 of this Problem. Therefore, this case is also proven.\\
+
+\end{homeworkProblem}
+
+\end{document}
