@@ -52,15 +52,11 @@ class Model():
 
         # encoded in action is: next state, reward
         self.model = np.zeros((height, width, actions, 2))
+        # fill model with -1s so we can encode visited, nextstate=-1 and reward=-1 is unvisited
+        self.model.fill(-1)
 
         #in each action space put tuple with next state and reward
         #actions 0=up 1=right 2=down 3=left
-        #populate goal reward with 1
-        self.model[0,width-1,0,1]=1
-        self.model[0,width-1,1,1]=1
-        self.model[0,width-1,3,1]=1
-        self.model[0,width-2,1,1]=1 #agent can never be here because obstacle
-        self.model[1,width-1,0,1]=1
 
     def take_action(self, state, action):
         r = state[0]
@@ -68,9 +64,9 @@ class Model():
         return self.model[r,c,action]
 
     def get_random_previously_observed_state_and_action(self):
-        #TODO: find a way to encode previously observed
+        #TODO: randomly select state where next state and reward is not -1
+        # self.model[:,:,:] != -1
         return 0,0
-
 
 class TabularDynaQ():
     def __init__(self, model, world, episodes = 50, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
@@ -81,9 +77,10 @@ class TabularDynaQ():
 
     def run(self):
         for ep in range(self.episodes):
-            #update
-            for planning_step in range(self.planning_steps):
-                s,a = self.model.get_random_previously_observed_state_and_action()
+            goal = False
+            while not goal:
+                for planning_step in range(self.planning_steps):
+                    s,a = self.model.get_random_previously_observed_state_and_action()
 
 if __name__ == "__main__":
 
