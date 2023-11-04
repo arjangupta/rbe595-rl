@@ -7,29 +7,32 @@ Programming Exercise 5: Model-Based RL
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_gridworld(gridworld):
-    _, ax = plt.subplots()
+class World():
 
-    # Plot the grid
-    ax.imshow(gridworld, cmap='binary')
+    def __init__(self):
+        # Create a 6x9 grid
+        self.gridworld = np.zeros((6, 9))
 
-    # Form the grid lines such that they are in the middle of each cell
-    ax.set_xticks(np.arange(-.5, gridworld.shape[1], 1))
-    ax.set_yticks(np.arange(-.5, gridworld.shape[0], 1))
-    ax.grid(which='both', color='black', linewidth=2)
+        # Set the obstacles
+        self.gridworld[1:4, 2] = 1
+        self.gridworld[4, 5] = 1
+        self.gridworld[0:3, 7] = 1
 
-    plt.show()
+        # plot_gridworld(gridworld)
 
-def main():
-    # Create a 6x9 grid
-    gridworld = np.zeros((6, 9))
+    def plot_gridworld(self):
+        _, ax = plt.subplots()
 
-    # Set the obstacles
-    gridworld[1:4, 2] = 1
-    gridworld[4,5] = 1
-    gridworld[0:3, 7] = 1
+        # Plot the grid
+        ax.imshow(self.gridworld, cmap='binary')
 
-    plot_gridworld(gridworld)
+        # Form the grid lines such that they are in the middle of each cell
+        ax.set_xticks(np.arange(-.5, self.gridworld.shape[1], 1))
+        ax.set_yticks(np.arange(-.5, self.gridworld.shape[0], 1))
+        ax.grid(which='both', color='black', linewidth=2)
+
+        plt.show()
 
 if __name__ == "__main__":
-    main()
+    world = World()
+    world.plot_gridworld()
