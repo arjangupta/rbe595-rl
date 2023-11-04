@@ -67,9 +67,27 @@ class Model():
         c = state[1]
         return self.model[r,c,action]
 
+    def get_random_previously_observed_state_and_action(self):
+        #TODO: find a way to encode previously observed
+        return 0,0
+
+
+class TabularDynaQ():
+    def __init__(self, model, world, episodes = 50, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
+        self.model = model
+        self.world = world
+        self.episodes = episodes
+        self.planning_steps = planning_steps
+
+    def run(self):
+        for ep in range(self.episodes):
+            #update
+            for planning_step in range(self.planning_steps):
+                s,a = self.model.get_random_previously_observed_state_and_action()
 
 if __name__ == "__main__":
 
     world = World()
     model = Model()
-    world.plot_gridworld()
+    # world.plot_gridworld()
+    dq = TabularDynaQ(model=model, world=world)
