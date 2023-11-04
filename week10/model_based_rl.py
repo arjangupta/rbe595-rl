@@ -7,16 +7,8 @@ Programming Exercise 5: Model-Based RL
 import matplotlib.pyplot as plt
 import numpy as np
 
-def create_gridworld():
-    # Create a 6x9 grid
-    gridworld = np.zeros((6, 9))
-
-    # Set the obstacles
-    gridworld[1:4, 2] = 1
-    gridworld[4,5] = 1
-    gridworld[0:3, 7] = 1
-
-    fig, ax = plt.subplots()
+def plot_gridworld(gridworld):
+    _, ax = plt.subplots()
 
     # Plot the grid
     ax.imshow(gridworld, cmap='binary')
@@ -28,5 +20,16 @@ def create_gridworld():
 
     plt.show()
 
+def main():
+    # Create a 6x9 grid
+    gridworld = np.zeros((6, 9))
+
+    # Set the obstacles
+    gridworld[1:4, 2] = 1
+    gridworld[4,5] = 1
+    gridworld[0:3, 7] = 1
+
+    plot_gridworld(gridworld)
+
 if __name__ == "__main__":
-    create_gridworld()
+    main()
