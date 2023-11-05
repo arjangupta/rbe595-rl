@@ -335,6 +335,32 @@
         Q(S_t, A_t) &= Q(S_t, A_t) + \alpha \left[ G_{t:t+n} - Q(S_t, A_t) \right]
     \end{align*}
 
+    We can see that if we use 1-step TD, the algorithm's environment-interaction steps will
+    be very similar to Dyna-Q with $n = 0$ planning steps.\\
+
+    However, I believe that in this particular problem,
+    \textbf{the general n-step TD method will not perform as well
+    as n-planning step Dyna-Q}, because it will take longer than Dyna-Q to learn the state-action
+    values of the states leading up to the goal state. This is because, initially the state-action
+    values of all the states will be 0. Then,
+    the n-step TD method will only update the value of the
+    state-action pair that encounters the goal state. All the states leading up to the goal state
+    will simply have their value updated to 0. After a few episodes, the state-action values
+    will be updated to non-zero values, but it will take longer than Dyna-Q.\\
+
+    On the other hand, Dyna-Q will use the simulated experience to update the value of all the
+    state-action pairs that were encountered in the simulated experience. It will make good
+    use of computational resources in its planning phase. With only 1 episode and a sufficiently
+    large number of planning steps, Dyna-Q will be able to learn non-zero values for the
+    state-action values leading up to the goal state.\\
+
+    By the second or third episode, Dyna-Q will have learned the state-action values of the
+    states leading up to the goal state much better than the n-step TD method. Perhaps after
+    a high number of episodes, the n-step TD method will catch up to Dyna-Q, but it will
+    be behind initially. Therefore,
+    I think if we compare the general performance of the two algorithms for this particular problem,
+    Dyna-Q will perform better than the n-step TD method.\\
+
 \end{homeworkProblem}
 
 \end{document}
