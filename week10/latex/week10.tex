@@ -291,4 +291,50 @@
 
 \end{homeworkProblem}
 
+\pagebreak
+
+\nobreak\extramarks{Problem 6}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 6]
+    \textbf{(Exercise 8.1, page 166)} The nonplanning method looks particularly poor in Figure 8.3 because it is
+    a one-step method; a method using multi-step bootstrapping would do better. Do you
+    think one of the multi-step bootstrapping methods from Chapter 7 could do as well as
+    the Dyna method? Explain why or why not.
+
+    \subsection{Answer}
+
+    Let us analyze how the $n$-step TD method would be applied to this problem.\\
+
+    Firstly, in $n$-step TD, the $G_{t:t+n}$ is given as,
+
+    \begin{align*}
+        G_{t:t+n} = R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \gamma^n Q(S_{t+n}, A_{t+n})
+    \end{align*}
+
+    One thing to notice is that, as given in the problem prompt, the reward for all actions
+    is 0 except for the goal state, where the reward is 1. Therefore, we have two cases,
+    depending on whether the goal state is reached within $n$ steps or not.\\
+
+    If $t < T$, then $G_{t:t+n}$ is given as,
+
+    \begin{align*}
+        G_{t:t+n} &= 0.95^n Q(S_{t+n}, A_{t+n})
+    \end{align*}
+
+    If $t \geq T$, then $G_{t:t+n}$ is given as,
+
+    \begin{align*}
+        G_{t:t+n} &= 0.95^{k-1} + 0.95^k Q(S_{t+n}, A_{t+n})
+    \end{align*}
+
+    Where $k$ is the number of steps taken before reaching the goal state (i.e. $k = T - t$).\\
+
+    And $Q(S_t, A_t)$ is given as,
+
+    \begin{align*}
+        Q(S_t, A_t) &= Q(S_t, A_t) + \alpha \left[ G_{t:t+n} - Q(S_t, A_t) \right]
+    \end{align*}
+
+\end{homeworkProblem}
+
 \end{document}
