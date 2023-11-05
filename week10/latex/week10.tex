@@ -374,16 +374,46 @@
 
     \subsection{Answer}
 
-    The Dyna-Q+ agent performed better in the first phase because it was able to explore
-    the environment better than the Dyna-Q agent. This is because the Dyna-Q+ agent
-    had an exploration bonus in the planning phase, which encouraged it to explore
-    the environment.\\
+    In the first phase, as described in Example 8.2, 
+    the maze has an opening on the near side, and a wall on the far side.
+    After 1000 time steps, the short path is blocked and the far side opening is created. The graph
+    for the performance of Dyna-Q and Dyna-Q+ is shown below:
 
-    The Dyna-Q+ agent performed better in the second phase because it was able to
-    learn the new environment faster than the Dyna-Q agent. This is because the Dyna-Q+
-    agent had an exploration bonus in the planning phase, which encouraged it to explore
-    the environment. This allowed it to learn the new environment faster than the Dyna-Q
-    agent.\\
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.5]{prob7_graph1.png}
+    \end{figure}
+
+    We can see that Dyna-Q+ performs better than Dyna-Q before and after the 1,000 time step mark.
+    Before the 1,000 time step mark, Dyna-Q+ performs better because it is able to explore the
+    grid-world more than Dyna-Q. This is because Dyna-Q+ uses the exploration bonus in its planning
+    phase, given by $R = r + \kappa \sqrt{\tau(s, a)}$. This encourages the agent to find the far
+    edge faster than Dyna-Q. After the 1,000 time step mark, Dyna-Q+ performs better again for the
+    same reason. Since the short path is blocked, Dyna-Q+ is able to explore the grid-world
+    faster than Dyna-Q.\\
+
+    In the second phase, as described in Example 8.3, the maze has an opening on far side,
+    and after the 3,000 time step mark, the short path is additionally opened. The graph
+    for the performance of Dyna-Q and Dyna-Q+ is shown below:
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.5]{prob7_graph2.png}
+    \end{figure}
+
+    While the performance of Dyna-Q+ and Dyna-Q is similar before the 3,000 time step mark,
+    we can see that around roughly the 4,000 time step mark, Dyna-Q+ begins to perform
+    noticeably better than Dyna-Q. Here, the reward bonus is helping Dyna-Q+ create
+    trajectories that lead to the short path. This is because the reward bonus is given
+    by $R = r + \kappa \sqrt{\tau(s, a)}$, where $\tau(s, a)$ is the number of time steps
+    since the last visit to state $s$ after taking action $a$. Therefore, the reward bonus
+    is higher for states that have not been visited in a long time. This encourages the
+    agent to explore the grid-world more, and find the short path. The Dyna-Q agent does
+    not have this advantage, and in fact never finds the short path, as noted by the book,
+    ``even with an $\epsilon$-greedy policy, it is very
+    unlikely that an agent will take so
+    many exploratory actions as to discover the shortcut.'' So, exploration in the
+    planning phase is what gives Dyna-Q+ the advantage over Dyna-Q.\\
 
 \end{homeworkProblem}
 
