@@ -152,7 +152,10 @@ class TabularDynaQ():
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
         state = self.world.start
+        ep = -1
         for _ in trange(self.episodes):
+            ep += 1
+            print("running episode %i" % ep)
             # goal = False
             # while not goal:
                 # action = epsilon-greedy(S,Q)
@@ -161,12 +164,21 @@ class TabularDynaQ():
                 action = random.randint(0, self.actions-1) #randint is inclusive
             else:
                 #TODO: make sure below works as intended
-                action = np.argmax(self.Q[state[0], state[1], :])
+                all_actions_for_state = self.Q[state[0], state[1], :]
+                print(all_actions_for_state)
+                if all(item == all_actions_for_state[0] for item in all_actions_for_state):
+                    #if all the q values for the actions are the same, pick an action at random
+                    print("no q max - all actions have same value. choosing randomly")
+                    action = random.randint(0, self.actions - 1)  # randint is inclusive
+                else:
+                    action = np.argmax(self.Q[state[0], state[1], :])
+            print("chosen action: %s" % action)
             next_state, reward = self.world.take_action(state, action)
             max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
             self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
             self.model.set_next_state_and_reward(state, action, next_state, reward)
             state = next_state
+            print("state: %s" % state)
             for planning_step in range(self.planning_steps):
                 # print("planning step: {}".format(planning_step))
                 state_and_action = self.model.get_random_previously_observed_state_and_action()
@@ -176,10 +188,11 @@ class TabularDynaQ():
                 next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
                 reward = next_state_and_reward[2]
                 max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
+                # print(max_a_Q)
                 self.Q[state[0], state[1], action] += self.alpha * (
                             reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
                         state[0], state[1], action])
-        print("Q: {}".format(self.Q))
+        # print("Q: {}".format(self.Q))
         world.update_gridworld(self.Q)
 
 
