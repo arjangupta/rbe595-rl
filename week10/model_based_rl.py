@@ -114,10 +114,17 @@ class TabularDynaQ():
                 next_state, reward = world.take_action(state, action)
                 max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
                 self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
-                #update model
+                self.model.model[state[0], state[1], action] = [next_state, reward]
                 state = next_state
                 for planning_step in range(self.planning_steps):
                     s,a = self.model.get_random_previously_observed_state_and_action()
+                    next_state_and_reward = self.model.model[s[0], s[1], a]
+                    next_state = next_state_and_reward[0]
+                    reward = next_state_and_reward[1]
+                    max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
+                    self.Q[state[0], state[1], action] += self.alpha * (
+                                reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
+                            state[0], state[1], action])
 
 if __name__ == "__main__":
 
