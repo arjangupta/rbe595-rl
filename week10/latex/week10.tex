@@ -151,9 +151,9 @@
     environment to improve the policy.\\
 
     A model of the environment is a representation of the environment that is used to predict
-    what next state and reward will be given a current state and action. Once we have a model,
+    the next state and reward for a given current state and action. Once we have a model,
     we can use it to simulate the environment and produce a simulated experience, in the
-    form of an episode. Then we can use this simulated experience to improve the policy. This
+    form of a trajectory. Then we can use this simulated experience to improve the policy. This
     is the process of \textbf{planning}.\\ 
 
 
@@ -169,10 +169,16 @@
 
     \subsection{Answer}
 
+    Dyna-Q is a model-based RL algorithm that uses a Q-table to represent the state-action values.
+    It also uses a tabular model of the environment to simulate the environment and produce simulated experience.
+    Then, it uses this simulated experience to improve the values in the Q-table.
+    Dyna-Q+ is a variant of Dyna-Q that addresses a problem with Dyna-Q.\\
+
     The problem with Dyna-Q is that it does not balance exploration and exploitation well
-    in the planning phase. This is because the planning phase is greedy. Only the learning
-    phase is $\epsilon$-greedy. The reason that we want to also explore in the planning phase
-    is that the model may need to change if the environment changes over time.\\
+    in the planning phase. The reason that we want to also explore in the planning phase
+    is that the model may need to change if the environment changes over time. Dyna-Q simply
+    chooses random states and actions to simulate, which does not truly help the agent
+    find a more optimal policy.\\
 
     Dyna-Q+ is like Dyna-Q, except that it adds an exploration `bonus' to the planning phase.
     What this means is that we essentially provide a bonus reward in the planning phase for
