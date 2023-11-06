@@ -105,7 +105,7 @@ class Model():
         self.model[state[0], state[1], action, 2] = reward
 
 class TabularDynaQ():
-    def __init__(self, model, world, episodes = 50, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
+    def __init__(self, model, world, episodes = 1000, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
         self.model = model
         self.world = world
         self.episodes = episodes
@@ -118,33 +118,34 @@ class TabularDynaQ():
 
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
-        for ep in trange(self.episodes):
-            goal = False
+        for _ in trange(self.episodes):
+            # goal = False
             state = self.world.start
-            while not goal:
+            # while not goal:
                 # action = epsilon-greedy(S,Q)
-                dice_roll = random.uniform(0, 1)
-                if dice_roll <= self.epsilon:
-                    action = random.randint(0, self.actions-1) #randint is inclusive
-                else:
-                    #TODO: make sure below works as intended
-                    action = np.argmax(self.Q[state[0], state[1], :])
-                next_state, reward = self.world.take_action(state, action)
-                max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
-                self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
-                self.model.set_next_state_and_reward(state, action, next_state, reward)
-                state = next_state
-                for planning_step in range(self.planning_steps):
-                    state_and_action = self.model.get_random_previously_observed_state_and_action()
-                    s = [state_and_action[0], state_and_action[1]]
-                    a = state_and_action[2]
-                    next_state_and_reward = self.model.model[s[0], s[1], a]
-                    next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
-                    reward = next_state_and_reward[2]
-                    max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
-                    self.Q[state[0], state[1], action] += self.alpha * (
-                                reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
-                            state[0], state[1], action])
+            dice_roll = random.uniform(0, 1)
+            if dice_roll <= self.epsilon:
+                action = random.randint(0, self.actions-1) #randint is inclusive
+            else:
+                #TODO: make sure below works as intended
+                action = np.argmax(self.Q[state[0], state[1], :])
+            next_state, reward = self.world.take_action(state, action)
+            max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
+            self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
+            self.model.set_next_state_and_reward(state, action, next_state, reward)
+            state = next_state
+            for planning_step in range(self.planning_steps):
+                # print("planning step: {}".format(planning_step))
+                state_and_action = self.model.get_random_previously_observed_state_and_action()
+                s = [state_and_action[0], state_and_action[1]]
+                a = state_and_action[2]
+                next_state_and_reward = self.model.model[s[0], s[1], a]
+                next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
+                reward = next_state_and_reward[2]
+                max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
+                self.Q[state[0], state[1], action] += self.alpha * (
+                            reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
+                        state[0], state[1], action])
 
 
 
