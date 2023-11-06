@@ -118,9 +118,9 @@ class TabularDynaQ():
 
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
+        state = self.world.start
         for _ in trange(self.episodes):
             # goal = False
-            state = self.world.start
             # while not goal:
                 # action = epsilon-greedy(S,Q)
             dice_roll = random.uniform(0, 1)
