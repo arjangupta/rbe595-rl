@@ -131,7 +131,7 @@ class Model():
                 #does this to get rid of duplicates from reward and next state being encoded under actions
                 if i%3 == 0:
                     locations.append([matches[0][i], matches[1][i], matches[2][i]])
-            print("observed locations: %s" % locations)
+            # print("observed locations: %s" % locations)
             random_index = random.randint(0, len(locations)-1) #randint is inclusive
             return locations[random_index]
         print("no observed states in model")
@@ -143,7 +143,7 @@ class Model():
         self.model[state[0], state[1], action, 2] = reward
 
 class TabularDynaQ():
-    def __init__(self, model, world, episodes = 1000, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
+    def __init__(self, model, world, episodes = 50, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
         self.model = model
         self.world = world
         self.episodes = episodes
@@ -162,48 +162,51 @@ class TabularDynaQ():
             # random.seed(1)
             ep += 1
             print("running episode %i" % ep)
-            # goal = False
-            # while not goal:
+            goal = False
+            while not goal:
                 # action = epsilon-greedy(S,Q)
-            dice_roll = random.uniform(0, 1)
-            if dice_roll <= self.epsilon:
-                action = random.randint(0, self.actions-1) #randint is inclusive
-            else:
-                #TODO: make sure below works as intended
-                all_actions_for_state = self.Q[state[0], state[1], :]
-                print(all_actions_for_state)
-                if all(item == all_actions_for_state[0] for item in all_actions_for_state):
-                    #if all the q values for the actions are the same, pick an action at random
-                    print("no q max - all actions have same value. choosing randomly")
-                    action = random.randint(0, self.actions - 1)  # randint is inclusive
+                dice_roll = random.uniform(0, 1)
+                if dice_roll <= self.epsilon:
+                    action = random.randint(0, self.actions-1) #randint is inclusive
                 else:
-                    action = np.argmax(self.Q[state[0], state[1], :])
-            print("chosen action: %s" % action)
-            next_state, reward = self.world.take_action(state, action)
-            max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
-            self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
-            self.model.set_next_state_and_reward(state, action, next_state, reward)
-            print("state: %s" % state)
-            state = next_state
-            print("next state: %s" % state)
-            for planning_step in range(self.planning_steps):
-                print("planning step: {}".format(planning_step))
-                state_and_action = self.model.get_random_previously_observed_state_and_action()
-                s = [state_and_action[0], state_and_action[1]]
-                a = state_and_action[2]
-                print("current planning state: %s and action %s" % (s, a))
-                next_state_and_reward = self.model.model[s[0], s[1], a]
-                next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
-                reward = next_state_and_reward[2]
-                max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
-                # print(max_a_Q)
-                print("Q before update: %s" % self.Q[state[0], state[1], action])
-                self.Q[state[0], state[1], action] += self.alpha * (
-                            reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
-                        state[0], state[1], action])
-                print("Q after update: %s" % self.Q[state[0], state[1], action])
+                    #TODO: make sure below works as intended
+                    all_actions_for_state = self.Q[state[0], state[1], :]
+                    print(all_actions_for_state)
+                    if all(item == all_actions_for_state[0] for item in all_actions_for_state):
+                        #if all the q values for the actions are the same, pick an action at random
+                        print("no q max - all actions have same value. choosing randomly")
+                        action = random.randint(0, self.actions - 1)  # randint is inclusive
+                    else:
+                        action = np.argmax(self.Q[state[0], state[1], :])
+                print("chosen action: %s" % action)
+                next_state, reward = self.world.take_action(state, action)
+                max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
+                self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
+                self.model.set_next_state_and_reward(state, action, next_state, reward)
+                print("state: %s" % state)
+                if state == self.world.goal:
+                    print("goal reached, reward %i" % reward)
+                    goal = True
+                state = next_state
+                print("next state: %s" % state)
+                for planning_step in range(self.planning_steps):
+                    print("planning step: {}".format(planning_step))
+                    state_and_action = self.model.get_random_previously_observed_state_and_action()
+                    s = [state_and_action[0], state_and_action[1]]
+                    a = state_and_action[2]
+                    print("current planning state: %s and action %s" % (s, a))
+                    next_state_and_reward = self.model.model[s[0], s[1], a]
+                    next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
+                    reward = next_state_and_reward[2]
+                    max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
+                    # print(max_a_Q)
+                    print("Q before update: %s" % self.Q[state[0], state[1], action])
+                    self.Q[state[0], state[1], action] += self.alpha * (
+                                reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
+                            state[0], state[1], action])
+                    print("Q after update: %s" % self.Q[state[0], state[1], action])
 
-        # print("Q: {}".format(self.Q))
+        print("Q: {}".format(self.Q))
         world.update_gridworld(self.Q)
 
 
