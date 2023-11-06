@@ -200,11 +200,11 @@ class TabularDynaQ():
                     reward = next_state_and_reward[2]
                     max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
                     # print(max_a_Q)
-                    print("Q before update: %s" % self.Q[state[0], state[1], action])
-                    self.Q[state[0], state[1], action] += self.alpha * (
+                    print("Q before update: %s" % self.Q[s[0], s[1], a])
+                    self.Q[s[0], s[1], a] += self.alpha * (
                                 reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
-                            state[0], state[1], action])
-                    print("Q after update: %s" % self.Q[state[0], state[1], action])
+                            s[0], s[1], a])
+                    print("Q after update: %s" % self.Q[s[0], s[1], a])
 
         print("Q: {}".format(self.Q))
         world.update_gridworld(self.Q)
