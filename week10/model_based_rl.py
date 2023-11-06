@@ -7,6 +7,7 @@ import random
 
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import trange
 
 class World():
 
@@ -116,7 +117,8 @@ class TabularDynaQ():
         self.gamma = gamma
 
     def run(self):
-        for ep in range(self.episodes):
+        print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
+        for ep in trange(self.episodes):
             goal = False
             state = self.world.start
             while not goal:
