@@ -8,6 +8,8 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import trange
+import random
+import time
 
 class World():
 
@@ -40,24 +42,26 @@ class World():
         self.gridworld[0, self.cols-1] = 2
 
         # Set the arrows
-        for r in range(self.rows):
-            for c in range(self.cols):
-                if not self.gridworld[r, c] == 1 and not self.gridworld[r, c] == 2:
-                    self.gridworld[r, c] = np.argmax(Q[r, c, :])
+        # for r in range(self.rows):
+        #     for c in range(self.cols):
+        #         if not self.gridworld[r, c] == 1 and not self.gridworld[r, c] == 2:
+        #             self.gridworld[r, c] = np.argmax(Q[r, c, :])
 
-    def plot_gridworld(self):
+    def plot_gridworld(self, Q):
         _, ax = plt.subplots()
 
         # Iterate through the grid and set arrow directions
         for r in range(self.rows):
             for c in range(self.cols):
-                if self.gridworld[r, c] == 0:
+                if r==5 and c == 5:
+                    print(Q[r, c, :])
+                if np.argmax(Q[r, c, :]) == 0:
                     ax.annotate('↑', xy=(c, r), horizontalalignment='center', verticalalignment='center')
-                elif self.gridworld[r, c] == 1:
+                elif np.argmax(Q[r, c, :]) == 1:
                     ax.annotate('→', xy=(c, r), horizontalalignment='center', verticalalignment='center')
-                elif self.gridworld[r, c] == 2:
+                elif np.argmax(Q[r, c, :]) == 2:
                     ax.annotate('↓', xy=(c, r), horizontalalignment='center', verticalalignment='center')
-                elif self.gridworld[r, c] == 3:
+                elif np.argmax(Q[r, c, :]) == 3:
                     ax.annotate('←', xy=(c, r), horizontalalignment='center', verticalalignment='center')
 
         # Plot the grid
@@ -127,6 +131,7 @@ class Model():
                 #does this to get rid of duplicates from reward and next state being encoded under actions
                 if i%3 == 0:
                     locations.append([matches[0][i], matches[1][i], matches[2][i]])
+            print("observed locations: %s" % locations)
             random_index = random.randint(0, len(locations)-1) #randint is inclusive
             return locations[random_index]
         print("no observed states in model")
@@ -154,6 +159,7 @@ class TabularDynaQ():
         state = self.world.start
         ep = -1
         for _ in trange(self.episodes):
+            # random.seed(1)
             ep += 1
             print("running episode %i" % ep)
             # goal = False
@@ -177,21 +183,26 @@ class TabularDynaQ():
             max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
             self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
             self.model.set_next_state_and_reward(state, action, next_state, reward)
-            state = next_state
             print("state: %s" % state)
+            state = next_state
+            print("next state: %s" % state)
             for planning_step in range(self.planning_steps):
-                # print("planning step: {}".format(planning_step))
+                print("planning step: {}".format(planning_step))
                 state_and_action = self.model.get_random_previously_observed_state_and_action()
                 s = [state_and_action[0], state_and_action[1]]
                 a = state_and_action[2]
+                print("current planning state: %s and action %s" % (s, a))
                 next_state_and_reward = self.model.model[s[0], s[1], a]
                 next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
                 reward = next_state_and_reward[2]
                 max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
                 # print(max_a_Q)
+                print("Q before update: %s" % self.Q[state[0], state[1], action])
                 self.Q[state[0], state[1], action] += self.alpha * (
                             reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
                         state[0], state[1], action])
+                print("Q after update: %s" % self.Q[state[0], state[1], action])
+
         # print("Q: {}".format(self.Q))
         world.update_gridworld(self.Q)
 
@@ -206,5 +217,5 @@ if __name__ == "__main__":
     dq.run()
 
     # Show the gridworld with arrows
-    world.plot_gridworld()
+    world.plot_gridworld(dq.Q)
 
