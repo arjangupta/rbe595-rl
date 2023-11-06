@@ -23,9 +23,42 @@ class World():
         self.gridworld[1:4, 2] = 1
         self.gridworld[4, 5] = 1
         self.gridworld[0:3, 7] = 1
+    
+    def update_gridworld(self, Q):
+        """Update the gridworld with an arrow showing the best action at each state"""
+        # Create a grid with input shape
+        self.rows = Q.shape[0]
+        self.cols = Q.shape[1]
+        self.gridworld = np.zeros((self.rows, self.cols))
+
+        # Set the obstacles
+        self.gridworld[1:4, 2] = 1
+        self.gridworld[4, 5] = 1
+        self.gridworld[0:3, 7] = 1
+
+        # Set the goal
+        self.gridworld[0, self.cols-1] = 2
+
+        # Set the arrows
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if not self.gridworld[r, c] == 1 and not self.gridworld[r, c] == 2:
+                    self.gridworld[r, c] = np.argmax(Q[r, c, :])
 
     def plot_gridworld(self):
         _, ax = plt.subplots()
+
+        # Iterate through the grid and set arrow directions
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.gridworld[r, c] == 0:
+                    ax.annotate('↑', xy=(c, r), horizontalalignment='center', verticalalignment='center')
+                elif self.gridworld[r, c] == 1:
+                    ax.annotate('→', xy=(c, r), horizontalalignment='center', verticalalignment='center')
+                elif self.gridworld[r, c] == 2:
+                    ax.annotate('↓', xy=(c, r), horizontalalignment='center', verticalalignment='center')
+                elif self.gridworld[r, c] == 3:
+                    ax.annotate('←', xy=(c, r), horizontalalignment='center', verticalalignment='center')
 
         # Plot the grid
         ax.imshow(self.gridworld, cmap='binary')
@@ -146,6 +179,8 @@ class TabularDynaQ():
                 self.Q[state[0], state[1], action] += self.alpha * (
                             reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
                         state[0], state[1], action])
+        print("Q: {}".format(self.Q))
+        world.update_gridworld(self.Q)
 
 
 
@@ -156,4 +191,7 @@ if __name__ == "__main__":
     # world.plot_gridworld()
     dq = TabularDynaQ(model=model, world=world)
     dq.run()
+
+    # Show the gridworld with arrows
+    world.plot_gridworld()
 
