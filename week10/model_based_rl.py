@@ -59,8 +59,8 @@ class Model():
 
     def __init__(self, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
 
-        # encoded in action is: next state, reward
-        self.model = np.zeros((height, width, actions, 2))
+        # encoded in action is: next state[0], next state[1], reward
+        self.model = np.zeros((height, width, actions, 3))
         # fill model with -1s so we can encode visited, nextstate=-1 and reward=-1 is unvisited
         self.model.fill(-1)
 
@@ -80,12 +80,28 @@ class Model():
     def take_action(self, state, action):
         r = state[0]
         c = state[1]
+        # returns return and next state
         return self.model[r,c,action]
 
     def get_random_previously_observed_state_and_action(self):
-        #TODO: randomly select state where next state and reward is not -1
+        # randomly select state where next state and reward is not -1
         # self.model[:,:,:] != -1
-        return 0,0
+        matches = np.where(self.model != -1)
+        if matches is not None and len(matches)>=3:
+            locations = list()
+            for i in range(len(matches[0])):
+                #does this to get rid of duplicates from reward and next state being encoded under actions
+                if i%3 == 0:
+                    locations.append([matches[0][i], matches[1][i], matches[2][i]])
+            random_index = random.randint(0, len(locations)-1) #randint is inclusive
+            return locations[random_index]
+        print("no observed states in model")
+        return [0,0,0]
+
+    def set_next_state_and_reward(self, state, action, next_state, reward):
+        self.model[state[0], state[1], action, 0] = next_state[0]
+        self.model[state[0], state[1], action, 1] = next_state[1]
+        self.model[state[0], state[1], action, 2] = reward
 
 class TabularDynaQ():
     def __init__(self, model, world, episodes = 50, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
@@ -107,24 +123,28 @@ class TabularDynaQ():
                 # action = epsilon-greedy(S,Q)
                 dice_roll = random.uniform(0, 1)
                 if dice_roll <= self.epsilon:
-                    action = random.randint(0, self.actions-1)
+                    action = random.randint(0, self.actions-1) #randint is inclusive
                 else:
                     #TODO: make sure below works as intended
                     action = np.argmax(self.Q[state[0], state[1], :])
-                next_state, reward = world.take_action(state, action)
+                next_state, reward = self.world.take_action(state, action)
                 max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
                 self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
-                self.model.model[state[0], state[1], action] = [next_state, reward]
+                self.model.set_next_state_and_reward(state, action, next_state, reward)
                 state = next_state
                 for planning_step in range(self.planning_steps):
-                    s,a = self.model.get_random_previously_observed_state_and_action()
+                    state_and_action = self.model.get_random_previously_observed_state_and_action()
+                    s = [state_and_action[0], state_and_action[1]]
+                    a = state_and_action[2]
                     next_state_and_reward = self.model.model[s[0], s[1], a]
-                    next_state = next_state_and_reward[0]
-                    reward = next_state_and_reward[1]
+                    next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
+                    reward = next_state_and_reward[2]
                     max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
                     self.Q[state[0], state[1], action] += self.alpha * (
                                 reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
                             state[0], state[1], action])
+
+
 
 if __name__ == "__main__":
 
@@ -132,4 +152,5 @@ if __name__ == "__main__":
     model = Model()
     # world.plot_gridworld()
     dq = TabularDynaQ(model=model, world=world)
+    dq.run()
 
