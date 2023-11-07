@@ -157,10 +157,10 @@ class TabularDynaQ():
 
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
-        state = self.world.start
         ep = -1
         for _ in trange(self.episodes):
             # random.seed(1)
+            state = self.world.start
             goal = False
             steps = 0
             while not goal:
@@ -207,6 +207,7 @@ class TabularDynaQ():
                 steps+=1
             self.steps_per_episode.append(steps)
         print("Q: {}".format(self.Q))
+        print(self.steps_per_episode)
         world.update_gridworld(self.Q)
 
 def plot_steps_per_episode(dq0, dq5, dq50):
