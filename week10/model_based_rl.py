@@ -92,14 +92,10 @@ class World():
 class Model():
 
     def __init__(self, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
-
         # Encoded in action is: next state[0], next state[1], reward
         self.model = np.zeros((height, width, actions, 3))
         # Fill model with -1s so we can encode visited, nextstate=-1 and reward=-1 is unvisited
         self.model.fill(-1)
-
-        # In each action space put tuple with next state and reward
-        # Actions are: 0=up 1=right 2=down 3=left
 
     def take_action(self, state, action):
         r = state[0]
@@ -146,6 +142,7 @@ class TabularDynaQ():
             state = self.world.start
             goal = False
             steps = 0
+            # Take steps until goal is reached
             while not goal:
                 dice_roll = random.uniform(0, 1)
                 if dice_roll <= self.epsilon:
@@ -165,10 +162,13 @@ class TabularDynaQ():
                     print("chosen action: %s" % action)
                 next_state, reward = self.world.take_action(state, action)
                 max_a_Q =np.argmax(self.Q[next_state[0], next_state[1], :])
+                # Update Q
                 self.Q[state[0], state[1], action] += self.alpha * (reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[state[0], state[1], action])
+                # Update model
                 self.model.set_next_state_and_reward(state, action, next_state, reward)
                 if self.verbose:
                     print("state: %s" % state)
+                # Check if goal is reached
                 if state == self.world.goal:
                     if self.verbose:
                         print("goal reached, reward %i" % reward)
@@ -176,6 +176,8 @@ class TabularDynaQ():
                 state = next_state
                 if self.verbose:
                     print("next state: %s" % state)
+
+                # Planning phase
                 for planning_step in range(self.planning_steps):
                     if self.verbose:
                         print("planning step: {}".format(planning_step))
@@ -195,6 +197,7 @@ class TabularDynaQ():
                             s[0], s[1], a])
                     if self.verbose:
                         print("Q after update: %s" % self.Q[s[0], s[1], a])
+                # Increment steps
                 steps+=1
             self.steps_per_episode.append(steps)
         if self.verbose:
