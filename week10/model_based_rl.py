@@ -238,20 +238,25 @@ if __name__ == "__main__":
     world = World()
     model = Model()
 
+    show_gridworld = False
+
     dq0 = TabularDynaQ(model=model, world=world, episodes = 50, planning_steps = 0)
     dq0.run()
-    # Show the gridworld with arrows
-    world.plot_gridworld(dq0.Q)
+    if show_gridworld:
+        # Show the gridworld with arrows
+        world.plot_gridworld(dq0.Q)
 
     dq5 = TabularDynaQ(model=model, world=world, episodes=50, planning_steps=5)
     dq5.run()
-    # Show the gridworld with arrows
-    world.plot_gridworld(dq5.Q)
+    if show_gridworld:
+        # Show the gridworld with arrows
+        world.plot_gridworld(dq5.Q)
 
     dq50 = TabularDynaQ(model=model, world=world, episodes=50, planning_steps=50)
     dq50.run()
-    # Show the gridworld with arrows
-    world.plot_gridworld(dq50.Q)
+    if show_gridworld:
+        # Show the gridworld with arrows
+        world.plot_gridworld(dq50.Q)
 
     plot_steps_per_episode(dq0.steps_per_episode, dq5.steps_per_episode, dq50.steps_per_episode)
 
