@@ -143,7 +143,7 @@ class Model():
         self.model[state[0], state[1], action, 2] = reward
 
 class TabularDynaQ():
-    def __init__(self, model, world, episodes = 50, planning_steps = 5, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
+    def __init__(self, model, world, episodes = 50, planning_steps = 50, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
         self.model = model
         self.world = world
         self.episodes = episodes
@@ -153,6 +153,7 @@ class TabularDynaQ():
         self.actions = actions
         self.alpha = alpha
         self.gamma = gamma
+        self.steps_per_episode = list()
 
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
@@ -160,16 +161,14 @@ class TabularDynaQ():
         ep = -1
         for _ in trange(self.episodes):
             # random.seed(1)
-            ep += 1
-            print("running episode %i" % ep)
             goal = False
+            steps = 0
             while not goal:
                 # action = epsilon-greedy(S,Q)
                 dice_roll = random.uniform(0, 1)
                 if dice_roll <= self.epsilon:
                     action = random.randint(0, self.actions-1) #randint is inclusive
                 else:
-                    #TODO: make sure below works as intended
                     all_actions_for_state = self.Q[state[0], state[1], :]
                     print(all_actions_for_state)
                     if all(item == all_actions_for_state[0] for item in all_actions_for_state):
@@ -205,20 +204,39 @@ class TabularDynaQ():
                                 reward + self.gamma * self.Q[next_state[0], next_state[1], max_a_Q] - self.Q[
                             s[0], s[1], a])
                     print("Q after update: %s" % self.Q[s[0], s[1], a])
-
+                steps+=1
+            self.steps_per_episode.append(steps)
         print("Q: {}".format(self.Q))
         world.update_gridworld(self.Q)
 
-
+def plot_steps_per_episode(dq1, dq5, dq50):
+    plt.plot(dq1)
+    plt.plot(dq5)
+    plt.plot(dq50)
+    plt.show()
 
 if __name__ == "__main__":
 
     world = World()
     model = Model()
-    # world.plot_gridworld()
-    dq = TabularDynaQ(model=model, world=world)
-    dq.run()
 
+    dq0 = TabularDynaQ(model=model, world=world, episodes = 50, planning_steps = 0)
+    dq0.run()
     # Show the gridworld with arrows
-    world.plot_gridworld(dq.Q)
+    world.plot_gridworld(dq0.Q)
+
+    dq5 = TabularDynaQ(model=model, world=world, episodes=50, planning_steps=5)
+    dq5.run()
+    # Show the gridworld with arrows
+    world.plot_gridworld(dq5.Q)
+
+    dq50 = TabularDynaQ(model=model, world=world, episodes=50, planning_steps=50)
+    dq50.run()
+    # Show the gridworld with arrows
+    world.plot_gridworld(dq50.Q)
+
+    plot_steps_per_episode(dq0.steps_per_episode, dq5.steps_per_episode, dq50.steps_per_episode)
+
+
+
 
