@@ -41,12 +41,6 @@ class World():
         # Set the goal
         self.gridworld[0, self.cols-1] = 2
 
-        # Set the arrows
-        # for r in range(self.rows):
-        #     for c in range(self.cols):
-        #         if not self.gridworld[r, c] == 1 and not self.gridworld[r, c] == 2:
-        #             self.gridworld[r, c] = np.argmax(Q[r, c, :])
-
     def plot_gridworld(self, Q):
         _, ax = plt.subplots()
         verbose = False
@@ -107,16 +101,6 @@ class Model():
         #in each action space put tuple with next state and reward
         #actions 0=up 1=right 2=down 3=left
 
-        #REMOVE BELOW: model needs to figure this out
-        # in each action space put tuple with next state and reward
-        # actions 0=up 1=right 2=down 3=left
-        # populate goal reward with 1
-        # self.model[0, width - 1, 0, 1] = 1
-        # self.model[0, width - 1, 1, 1] = 1
-        # self.model[0, width - 1, 3, 1] = 1
-        # self.model[0, width - 2, 1, 1] = 1  # agent can never be here because obstacle
-        # self.model[1, width - 1, 0, 1] = 1
-
     def take_action(self, state, action):
         r = state[0]
         c = state[1]
@@ -125,7 +109,6 @@ class Model():
 
     def get_random_previously_observed_state_and_action(self):
         # randomly select state where next state and reward is not -1
-        # self.model[:,:,:] != -1
         matches = np.where(self.model != -1)
         if matches is not None and len(matches)>=3:
             locations = list()
@@ -133,7 +116,6 @@ class Model():
                 #does this to get rid of duplicates from reward and next state being encoded under actions
                 if i%3 == 0:
                     locations.append([matches[0][i], matches[1][i], matches[2][i]])
-            # print("observed locations: %s" % locations)
             random_index = random.randint(0, len(locations)-1) #randint is inclusive
             return locations[random_index]
         print("no observed states in model")
@@ -160,7 +142,6 @@ class TabularDynaQ():
 
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
-        ep = -1
         for _ in trange(self.episodes):
             # random.seed(1)
             state = self.world.start
