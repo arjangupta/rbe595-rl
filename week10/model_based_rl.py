@@ -49,12 +49,14 @@ class World():
 
     def plot_gridworld(self, Q):
         _, ax = plt.subplots()
+        verbose = False
 
         # Iterate through the grid and set arrow directions
         for r in range(self.rows):
             for c in range(self.cols):
                 if r==5 and c == 5:
-                    print(Q[r, c, :])
+                    if verbose:
+                        print(f"Q for state 5,5, {Q[r, c, :]}")
                 if np.argmax(Q[r, c, :]) == 0:
                     ax.annotate('↑', xy=(c, r), horizontalalignment='center', verticalalignment='center')
                 elif np.argmax(Q[r, c, :]) == 1:
