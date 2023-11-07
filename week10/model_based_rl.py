@@ -71,7 +71,7 @@ class World():
         plt.show()
 
     def take_action(self, state, action):
-        # actions 0=up 1=right 2=down 3=left
+        # Actions are: 0=up 1=right 2=down 3=left
         next_state = state #[0,0]
         if action==0:
             if not state[0]==0 and not self.gridworld[state[0]-1, state[1]]==1:
@@ -93,13 +93,13 @@ class Model():
 
     def __init__(self, height=6, width=9, actions=4, alpha=0.1, epsilon=0.1, gamma=0.95):
 
-        # encoded in action is: next state[0], next state[1], reward
+        # Encoded in action is: next state[0], next state[1], reward
         self.model = np.zeros((height, width, actions, 3))
-        # fill model with -1s so we can encode visited, nextstate=-1 and reward=-1 is unvisited
+        # Fill model with -1s so we can encode visited, nextstate=-1 and reward=-1 is unvisited
         self.model.fill(-1)
 
-        #in each action space put tuple with next state and reward
-        #actions 0=up 1=right 2=down 3=left
+        # In each action space put tuple with next state and reward
+        # Actions are: 0=up 1=right 2=down 3=left
 
     def take_action(self, state, action):
         r = state[0]
@@ -108,12 +108,12 @@ class Model():
         return self.model[r,c,action]
 
     def get_random_previously_observed_state_and_action(self):
-        # randomly select state where next state and reward is not -1
+        # Randomly select state where next state and reward is not -1
         matches = np.where(self.model != -1)
         if matches is not None and len(matches)>=3:
             locations = list()
             for i in range(len(matches[0])):
-                #does this to get rid of duplicates from reward and next state being encoded under actions
+                # Does this to get rid of duplicates from reward and next state being encoded under actions
                 if i%3 == 0:
                     locations.append([matches[0][i], matches[1][i], matches[2][i]])
             random_index = random.randint(0, len(locations)-1) #randint is inclusive
@@ -143,23 +143,21 @@ class TabularDynaQ():
     def run(self):
         print("Running Dyna-Q for {} episodes with {} planning steps".format(self.episodes, self.planning_steps))
         for _ in trange(self.episodes):
-            # random.seed(1)
             state = self.world.start
             goal = False
             steps = 0
             while not goal:
-                # action = epsilon-greedy(S,Q)
                 dice_roll = random.uniform(0, 1)
                 if dice_roll <= self.epsilon:
-                    action = random.randint(0, self.actions-1) #randint is inclusive
+                    action = random.randint(0, self.actions-1) # randint is inclusive
                 else:
                     all_actions_for_state = self.Q[state[0], state[1], :]
                     if self.verbose:
                         print(all_actions_for_state)
                     if all(item == all_actions_for_state[0] for item in all_actions_for_state):
-                        #if all the q values for the actions are the same, pick an action at random
                         if self.verbose:
                             print("no q max - all actions have same value. choosing randomly")
+                        # If all the q values for the actions are the same, pick an action at random
                         action = random.randint(0, self.actions - 1)  # randint is inclusive
                     else:
                         action = np.argmax(self.Q[state[0], state[1], :])
@@ -190,7 +188,6 @@ class TabularDynaQ():
                     next_state = [int(next_state_and_reward[0]), int(next_state_and_reward[1])]
                     reward = next_state_and_reward[2]
                     max_a_Q = np.argmax(self.Q[next_state[0], next_state[1], :])
-                    # print(max_a_Q)
                     if self.verbose:
                         print("Q before update: %s" % self.Q[s[0], s[1], a])
                     self.Q[s[0], s[1], a] += self.alpha * (
