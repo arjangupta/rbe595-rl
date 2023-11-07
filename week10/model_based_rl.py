@@ -209,10 +209,13 @@ class TabularDynaQ():
         print("Q: {}".format(self.Q))
         world.update_gridworld(self.Q)
 
-def plot_steps_per_episode(dq1, dq5, dq50):
-    plt.plot(dq1)
-    plt.plot(dq5)
-    plt.plot(dq50)
+def plot_steps_per_episode(dq0, dq5, dq50):
+    plt.plot(dq0, label='0 planning steps (direct RL only)')
+    plt.plot(dq5, label='5 planning steps')
+    plt.plot(dq50, label='50 planning steps')
+    plt.legend()
+    plt.xlabel("Episodes")
+    plt.ylabel("Steps per episode")
     plt.show()
 
 if __name__ == "__main__":
