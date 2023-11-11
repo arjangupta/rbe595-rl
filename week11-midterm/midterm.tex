@@ -439,9 +439,53 @@
     \subsection{Answer}
 
     TD methods use bootstrapping, whereas MCTS does not. Therefore, to design TD-search by
-    modifying MCTS, we can incorporate bootstrapping into MCTS.\\
+    modifying MCTS, we can incorporate bootstrapping into MCTS. Specifically, we can modify
+    the simulation phase of MCTS to use TD methods.\\
+    
+    By default,
+    MCTS uses the rollout algorithm to simulate the environment. In rollout, we simulate
+    trajectories by starting from a state, then choosing actions randomly until we reach
+    a terminal state. The randomness of the action choice is often a uniform distribution.
+    After taking each action, we record the reward observed. Once we reach a terminal state,
+    we take the average of the rewards observed in the trajectory, and use that as the
+    estimated reward for the state we started from. So, suppose we took 3 actions before
+    reaching a terminal state, where we observed rewards of 1, 2, and 3. Then, we would
+    take the average of these rewards: $(1 + 2 + 3)/3 = 2$.
+    Then we can proceed to backup this
+    value in the tree.\\
 
-    Specifically, we can modify the simulation phase of MCTS to use TD methods.
+    However, if we want to use TD methods, we would not choose actions according to
+    a uniform random policy like the way traditional rollout works.
+    Instead, we would choose actions according to the policy
+    that we are trying to learn, i.e. derived from the $Q$-values. However, we can still
+    make this policy $\epsilon$-greedy, so that we can still explore in the planning phase.
+    Additionally, since
+    this is a simulation, there is no harm in using an on-policy method like SARSA (because
+    we are not actually taking actions in the real environment, so we do not have to worry
+    about `bad' results from the on-policy method).
+    So, for the simulation phase of TD-search, we would take the following algorithmic steps:
+
+    \begin{enumerate}
+        \item Start at the state $S$ we are simulating from.
+        \item Choose the action from our current policy, i.e. the one 
+        that maximizes the $Q$-value of the state-action pair, or if the random number
+        is less than $\epsilon$, then choose a random action (this is normal $\epsilon$-greedy
+        exploration).
+        \item Take the action, and observe the reward $R$ and the record next state $S'$. Use
+        $R$ to update our current average reward estimate for the state we started from. Say that
+        this average reward estimate is $R_{avg}$.
+        \item Update the $Q$-value of the state-action pair using SARSA, i.e. given 
+        by the following update rule:
+        \begin{align*}
+            Q(S, A) \leftarrow Q(S, A) + \alpha \left[ R + \gamma Q(S', A') - Q(S, A) \right]
+        \end{align*}
+        \item Set $S = S'$, set $A = A'$, and repeat steps 2-4 until we reach a terminal state.
+        \item Backup the value of the state we started from.
+    \end{enumerate}
+
+    The backup step is similar to backup step in traditional MCTS, i.e. we take the $R_{avg}$
+    that we calculated in step 3 of the TD simulation, and we backup this value in the tree. This
+    way, we can use the benefits of bootstrapping in MCTS.\\
 
 \end{homeworkProblem}
 
