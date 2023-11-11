@@ -373,52 +373,59 @@
 \nobreak\extramarks{Problem 5}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 5]
-    What are the 4 steps of the MCTS algorithm? How does MCTS balance exploration and
-    exploitation?
+    As we discussed, n-step off-policy return via bootstrapping can be written as:
+    \begin{align}
+        G_{t:h} = \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right) 
+    \end{align}
+    where $\rho_t = \frac{\pi(A_t | S_t)}{b(A_t | S_t)}$
+    is the importance sampling ratio between target and behavior policy.\\
+    Using control variates, the return can be written as:
+    \begin{align}
+        G_{t:h} = \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right) + (1 - \rho_t) V_{h-1} (S_t)
+    \end{align}
+    • [8 points] Prove that introducing the control variates in equation (2) does not add any
+    bias to the original return (i.e.\ equation (1)) in expectation.
 
     \subsection{Answer}
 
-    The 4 steps of the MCTS algorithm are:
-
-    \begin{enumerate}
-        \item \textbf{Selection}: Starting from the root node, we select a leaf node
-            with an exploration-exploitation trade-off criteria (UCB1).
-        \item \textbf{Expansion}: We expand the leaf node by adding a child node for each
-            possible action.
-        \item \textbf{Simulation}: We simulate an episode starting from the newly added
-            child node. We use the roll-out policy to select actions during the simulation.
-        \item \textbf{Back-up}: We store action-values for each node in the tree.
-    \end{enumerate}
-
-    Specifically, in the selection step, for balancing exploration and exploitation, we use the UCB1 formula:
+    We know that the expectation of the return is given by,
 
     \begin{align*}
-        UCB1(S_i) = \frac{v_i}{n_i} + C \sqrt{\frac{\ln N_i}{n_i}}
+        \EX[G_{t:h}] &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right) + (1 - \rho_t) V_{h-1} (S_t)] \\
+        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[(1 - \rho_t) V_{h-1} (S_t)] \\
+        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - \EX[\rho_t]) \EX[V_{h-1} (S_t)] \\
+        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - \EX[\rho_t]) V_{h-1} (S_t) \\
     \end{align*}
 
-    Where,\\
-    $n_i$ is the number of times we have visited node $S_i$,\\
-    $N_i$ is the number of times we have visited the parent of node $S_i$,\\
-    $v_i$ is the value of node $S_i$, and\\
-    $C$ is a constant that we choose.\\
+    We know that the expectation of the importance sampling ratio is given by,
 
-    The flow chart for the MCTS algorithm (tree policy) is shown below:
+    \begin{align*}
+        \EX[\rho_t] &= \EX\left[\frac{\pi(A_t | S_t)}{b(A_t | S_t)}\right] \\
+        &= \sum_{a} \pi(a | S_t) \frac{\pi(a | S_t)}{b(a | S_t)} \\
+        &= \sum_{a} \pi(a | S_t) \frac{\pi(a | S_t)}{\sum_{a'} \beta(a' | S_t)} \\
+        &= \sum_{a} \pi(a | S_t) \frac{\pi(a | S_t)}{\sum_{a'} \pi(a' | S_t)} \\
+        &= \sum_{a} \pi(a | S_t) \\
+        &= 1
+    \end{align*}
 
-    Now, let us describe how we use the above flow chart to balance exploration and exploitation.
-    At first, we just have the root node, $S_0$. This technically currently a leaf node, but
-    since it is the root-node, we make an exception and immediately add new child nodes to it,
-    and rollout from the first new child node. Based on the results of the rollout, we update
-    the value of the first new child node and its parent.\\
+    Therefore, we can write the expectation of the return as,
 
-    Then, we restart the algorithm from the root node. This time, since the root node is no longer
-    a leaf node, we need to use UCB1 to select a leaf node. Now this is where the exploration-exploitation
-    trade-off comes in. We will find that even though the first new child node has a high value (since
-    we rolled out from it previously), it would be the choice in case of greedy selection. However,
-    since we are using UCB1, we will instead consider the second new child node, which has a lower value,
-    because its exploration term is higher. Specifically, the exploration term is higher because $n_i$ is
-    0, making the second term in the UCB1 for that node infinitely large. This shows that in the planning
-    phase, MCTS balances exploration and exploitation by using the UCB1 formula.\\
+    \begin{align*}
+        \EX[G_{t:h}] &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - \EX[\rho_t]) V_{h-1} (S_t) \\
+        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - 1) V_{h-1} (S_t) \\
+        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + 0 \\
+        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] \\
+    \end{align*}
 
+    We know that the expectation of the return without control variates is given by,
+
+    \begin{align*}
+        \EX[G_{t:h}] &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)]
+    \end{align*}
+
+    We can see that the expectation of the return without control variates is the same as the
+    expectation of the return with control variates. Therefore, introducing the control variates
+    in equation (2) does not add any bias to the original return (i.e.\ equation (1)) in expectation.
 
 \end{homeworkProblem}
 
