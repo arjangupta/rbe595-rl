@@ -232,15 +232,41 @@
 \nobreak\extramarks{Problem 3}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 3]
-    Model-based RL methods suffer more bias than model-free methods. Is this
-    statement correct? Why or why not?
+    Consider a vehicle with 4 actions (left, right, up, down). There's no uncertainty in the outcome
+    of the action (i.e. when left is commanded, the left state is achieved). The actions that cause
+    the vehicle outside the grid, leave the state unchanged.
+    The reward for all transition is -1 except when the goal is reached where the reward is zero.
+    Discount factor $\gamma = 1$.\\
+    The figure on left shows the name of the states and figure on the right shows the state-value
+    $V(s)$, for each state under a uniform random policy.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.5]{prob3_prompt.png}
+    \end{figure}
+
+    A. [4 points] What is $q(k, down)$?\\
+    B. [4 points] What is $q(g, down)$?\\
+    C. [4 points] What is $V(f)$?\\
 
     \subsection{Answer}
 
-    This statement is correct. Model-based RL methods suffer more bias than model-free methods
-    because the design of the model introduces bias. The model is a representation of the
-    environment, and it is not possible to represent the environment perfectly. Therefore,
-    the model will always introduce some bias.\\
+    We know the equation for $q(s, a)$ is given by,
+
+    \begin{align*}
+        q(s, a) &= \sum_{s', r} p(s', r | s, a) \left[ r + \gamma V(s') \right]
+    \end{align*}
+
+    \textbf{A.} We can calculate $q(k, down)$ as follows:
+
+    \begin{align*}
+        q(k, down) &= \sum_{s', r} p(s', r | k, down) \left[ r + \gamma V(s') \right] \\
+        &= p(k, -1 | k, down) \left[ -1 + \gamma V(k) \right] + p(f, -1 | k, down) \left[ -1 + \gamma V(f) \right] \\
+        &= 1 \left[ -1 + \gamma V(k) \right] + 0 \left[ -1 + \gamma V(f) \right] \\
+        &= -1 + \gamma V(k) \\
+        &= -1 + 0.5 \\
+        &= -0.5
+    \end{align*}
     
 \end{homeworkProblem}
 
