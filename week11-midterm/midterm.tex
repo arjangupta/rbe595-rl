@@ -388,44 +388,42 @@
 
     \subsection{Answer}
 
-    We know that the expectation of the return is given by,
+    If equation (2) does not add any bias to the original return, then we would be able to state that,
+    \begin{align}\label{prob5toprove}
+        \EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right) ] = \EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right) + (1 - \rho_t) V_{h-1} (S_t) ]
+    \end{align}
 
+    This is what we have to prove. Let us first consider the right hand side of the equation (\ref{prob5toprove}).
+    We can expand it as follows:
     \begin{align*}
-        \EX[G_{t:h}] &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right) + (1 - \rho_t) V_{h-1} (S_t)] \\
-        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[(1 - \rho_t) V_{h-1} (S_t)] \\
-        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - \EX[\rho_t]) \EX[V_{h-1} (S_t)] \\
-        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - \EX[\rho_t]) V_{h-1} (S_t) \\
+        &\EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[(1 - \rho_t) V_{h-1} (S_t) ]\\
+        = &\EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[(V_{h-1} (S_t) - \rho_t V_{h-1} (S_t) ]\\
+        = &\EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[V_{h-1} (S_t)] - \EX[\rho_t V_{h-1} (S_t) ]
     \end{align*}
 
-    We know that the expectation of the importance sampling ratio is given by,
+    However, $\rho_t$ is independent of $V_{h-1} (S_t)$ because the ratio of the target policy
+    and the behavior policy is independent of the value function. Therefore, we can further
+    write the right hand side of the equation (\ref{prob5toprove}) as,
+    \begin{align}\label{prob5rhs}
+        \EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[V_{h-1} (S_t)] - \EX[\rho_t] \EX[V_{h-1} (S_t) ]
+    \end{align}
+
+    Furthermore, the expectation of the importance sampling ratio is given by,
 
     \begin{align*}
-        \EX[\rho_t] &= \EX\left[\frac{\pi(A_t | S_t)}{b(A_t | S_t)}\right] \\
-        &= \sum_{a} \pi(a | S_t) \frac{\pi(a | S_t)}{b(a | S_t)} \\
-        &= \sum_{a} \pi(a | S_t) \frac{\pi(a | S_t)}{\sum_{a'} \beta(a' | S_t)} \\
-        &= \sum_{a} \pi(a | S_t) \frac{\pi(a | S_t)}{\sum_{a'} \pi(a' | S_t)} \\
-        &= \sum_{a} \pi(a | S_t) \\
-        &= 1
+        \EX[\rho_t] &= \EX \left[ \frac{\pi(A_t | S_t)}{b(A_t | S_t)} \right]
+        = \sum_{a} b(a | S_t) \frac{\pi(a | S_t)}{b(a | S_t)} = \sum_{a} \pi(a | S_t) = 1
     \end{align*}
 
-    Therefore, we can write the expectation of the return as,
+    Which we can substitute into equation (\ref{prob5rhs}) to get,
 
     \begin{align*}
-        \EX[G_{t:h}] &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - \EX[\rho_t]) V_{h-1} (S_t) \\
-        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + (1 - 1) V_{h-1} (S_t) \\
-        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + 0 \\
-        &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] \\
+        &\EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)] + \EX[V_{h-1} (S_t)] - \EX[V_{h-1} (S_t) ]\\
+        = &\EX [ \rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)]
     \end{align*}
 
-    We know that the expectation of the return without control variates is given by,
-
-    \begin{align*}
-        \EX[G_{t:h}] &= \EX[\rho_t \left( R_{t+1} + \gamma G_{t+1:h} \right)]
-    \end{align*}
-
-    We can see that the expectation of the return without control variates is the same as the
-    expectation of the return with control variates. Therefore, introducing the control variates
-    in equation (2) does not add any bias to the original return (i.e.\ equation (1)) in expectation.
+    Which is the same as the left hand side of the equation (\ref{prob5toprove}). Therefore,
+    we have proved that equation (2) does not add any bias to the original return in expectation.
 
 \end{homeworkProblem}
 
