@@ -523,4 +523,92 @@
 
 \end{homeworkProblem}
 
+\pagebreak
+
+\nobreak\extramarks{Problem 8}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 8]
+
+    In this question we are comparing mean and variance of the estimate reward for on-policy and
+    off-policy algorithms. Consider the on-policy scenario below where actions are taken under
+    target policy $\pi$:\\
+
+    \begin{tabular}{c | c | c}
+        Action & Reward & Probability of Action under policy $\pi$\\
+        \hline
+        right & +10 & 0.9\\
+        left & +20 & 0.1\\
+    \end{tabular}\\
+
+    A. [2 points] What is the expected value (mean) of estimated reward?\\
+    B. [4 points] What is the variance of the estimate reward?\\
+    Hint: use the equation $Var[X] = \EX[X^2] - \EX[X]^2$\\
+
+    Now assume that there is a behavior policy that is taking actions with following distribution:
+
+    \begin{tabular}{c | c | c | c}
+        Action & Reward & Probability of Action under policy $\pi$& Probability of Action under policy $b$\\
+        \hline
+        right & +10 & 0.9 & 0.5\\
+        left & +20 & 0.1 & 0.5\\
+    \end{tabular}
+
+    C. [3 points] Assume that we don’t know the distribution of the target policy and we only
+    know the ratio $\frac{\pi}{b}$ (importance sampling ratio).\\
+    Numerically calculate the expected reward assuming that the action are taken by the
+    behavior policy.\\
+    D. [5 points] Calculate the variance of the expected reward?\\
+    E. [3 points] What is the intuition behind higher variance in off-policy in this example? Can
+    you explain how the importance sampling could increase the variance in off-policy
+    learning?
+
+    \subsection{Answer}
+
+    \textbf{A.} The expected value of the estimated reward is given by,
+
+    \begin{align*}
+        \EX[X] &= \sum_{x} x p(x)\\
+        &= 10 \cdot 0.9 + 20 \cdot 0.1\\
+        &= 11
+    \end{align*}
+
+    \textbf{B.} The variance of the estimated reward is given by,
+
+    \begin{align*}
+        Var[X] &= \EX[X^2] - \EX[X]^2\\
+        &= (10^2 \cdot 0.9 + 20^2 \cdot 0.1) - 11^2\\
+        &= 9
+    \end{align*}
+
+    \textbf{C.} The expected reward assuming that the actions are taken by the behavior policy
+    is given by,
+
+    \begin{align*}
+        \EX[X] &= \sum_{x} x p(x)\\
+        &= 10 \cdot 0.5 + 20 \cdot 0.5\\
+        &= 15
+    \end{align*}
+
+    \textbf{D.} The variance of the expected reward is given by,
+
+    \begin{align*}
+        Var[X] &= \EX[X^2] - \EX[X]^2\\
+        &= (10^2 \cdot 0.5 + 20^2 \cdot 0.5) - 15^2\\
+        &= 75
+    \end{align*}
+
+    \textbf{E.} The intuition behind higher variance in off-policy learning is that, the behavior
+    policy is not the same as the target policy, so the actions taken by the behavior policy
+    are not the same as the actions taken by the target policy. Therefore, the expected reward
+    is different for the behavior policy and the target policy.\\
+
+    Importance sampling increases the variance in off-policy learning because it is a ratio
+    of the target policy and the behavior policy. Therefore, if the behavior policy is very
+    different from the target policy, then the importance sampling ratio will be very large,
+    which will increase the variance of the expected reward. This is because the importance
+    sampling ratio is multiplied with the reward, and the reward is squared in the variance
+    calculation.\\
+    
+\end{homeworkProblem}
+
 \end{document}
