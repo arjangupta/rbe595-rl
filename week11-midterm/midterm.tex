@@ -296,20 +296,25 @@
 \nobreak\extramarks{Problem 4}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 4]
-    Model-based RL methods are more sample efficient. Is this statement correct? Why or why not?
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.8]{prob4_prompt.png}
+    \end{figure}
 
     \subsection{Answer}
 
-    This statement is correct. Model-based RL methods can use a limited number of samples
-    to learn a model of the environment. Given an episode from real-interaction, we can
-    extract as much `juice' as possible from it by using it to learn a model. Then, we can
-    use the model to simulate more episodes, and use those episodes to improve the policy.\\
+    \textbf{A.} The target value for SARSA is given by
+    $R_{t+1} + \gamma Q(S_{t+1}, A_{t+1})$.\\
+    The update rule for SARSA is given by $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ target - Q(S_t, A_t) \right]$.\\
 
-    On the other hand model-free RL methods can only use the episode to improve the policy,
-    so they require more `samples' to learn the same amount.\\
 
-    Therefore, model-based RL methods are more sample efficient since they can learn more
-    from the same number of samples.\\
+    \textit{For left action at $s'$}:\\
+    The target SARSA value at $q(s, left)$ is given by $1 + 0.5 \cdot 2 = 2$\\
+    The update rule for SARSA is given by $1 + 0.1 \cdot (2 - 1) = 1.1$\\
+
+    \textit{For right action at $s'$}:\\
+    The target SARSA value at $q(s, right)$ is given by $1 + 0.5 \cdot 4 = 3$\\
+    The update rule for SARSA is given by $1 + 0.1 \cdot (3 - 1) = 1.2$\\
 
 \end{homeworkProblem}
 
