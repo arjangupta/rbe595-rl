@@ -432,70 +432,16 @@
 \nobreak\extramarks{Problem 6}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 6]
-    \textbf{(Exercise 8.1, page 166)} The nonplanning method looks particularly poor in Figure 8.3 because it is
-    a one-step method; a method using multi-step bootstrapping would do better. Do you
-    think one of the multi-step bootstrapping methods from Chapter 7 could do as well as
-    the Dyna method? Explain why or why not.
+    [8 points] If you were to design an algorithm called TD-search by modifying the Monte-Carlo
+    Tree Search, how do you go about it. In particular, which part of the MCTS you would modify
+    and how?
 
     \subsection{Answer}
 
-    Let us analyze how the $n$-step TD method would be applied to this problem.\\
+    TD methods use bootstrapping, whereas MCTS does not. Therefore, to design TD-search by
+    modifying MCTS, we can incorporate bootstrapping into MCTS.\\
 
-    Firstly, in $n$-step TD, the $G_{t:t+n}$ is given as,
-
-    \begin{align*}
-        G_{t:t+n} = R_{t+1} + \gamma R_{t+2} + \ldots + \gamma^{n-1} R_{t+n} + \gamma^n Q(S_{t+n}, A_{t+n})
-    \end{align*}
-
-    One thing to notice is that, as given in the problem prompt, the reward for all actions
-    is 0 except for the goal state, where the reward is 1. Therefore, we have two cases,
-    depending on whether the goal state is reached within $n$ steps or not.\\
-
-    If $t < T$, then $G_{t:t+n}$ is given as,
-
-    \begin{align*}
-        G_{t:t+n} &= 0.95^n Q(S_{t+n}, A_{t+n})
-    \end{align*}
-
-    If $t \geq T$, then $G_{t:t+n}$ is given as,
-
-    \begin{align*}
-        G_{t:t+n} &= 0.95^{k-1} + 0.95^k Q(S_{t+n}, A_{t+n})
-    \end{align*}
-
-    Where $k$ is the number of steps taken before reaching the goal state (i.e. $k = T - t$).\\
-
-    And $Q(S_t, A_t)$ is given as,
-
-    \begin{align*}
-        Q(S_t, A_t) &= Q(S_t, A_t) + \alpha \left[ G_{t:t+n} - Q(S_t, A_t) \right]
-    \end{align*}
-
-    We can see that if we use 1-step TD, the algorithm's environment-interaction steps will
-    be very similar to Dyna-Q with $n = 0$ planning steps.\\
-
-    However, I believe that in this particular problem,
-    \textbf{the general n-step TD method will not perform as well
-    as n-planning step Dyna-Q}, because it will take longer than Dyna-Q to learn the state-action
-    values of the states leading up to the goal state. This is because, initially the state-action
-    values of all the states will be 0. Then,
-    the n-step TD method will only update the value of the
-    state-action pair that encounters the goal state. All the states leading up to the goal state
-    will simply have their value updated to 0. After a few episodes, the state-action values
-    will be updated to non-zero values, but it will take longer than Dyna-Q.\\
-
-    On the other hand, Dyna-Q will use the simulated experience to update the value of all the
-    state-action pairs that were encountered in the simulated experience. It will make good
-    use of computational resources in its planning phase. With only 1 episode and a sufficiently
-    large number of planning steps, Dyna-Q will be able to learn non-zero values for the
-    state-action values leading up to the goal state.\\
-
-    By the second or third episode, Dyna-Q will have learned the state-action values of the
-    states leading up to the goal state much better than the n-step TD method. Perhaps after
-    a high number of episodes, the n-step TD method will catch up to Dyna-Q, but it will
-    be behind initially. Therefore,
-    I think if we compare the general performance of the two algorithms for this particular problem,
-    Dyna-Q will perform better than the n-step TD method.\\
+    Specifically, we can modify the simulation phase of MCTS to use TD methods.
 
 \end{homeworkProblem}
 
@@ -504,42 +450,76 @@
 \nobreak\extramarks{Problem 7}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 7]
-    \textbf{(Exercise 8.2, page 168)} Why did the Dyna agent with exploration bonus, Dyna-Q+, perform
-    better in the first phase as well as in the second phase of the blocking and shortcut
-    experiments?
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.5]{prob7_prompt.png}
+    \end{figure}
 
     \subsection{Answer}
 
-    In the first phase, as described in Example 8.2, 
-    the maze has an opening on the near side, and a wall on the far side.
-    After 1000 time steps, the short path is blocked and the far side opening is created. The graph
-    for the performance of Dyna-Q and Dyna-Q+ is shown below:
+    \textbf{A.} We can use the following flowchart to choose the next node:
 
-    We can see that Dyna-Q+ performs better than Dyna-Q before and after the 1,000 time step mark.
-    Before the 1,000 time step mark, Dyna-Q+ performs better because it is able to explore the
-    grid-world more than Dyna-Q. This is because Dyna-Q+ uses the exploration bonus in its planning
-    phase, given by $R = r + \kappa \sqrt{\tau(s, a)}$. This encourages the agent to find the far
-    edge faster than Dyna-Q. After the 1,000 time step mark, Dyna-Q+ performs better again for the
-    same reason. Since the short path is blocked, Dyna-Q+ is able to explore the grid-world
-    faster than Dyna-Q.\\
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.37]{prob7_flowchart.png}
+    \end{figure}
 
-    In the second phase, as described in Example 8.3, the maze has an opening on far side,
-    and after the 3,000 time step mark, the short path is additionally opened. The graph
-    for the performance of Dyna-Q and Dyna-Q+ is shown below:
+    The UCB1 formula is given by,
 
-    While the performance of Dyna-Q+ and Dyna-Q is similar before the 3,000 time step mark,
-    we can see that around roughly the 4,000 time step mark, Dyna-Q+ begins to perform
-    noticeably better than Dyna-Q. Here, the reward bonus is helping Dyna-Q+ create
-    trajectories that lead to the short path. This is because the reward bonus is given
-    by $R = r + \kappa \sqrt{\tau(s, a)}$, where $\tau(s, a)$ is the number of time steps
-    since the last visit to state $s$ after taking action $a$. Therefore, the reward bonus
-    is higher for states that have not been visited in a long time. This encourages the
-    agent to explore the grid-world more, and find the short path. The Dyna-Q agent does
-    not have this advantage, and in fact never finds the short path, as noted by the book,
-    ``even with an $\epsilon$-greedy policy, it is very
-    unlikely that an agent will take so
-    many exploratory actions as to discover the shortcut.'' So, exploration in the
-    planning phase is what gives Dyna-Q+ the advantage over Dyna-Q.\\
+    \begin{align*}
+        UCB1(S_i) = \frac{v_i}{n_i} + C \sqrt{\frac{\ln N_i}{n_i}}
+    \end{align*}
+
+    Where,\\
+    $n_i$ is the number of times we have visited node $S_i$,\\
+    $N_i$ is the number of times we have visited the parent of node $S_i$,\\
+    $v_i$ is the value of node $S_i$, and\\
+    $C$ is a constant that we choose.\\
+
+    Starting at A, we choose B because by the UCB1 algorithm,
+
+    \begin{align*}
+        \frac{2}{6} + 0.5 \sqrt{\frac{\ln 8}{6}} &> \frac{0}{2} + 0.5 \sqrt{\frac{\ln 8}{2}}\\
+        0.62 &> 0.51
+    \end{align*}
+
+    Then, at B, we pick E because,
+
+    \begin{align*}
+        \frac{-1}{3} + 0.5 \sqrt{\frac{\ln 6}{3}} &< \frac{0}{2} + 0.5 \sqrt{\frac{\ln 6}{2}}\\
+        0.053 &< 0.473
+    \end{align*}
+
+    Then, at E, we pick H because that is the only option. It is possible that H is
+    the only option because there is no valid down action from E.\\
+
+    Hence, H is the next node we pick.
+
+    \vspace{0.5cm}
+
+    \textbf{B.} At H, we assume that both up and down actions are valid, since
+    the prompt of this question does not specify otherwise. Therefore, we add
+    both up and down nodes from H. Since the first action is up, we choose it.
+    This up action creates a new state, which is the `J' node.\\
+
+    \textbf{C.} The `n' and `v' of J are 0 and 0 currently because we have not
+    visited J yet, and we have not rolled out from it yet.\\
+
+    \textbf{D.} The simulation from J gives a value of 1. So now we can
+    backup the tree and update the `n' and `v' of J and its ancestors. The
+    new values are given below:
+
+    J\@: $n = 1$, $v = 1$\\
+    H\@: $n = 2$, $v = 2$\\
+    E\@: $n = 3$, $v = 1$\\
+    B\@: $n = 7$, $v = 3$\\
+    A\@: $n = 9$, $v = 0$\\
+
+    \textbf{E.} Now that we have run out of time, we compare the up and down
+    actions at A. With up, we reach B, which has an average reward is $3/7 = 0.42$.
+    With down, we reach C, which has an average reward of $0/2 = 0$. Therefore we
+    choose up because in the greedy tree policy we choose the action that maximizes
+    the average reward.\\
 
 \end{homeworkProblem}
 
