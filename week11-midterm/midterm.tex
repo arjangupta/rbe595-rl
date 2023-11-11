@@ -544,7 +544,10 @@
     \textbf{B.} At H, we assume that both up and down actions are valid, since
     the prompt of this question does not specify otherwise. Therefore, we add
     both up and down nodes from H. Since the first action is up, we choose it.
-    This up action creates a new state, which is the `J' node.\\
+    Ideally we would choose the action that maximizes the UCB1 value, but
+    since we have no information about the value of the nodes, we choose the
+    first action. This can also be randomly selected according to the uniform distribution
+    (like a coin flip). This up action creates a new state, which is the `J' node.\\
 
     \textbf{C.} The `n' and `v' of J are 0 and 0 currently because we have not
     visited J yet, and we have not rolled out from it yet.\\
@@ -597,7 +600,7 @@
         left & +20 & 0.1 & 0.5\\
     \end{tabular}
 
-    C. [3 points] Assume that we don’t know the distribution of the target policy and we only
+    C. [3 points] Assume that we don't know the distribution of the target policy and we only
     know the ratio $\frac{\pi}{b}$ (importance sampling ratio).\\
     Numerically calculate the expected reward assuming that the action are taken by the
     behavior policy.\\
