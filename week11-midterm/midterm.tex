@@ -304,17 +304,67 @@
     \subsection{Answer}
 
     \textbf{A.} The target value for SARSA is given by
-    $R_{t+1} + \gamma Q(S_{t+1}, A_{t+1})$.\\
-    The update rule for SARSA is given by $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ target - Q(S_t, A_t) \right]$.\\
-
+    $R + \gamma Q(S_{t+1}, A_{t+1})$.\\
+    The update rule for SARSA is given by
+    $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ target - Q(S_t, A_t) \right]$.\\
 
     \textit{For left action at $s'$}:\\
     The target SARSA value at $q(s, left)$ is given by $1 + 0.5 \cdot 2 = 2$\\
-    The update rule for SARSA is given by $1 + 0.1 \cdot (2 - 1) = 1.1$\\
+    The update value for SARSA is given by $1 + 0.1 \cdot (2 - 1) = 1.1$\\
 
     \textit{For right action at $s'$}:\\
     The target SARSA value at $q(s, right)$ is given by $1 + 0.5 \cdot 4 = 3$\\
-    The update rule for SARSA is given by $1 + 0.1 \cdot (3 - 1) = 1.2$\\
+    The update value for SARSA is given by $1 + 0.1 \cdot (3 - 1) = 1.2$\\
+
+    \vspace{0.75cm}
+
+    \textbf{B.} The target value for Expected SARSA is given by
+    $R + \gamma \sum_a \pi(a | S_{t+1}) Q(S_{t+1}, a)$.\\
+    The update rule for Expected SARSA is given by
+    $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ target - Q(S_t, A_t) \right]$.\\
+
+    The policy distribution for $s'$ is given by $\pi(left | s') = 0.3$ and $\pi(right | s') = 0.7$.\\
+    
+    The target Expected SARSA value at $q(s, left)$ is given by
+    $1 + 0.5 (0.3 \cdot 2 + 0.7 \cdot 4) = 2.7$\\
+    The update value for Expected SARSA is given by $1 + 0.1 \cdot (2.7 - 1) = 1.17$\\
+
+    \vspace{0.5cm}
+
+    \textbf{C.} The target value for Q-learning is given by
+    $R + \gamma \max_a Q(S_{t+1}, a)$.\\
+    The update rule for Q-learning is given by
+    $Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ target - Q(S_t, A_t) \right]$.\\
+
+    The target Q-learning value at $q(s, left)$ is given by $1 + 0.5 \cdot 4 = 3$\\
+    The update value for Q-learning is given by $1 + 0.1 \cdot (3 - 1) = 1.2$\\
+
+    \vspace{0.6cm}
+
+    \textbf{D.} The distribution of the action at $s'$ does not affect the target value for Q-learning,
+    because the target value for Q-learning is given by $R + \gamma \max_a Q(S_{t+1}, a)$, which
+    does not depend on the action distribution at $s'$.\\
+
+    \vspace{0.5cm}
+
+    \textbf{E.} With the new batch of initial estimates, and applying double Q-learning,\\
+    our $Q_1$ target is given by
+    $R + \gamma Q_2(S_{t+1}, \arg\max_a Q_1(S_{t+1}, a))$\\
+    and our $Q_2$ target is given by
+    $R + \gamma Q_1(S_{t+1}, \arg\max_a Q_2(S_{t+1}, a))$\\
+
+    The update rule for $Q_1$ is given by
+    $Q_1(S_t, A_t) \leftarrow Q_1(S_t, A_t) + \alpha \left[ targetQ_1 - Q_1(S_t, A_t) \right]$.\\
+    The update rule for $Q_2$ is given by
+    $Q_2(S_t, A_t) \leftarrow Q_2(S_t, A_t) + \alpha \left[ targetQ_2 - Q_2(S_t, A_t) \right]$.\\
+
+    The target value for $q(s, left)$ is given by $1 + 0.5 \cdot q'(s', right) = 1 + 0.5 \cdot 3 = 2.5$\\
+    The update value for $q(s, left)$ is given by $1 + 0.1 \cdot (2.5 - 1) = 1.15$\\
+    
+    \textbf{F.}
+    
+    The target value for $q'(s, left)$ is given by $1 + 0.5 \cdot q(s', right) = 1 + 0.5 \cdot 4 = 3$\\
+    The update value for $q'(s, left)$ is given by $2 + 0.1 \cdot (3 - 2) = 2.1$\
 
 \end{homeworkProblem}
 
