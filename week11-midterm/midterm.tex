@@ -627,7 +627,7 @@
         &= 9
     \end{align*}
 
-    \textbf{C.} The expected reward assuming that the actions are taken by the behavior policy
+    \textbf{C.} The expected reward under the behavior policy
     is given by,
 
     \begin{align*}
@@ -636,12 +636,26 @@
         &= 15
     \end{align*}
 
+    And the overall importance sampling ratio is given by,
+
+    \begin{align*}
+        \prod \frac{\pi}{b} &= \frac{0.9}{0.5} \cdot \frac{0.1}{0.5}\\
+        &= 0.36
+    \end{align*}
+
+    Therefore, the expected reward is,
+
+    \begin{align*}
+        \EX[X] &= 15 \cdot 0.36\\
+        &= 5.4
+    \end{align*}
+
     \textbf{D.} The variance of the expected reward is given by,
 
     \begin{align*}
         Var[X] &= \EX[X^2] - \EX[X]^2\\
-        &= (10^2 \cdot 0.5 + 20^2 \cdot 0.5) - 15^2\\
-        &= 75
+        &= (10^2 \cdot 0.5 + 20^2 \cdot 0.5) \cdot 0.36 - 5.4^2\\
+        &= 60.84
     \end{align*}
 
     \textbf{E.} The intuition behind higher variance in off-policy learning is that, the behavior
@@ -649,12 +663,12 @@
     are not the same as the actions taken by the target policy. Therefore, the expected reward
     is different for the behavior policy and the target policy.\\
 
-    Importance sampling increases the variance in off-policy learning because it is a ratio
-    of the target policy and the behavior policy. Therefore, if the behavior policy is very
-    different from the target policy, then the importance sampling ratio will be very large,
-    which will increase the variance of the expected reward. This is because the importance
-    sampling ratio is multiplied with the reward, and the reward is squared in the variance
-    calculation.\\
+    Importance sampling increases the variance in off-policy learning because there
+    could be actions that the behavior policy takes that the target policy does not take.
+    This would result in a higher variance in the estimated reward, because if we graphed
+    the accumulated reward over time, the graph would be more `jagged' than if we were
+    using the target policy. The jaggedness comes from the times when importance sampling
+    goes to 0 because of actions not taken by the target policy.\\
     
 \end{homeworkProblem}
 
