@@ -251,21 +251,42 @@
 
     \subsection{Answer}
 
-    We know the equation for $q(s, a)$ is given by,
+    \textbf{A.} We know the equation for $q(s, a)$ is given by,
 
     \begin{align*}
         q(s, a) &= \sum_{s', r} p(s', r | s, a) \left[ r + \gamma V(s') \right]
     \end{align*}
 
-    \textbf{A.} We can calculate $q(k, down)$ as follows:
+    We can calculate $q(k, down)$ as follows:
 
     \begin{align*}
         q(k, down) &= \sum_{s', r} p(s', r | k, down) \left[ r + \gamma V(s') \right] \\
-        &= p(k, -1 | k, down) \left[ -1 + \gamma V(k) \right] + p(f, -1 | k, down) \left[ -1 + \gamma V(f) \right] \\
-        &= 1 \left[ -1 + \gamma V(k) \right] + 0 \left[ -1 + \gamma V(f) \right] \\
-        &= -1 + \gamma V(k) \\
-        &= -1 + 0.5 \\
-        &= -0.5
+        &= 1 \left[ 0 + 1 \cdot 0 \right]\\
+        &= 0
+    \end{align*}
+
+    \textbf{B.} We can calculate $q(g, down)$ as follows:
+
+    \begin{align*}
+        q(g, down) &= \sum_{s', r} p(s', r | g, down) \left[ r + \gamma V(s') \right] \\
+        &= 1 \left[ -1 + 1 \cdot -14 \right]\\
+        &= -15
+    \end{align*}
+
+    \textbf{C.} We know the equation for $V(s)$ is given by,
+
+    \begin{align*}
+        V(s) &= \sum_{a} \pi(a | s) q(s, a)
+    \end{align*}
+    
+    We can calculate $V(f)$ as follows:
+
+    \begin{align*}
+        V(f) &= \sum_{s', r} p(s', r | f, \pi(f)) \left[ r + \gamma V(s') \right] \\
+        &= 0.25 \left[ -1 + 1 \cdot -18 \right] + 0.25 \left[ -1 + 1 \cdot -20 \right] + 0.25 \left[ -1 + 1 \cdot -20 \right] + 0.25 \left[ -1 + 1 \cdot -18 \right]\\
+        &= 0.25 \left[ -19 \right] + 0.25 \left[ -21 \right] + 0.25 \left[ -21 \right] + 0.25 \left[ -19 \right]\\
+        &= 0.25 \left[ -80 \right]\\
+        &= -20
     \end{align*}
     
 \end{homeworkProblem}
