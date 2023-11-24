@@ -79,3 +79,32 @@ print(f"z1: \n {z1} \n")
 print(f"z2: \n {z2} \n")
 print(f"z3: \n {z3} \n")
 
+# Single-element tensors
+agg = tensor2.sum()
+agg_item = agg.item()
+print(f"agg: \n {agg} \n")
+print(f"agg_item: \n {agg_item} \n")
+
+# In-place operations (operations that have a _ suffix)
+print("In-place operation of adding 5 to tensor2: \n")
+tensor2.add_(5)
+print(f"tensor2: \n {tensor2} \n")
+
+# Bridge with NumPy
+# Tensor to NumPy array
+tensor3 = torch.ones(5) # tensor3 is on CPU
+print(f"tensor3: \n {tensor3} \n")
+numpy_array2 = tensor3.numpy() # can only be done on CPU
+print(f"numpy_array2: \n {numpy_array2} \n")
+# A change in tensor3 reflects in numpy_array2
+print("Adding 1 to tensor3: \n")
+tensor3.add_(1)
+print(f"tensor3: \n {tensor3} \n")
+print(f"numpy_array2: \n {numpy_array2} \n")
+# A change in numpy_array2 reflects in tensor3
+print("Setting numpy_array2 to all zeros: \n")
+numpy_array2 = np.zeros(5)
+tensor3 = torch.from_numpy(numpy_array2)
+print(f"tensor3: \n {tensor3} \n")
+print(f"numpy_array2: \n {numpy_array2} \n")
+
