@@ -56,10 +56,12 @@ train_dataloader = DataLoader(training_data, batch_size=64, shuffle=True)
 test_dataloader = DataLoader(test_data, batch_size=64, shuffle=True)
 
 # Display image and label.
+feature_number = 0
 while True:
     feature_and_label = next(iter(train_dataloader), "end")
     if feature_and_label == "end":
         break
+    print("Feature number: ", feature_number)
     train_features, train_labels = feature_and_label
     print(f"Feature batch shape: {train_features.size()}")
     print(f"Labels batch shape: {train_labels.size()}")
@@ -67,7 +69,10 @@ while True:
     label = train_labels[0]
     plt.imshow(img, cmap="gray")
     print(f"Label: {label}")
+    print()
     # Put the label on the top of the image.
     plt.title(str(label.item()) + ": " + labels_map[label.item()], color="red")
-    plt.show()
-    print()
+    feature_number += 1
+    plt.show(block=False)
+    plt.pause(0.75)
+    plt.close()
