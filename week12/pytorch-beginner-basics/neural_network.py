@@ -42,11 +42,13 @@ print(f"Predicted class: {y_pred}")
 # Let's break down the layers in the model
 
 # mini-batch of 3 images of size 28x28
+print("mini-batch of 3 images of size 28x28")
 input_image = torch.rand(3,28,28)
 print(input_image.size())
 
 # nn.Flatten - converts each 2D 28x28 image into a 
 # contiguous array of 784 pixel values
+print("nn.Flatten - converts each 2D 28x28 image into a contiguous array of 784 pixel values")
 flatten = nn.Flatten()
 flat_image = flatten(input_image)
 print(flat_image.size())
@@ -55,6 +57,7 @@ print(flat_image.size())
 # y = xA^T + b
 # A is the weight matrix, b is the bias vector
 # x is the input vector, y is the output vector
+print("nn.Linear - applies a linear transformation on the input")
 layer1 = nn.Linear(in_features=28*28, out_features=20)
 hidden1 = layer1(flat_image)
 print(hidden1.size())
@@ -63,3 +66,25 @@ print(hidden1.size())
 print(f"Before ReLU: {hidden1}\n\n")
 hidden1 = nn.ReLU()(hidden1)
 print(f"After ReLU: {hidden1}")
+
+# nn.Sequential - a sequential container that holds a list of layers
+# and when input is passed through the container, the input is passed
+# through each layer in the list in order
+print("nn.Sequential - a sequential container that holds a list of layers")
+seq_modules = nn.Sequential(
+    flatten,
+    layer1,
+    nn.ReLU(),
+    nn.Linear(20, 10)
+)
+input_image = torch.rand(3,28,28)
+logits = seq_modules(input_image)
+print("logits.size() is: ", logits.size())
+print("logits is: ", logits)
+
+# nn.Softmax - normalizes the input vector into a probability distribution
+# over the classes
+print("nn.Softmax - normalizes the input vector into a probability distribution over the classes")
+softmax = nn.Softmax(dim=1)
+pred_probab = softmax(logits)
+print("pred_probab is: ", pred_probab)
