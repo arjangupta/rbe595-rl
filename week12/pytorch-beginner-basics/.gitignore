@@ -1,2 +1,5 @@
 # Ignore the PyTorch dataset
 data
+
+# Ignore model pth
+*.pth
