@@ -39,6 +39,7 @@ class NeuralNetwork(nn.Module):
         return logits
 
 model = NeuralNetwork()
+model = model.to("cuda")
 
 # Hyperparameters
 learning_rate = 1e-3
@@ -52,6 +53,7 @@ def train_loop(dataloader, model, loss_fn, optimizer):
     # Unnecessary in this situation but added for best practices
     model.train()
     for batch, (X, y) in enumerate(dataloader):
+        X, y = X.to("cuda"), y.to("cuda")
         # Compute prediction and loss
         pred = model(X)
         loss = loss_fn(pred, y)
@@ -78,6 +80,7 @@ def test_loop(dataloader, model, loss_fn):
     # also serves to reduce unnecessary gradient computations and memory usage for tensors with requires_grad=True
     with torch.no_grad():
         for X, y in dataloader:
+            X, y = X.to("cuda"), y.to("cuda")
             pred = model(X)
             test_loss += loss_fn(pred, y).item()
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
@@ -91,7 +94,7 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 # Training and testing the model
-epochs = 10
+epochs = 20
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
     train_loop(train_dataloader, model, loss_fn, optimizer)
