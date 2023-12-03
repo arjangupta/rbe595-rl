@@ -11,6 +11,7 @@
 \usepackage{graphicx}
 \usepackage{gensymb}
 \usepackage{hyperref}
+\usepackage{enumitem}
 
 \DeclareRobustCommand{\bbone}{\text{\usefont{U}{bbold}{m}{n}1}}
 
@@ -247,14 +248,27 @@
 \nobreak\extramarks{Problem 5}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 5]
-    Can we consider TD an online (real-time) method and MC an offline method? Why?
+    In the Deep Q-learning method, which are true:
+
+    \begin{enumerate}[label=(\alph*)]
+        \item epsilon-greedy is required to ensure exploration.
+        \item exploration is taken care of by the randomization provided by experience replay.
+    \end{enumerate}
 
     \subsection{Answer}
     
-    Yes, we can consider TD an online (real-time) method and MC an offline method. This is because
-    TD learns during the episode, whereas MC learns after the episode has ended. Specifically, TD updates the
-    value of a state based on the value of the next state (during the episode), whereas MC updates
-    the value of a state based on successive returns (after the episode has ended).
+    (a) is true. Epsilon-greedy is required to ensure exploration as seen in the
+    `Deep Q-learning with Experience Replay' paper's algorithm. This is because the action
+    selection policy is greedy. This means that the agent will always choose the action that
+    maximizes the Q-value. So, in order to ensure exploration, epsilon-greedy action selection
+    is used.\\
+
+    (b) is false. Exploration is not taken care of by the randomization provided by experience replay.
+    Experience replay is used to break the correlation between consecutive samples. This is done by
+    storing the samples in a buffer and sampling from the buffer randomly. This is done to make the
+    training process more stable. However, this does not take care of exploration because the agent
+    is not experiencing or simulating any new orders of states. The agent is only experiencing the
+    same states in a different order.
 \end{homeworkProblem}
 
 \pagebreak
