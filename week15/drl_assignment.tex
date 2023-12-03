@@ -202,7 +202,8 @@
     Deep neural networks (DNNs) have helped reinforcement learning become more powerful and practical.
     DNNs can be used to approximate the value function as a non-linear function of the state. This
     is more powerful than linear function approximation, which can only approximate the value function
-    as a linear function of the state.\\
+    as a linear function of the state. A general advantage of DNNs is also that they learn their own
+    features, which is not the case with linear function approximation.\\
 
     Linear function approximation are still useful, however. Their advantage is that they can
     be used to verify theoretical results (in academia, for example). The mathematical analysis
@@ -215,46 +216,29 @@
 \nobreak\extramarks{Problem 4}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 4]
-    Assume that we have two states $x$ and $y$ with the current value of $V(x) = 10$, $V(y) = 1$. We
-    run an episode of $\{x, 3, y, 0, y, 5, T\}$. What's the new estimate of $V(x)$, $V(y)$ using TD (assume
-    step size $\alpha = 0.1$ and discount rate $\gamma = 0.9$).
+    In DQN, what is the purpose of the target network and value network?
 
     \subsection{Answer}
 
-    The new estimate of $V(x)$ is as follows:
+    In DQN, two separate neural networks are used: the target network and the value network. The
+    target network is used to estimate the target value, whereas the value network is used to estimate
+    the Q-value. The purpose of having two separate networks is to serve as one of the two features
+    of DQN that mitigates the problem of divergence (or weaker convergence) that occurs in
+    gradient Q-learning. The other feature is experience replay.\\
+    
+    We can provide more context on how DQN achieves this mitigation, as follows.
+    The target network is updated less frequently than the value network for each mini-batch of
+    $(s, a, r, s')$ tuples from the experience replay buffer. This is done to make the target
+    network more stable. The target network is updated as follows:
 
     \begin{align*}
-        V(x) &= V(x) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(x) \right]\\
-             &= 10 + 0.1 \left[ 3 + 0.9 \cdot 1 - 10 \right]\\
-             &= 10 + 0.1 \left[ 3.9 - 10 \right]\\
-             &= 10 + 0.1 \left[ -6.1 \right]\\
-             &= 10 - 0.61\\
-             &= 9.39
+        w_{i+1} &= w_i + \alpha \left[ Q_w(s, a) - r - \gamma \max_{a'} Q_{\overline{w}}(s', a') \right] \frac{\partial Q_{{w}}(s, a)}{\partial w}
     \end{align*}
 
-    However, $V(y)$ gets updated twice in this episode. The first update is as follows:
-
-    \begin{align*}
-        V(y) &= V(y) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(y) \right]\\
-             &= 1 + 0.1 \left[ 0 + 0.9 \cdot 1 - 1 \right]\\
-                &= 1 + 0.1 \left[ 0.9 - 1 \right]\\
-                &= 1 + 0.1 \left[ -0.1 \right]\\
-                &= 1 - 0.01\\
-                &= 0.99
-    \end{align*}
-
-    The second update is as follows:
-
-    \begin{align*}
-        V(y) &= V(y) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(y) \right]\\
-             &= 0.99 + 0.1 \left[ 5 + 0.9 \cdot 0 - 0.99 \right]\\
-                &= 0.99 + 0.1 \left[ 5 - 0.99 \right]\\
-                &= 0.99 + 0.1 \left[ 4.01 \right]\\
-                &= 0.99 + 0.401\\
-                &= 1.391
-    \end{align*}
-
-    Therefore, the new estimate of $V(x)$ is $9.39$ and the new estimate of $V(y)$ is $1.391$.
+    Where the first Q in the square brackets is the value network, and the second Q is the target
+    network. The second Q remains `fixed' for a certain number of iterations. This is akin to
+    the optimal value function being fixed while the value function for all the other states is
+    being updated. 
 
 \end{homeworkProblem}
 
