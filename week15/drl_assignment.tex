@@ -306,23 +306,14 @@
 
 \begin{homeworkProblem}[Problem 7]
 
-    What is the advantage of Double Q-learning over Q-learning?
+    What makes the optimization space smooth in policy gradient methods?
 
     \subsection{Answer}
 
-    The advantage of Double Q-learning over Q-learning is that Double Q-learning is less prone to
-    bias than Q-learning. Specifically, Q-learning is biased toward the maximum value action, which
-    is also known as maximization bias. This is because Q-learning uses the maximum value action
-    to update the value of a state.\\
-
-    In contrast, Double Q-learning is not biased toward the maximum value action. This is because
-    Double Q-learning uses two action-value functions, $Q_1$ and $Q_2$, to update the value of a state.
-    With probability $0.5$, Double Q-learning uses either $Q_1$ or $Q_2$ to update the value of a state.
-    Now, for example, the action is picked as per $Q_1$, then that action is probably not the maximum
-    value action as per $Q_2$. This way, for a given state, we have two estimates of the value of the
-    maximum value action. This reduces the bias of Double Q-learning and is hence the advantage over
-    Q-learning.
-
+    In policy gradient method, the optimization space is the policy parameter space.
+    In general, stochastic policies are used in policy gradient methods. This means that the policy is a
+    distribution over actions, like a Gaussian distribution. This makes the optimization space
+    smooth.
 
 \end{homeworkProblem}
 
