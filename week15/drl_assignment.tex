@@ -277,22 +277,16 @@
 
 \begin{homeworkProblem}[Problem 6]
 
-    Does Q-learning learn the outcome of exploratory actions? (Refer to the Cliff walking example).
+    Value function-based RL methods are oriented towards finding deterministic policies whereas
+    policy search methods are geared towards finding stochastic policies:
+    \begin{enumerate}[label=(\alph*)]
+        \item True
+        \item False
+    \end{enumerate}
 
     \subsection{Answer}
 
-    Yes, Q-learning learns the outcome of exploratory actions. This is because Q-learning is an
-    off-policy TD control algorithm. In the context of the Cliff walking example, this means that
-    Q-learning learns the optimal action-value function, $q_*$, which is closest to the cliff. 
-    The behavior policy takes exploratory actions, and the target policy is greedy. This
-    causes makes it so that initially, the agent falls off the cliff a lot, but eventually, the agent
-    learns to avoid the cliff and converges to the optimal action-value function, $q_*$. This is why the
-    graph of the sum of rewards per episode for Q-learning is initially very low, but eventually
-    converges to a high value. The graph is shown below:
-
-    \begin{center}
-        % \includegraphics[scale=0.5]{q_learning_cliff_walking.png}
-    \end{center}
+    False. Value function-based RL methods are not oriented towards finding deterministic policies.
 
 \end{homeworkProblem}
 
