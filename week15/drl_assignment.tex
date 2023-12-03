@@ -166,26 +166,24 @@
 \pagebreak
 
 \begin{homeworkProblem}[Problem 2]
-    We mentioned that the target value for TD is $[R_{t+1} + \gamma V(s_{t+1})]$. What is the target value for
-    Monte-carlo, Q-learning, SARSA and Expected-SARSA?
+    In TD learning with a neural network what are we trying to minimize? What are we trying to
+    maximize?
 
     \subsection{Answer}
 
-    The Target is shown as part of the following equation:
+    In general with any deep TD learning method, we aim to minimize the error between the target value
+    and the current estimate Q-value. We try to maximize the value of the current state by choosing
+    the action that maximizes the value of the next state.\\
+
+    We can use the example of gradient Q-learning to answer this question more specifically.
+    In gradient Q-learning, we are trying to minimize the error given by the loss function as follows:
+
     \begin{align*}
-        NewEstimate \leftarrow OldEstimate + StepSize \left[ Target - OldEstimate \right]
+        e(w) &= \frac{1}{2} \left[ Q_w(s, a) - \left( r + \gamma \max_{a'} Q_{w'}(s', a') \right) \right]^2\\
     \end{align*}
 
-    \begin{itemize}
-        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. Its target value is the
-        actual return value, $G_t$.
-        \item \textbf{Q-Learning} --- As given in the algorithm, the target value is
-        $R_{t+1} + \gamma \max_{a} Q(S_{t+1}, a)$.
-        \item \textbf{SARSA} --- As shown in the algorithm, the target value is
-        $R_{t+1} + \gamma Q(S_{t+1}, A_{t+1})$.
-        \item \textbf{Expected-SARSA} --- As described in the book, the target value is
-        $R_{t+1} + \gamma \mathbb{E}_{\pi} \left[ Q(S_{t+1}, A_{t+1}) \mid S_{t+1} \right]$.
-    \end{itemize}
+    We are trying to maximize the value of the current state by choosing the action that maximizes
+    the value of the next state. This is done by updating the weights of the neural network.
 
 \end{homeworkProblem}
 
