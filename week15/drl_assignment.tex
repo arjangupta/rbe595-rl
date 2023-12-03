@@ -286,7 +286,17 @@
 
     \subsection{Answer}
 
-    False. Value function-based RL methods are not oriented towards finding deterministic policies.
+    This is true, value-function based RL methods are oriented towards finding deterministic policies.
+    The reason for this is that value-function based RL methods focus on estimating the value function
+    in order to find the optimal policy. The optimal policy is the policy that maximizes the value
+    function. This is by definition a deterministic policy. We can manually introduce some `stochasticity'
+    in the policy by using an $\epsilon$-greedy policy, but this is not the same as a truly stochastic
+    policy.\\
+
+    It is also true that policy search methods are geared towards finding stochastic policies. This
+    is because policy search methods directly search for the optimal policy, so they focus on building
+    a mapping which turns out to be a distribution over actions. This is by definition a stochastic
+    policy.
 
 \end{homeworkProblem}
 
