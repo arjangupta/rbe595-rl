@@ -143,25 +143,21 @@
 \pagebreak
 
 \begin{homeworkProblem}[Problem 1]
-    Between DP (Dynamic Programming), MC (Monte-Carlo) and TD (Temporal Difference), which
-    one of these algorithms use bootstrapping? Explain.
+    What are the two sources of error in Deep RL with function approximation?
 
     \subsection{Answer}
 
-    Bootstrapping is the process of updating the estimate value of a state based on the estimate value of another state.
-    
-    \begin{itemize}
-        \item \textbf{Dynamic Programming} (DP) uses bootstrapping. This is because DP uses the Bellman
-        equation to update the value of a state based on the value of a future state.
-        \item \textbf{Monte-Carlo} (MC) does not use bootstrapping. This is because MC does not use the
-        Bellman equation to update the value of a state based on the value of a future state. Instead,
-        MC uses the expected return value, $\EX_{\pi}[G_t \mid S_t = s]$, to update the value of a state.
-        \item \textbf{Temporal Difference} (TD) uses bootstrapping. This is because uses a combination of
-        DP and MC to update the value of a state based on the value of a future state. TD uses a target value
-        of $[R_{t+1} + \gamma V(s_{t+1})]$ to update the value of a state. Since this depends on a future
-        state, TD uses bootstrapping.
-    \end{itemize}
+    The two sources of error in Deep RL with function approximation are as follows:
 
+    \begin{itemize}
+        \item \textbf{Bootstrapping error} --- This is the error that arises due to the use of
+        bootstrapping. Bootstrapping is the process of using the value of a successor state to
+        update the value of a state. This is done in TD methods. The error is the difference
+        between the target value and the current estimate value.
+        \item \textbf{Approximation error} --- This is the error defined as the difference
+        between the true value function and the approximate value function. This error arises
+        due to the use of function approximation itself.
+    \end{itemize}
 
 \end{homeworkProblem}
 
