@@ -194,18 +194,20 @@
 \nobreak\extramarks{Problem 3}{}\nobreak{}
 
 \begin{homeworkProblem}[Problem 3]
-    What are the similarities of TD and MC\@?
+    What is the main benefit of deep neural networks in function approximation compared to linear
+    method? What is the linear function approximation useful for?
 
     \subsection{Answer}
 
-    The similarities between TD and MC are as follows:
+    Deep neural networks (DNNs) have helped reinforcement learning become more powerful and practical.
+    DNNs can be used to approximate the value function as a non-linear function of the state. This
+    is more powerful than linear function approximation, which can only approximate the value function
+    as a linear function of the state.\\
 
-    \begin{itemize}
-        \item Both TD and MC are model-free, i.e. they do not require a model of the environment.
-        \item Both TD and MC are \textit{sample updates}, i.e., they involve looking ahead at a sample
-        successor state (or state-action pair), using the value of that state to compute a backed-up value, and then updating
-        the value of the original state (or state-action pair) accordingly.
-    \end{itemize}
+    Linear function approximation are still useful, however. Their advantage is that they can
+    be used to verify theoretical results (in academia, for example). The mathematical analysis
+    of linear function approximation is much easier than that of non-linear function approximation,
+    which is why linear function approximation is still useful.
 \end{homeworkProblem}
 
 \pagebreak
