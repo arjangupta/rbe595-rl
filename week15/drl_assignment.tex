@@ -374,8 +374,29 @@
         \nabla_\theta J(\theta) &= \frac{1}{m} \sum_{i=1}^m \sum_{t=1}^T \nabla_\theta \log \pi_\theta (a_t^i | s_t^i) (R(\tau^i) - b(s_t^i))
     \end{align}
 
-    This reduces the variance of the policy gradient. The $R(\tau^i) - b(s_t^i)$ term is called the
-    \textit{advantage function}. 
+    This reduces the variance of the policy gradient. The $\b(s_t^i)$ is called the baseline.
+    We have different options for the baseline, such as the average reward of the trajectories or
+    the expected return. We can also use the value function as the baseline. When we do this,
+    it is called the \textit{advantage function}. We can rewrite (\ref{eq:improved_policy_gradient})
+    as follows:
+
+    \begin{align*}
+        \nabla_\theta J(\theta) &= \frac{1}{m} \sum_{i=1}^m \sum_{t=1}^T \nabla_\theta \log \pi_\theta (a_t^i | s_t^i) A_{\pi}(s_t^i, a_t^i)
+    \end{align*}
+    Where $A_{\pi}(s_t^i, a_t^i) = \sum_{k=t+1}^T r(s_k^i, a_k^i) - V_{\pi}(s_t^i)$ is the
+    \textit{advantage function}. It can take on different forms, such as the Monte Carlo-based
+    advantage function and the TD-based advantage function. The Monte Carlo-based advantage function
+    is as follows:
+
+    \begin{align*}
+        A_{\pi}(s_t, a_t) &= Q_{\pi}(s_t, a_t) - V_{\pi}(s_t)
+    \end{align*}
+
+    The TD-based advantage function is as follows:
+
+    \begin{align*}
+        A_{\pi}(s_t, a_t) &= r_t(s_t, a_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t)
+    \end{align*}
 
 \end{homeworkProblem}
 
