@@ -389,7 +389,7 @@
     is as follows:
 
     \begin{align*}
-        A_{\pi}(s_t, a_t) &= Q_{\pi}(s_t, a_t) - V_{\pi}(s_t)
+        A_{\pi}(s_t, a_t) &= \sum_{k=t+1}^T r(s_k, a_k) - V_{\pi}(s_t)
     \end{align*}
 
     The TD-based advantage function is as follows:
