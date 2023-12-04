@@ -423,4 +423,113 @@
 
 \end{homeworkProblem}
 
+\pagebreak
+
+\nobreak\extramarks{Problem 11}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 11]
+
+    In the actor-critic architecture described in the lecture, assuming the use of differentiable
+    function approximators, we can conclude that the use of such a scheme will result in:
+
+    \begin{enumerate}[label=(\alph*)]
+        \item convergence to a globally optimal policy
+        \item convergence to a locally optimal policy
+        \item cannot comment on the convergence of such an algorithm
+    \end{enumerate}
+
+    \subsection{Answer}
+
+    (b) is the correct answer. The reason for this is that the actor-critic architecture
+    is a gradient-based method. Gradient-based methods are known to converge to a locally
+    optimal policy. This is because gradient-based methods are not guaranteed to find the
+    global optimum. They are only guaranteed to find a local optimum.
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 12}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 12]
+
+    Assume that we are using the linear function approximation for the critic network and SoftMax
+    policy with linear function approximation for the actor network. Write down the parameter
+    update equations for the actor and the critic network (use on-line update equations similar to
+    the algorithm in page 332)
+
+    \subsection{Answer}
+
+    Since we are using the linear function approximation for the critic network, we can write
+    the value function as follows:
+
+    \begin{align*}
+        V_{\pi}(s) &= \theta^T \phi(s)
+    \end{align*}
+
+    Where $\theta$ is the parameter vector and $\phi(s)$ is the feature vector.\\
+
+    Since we are using the SoftMax policy with linear function approximation for the actor network,
+    we can write the policy as follows:
+
+    \begin{align*}
+        \pi_{\theta}(a | s) &= \frac{e^{\theta^T \phi(s, a)}}{\sum_{b \in \mathcal{A}} e^{\theta^T \phi(s, b)}}
+    \end{align*}
+
+    Where $\theta$ is the parameter vector and $\phi(s, a)$ is the feature vector.\\
+
+    We can now write the parameter update equations for the actor and the critic network.
+
+    \begin{align*}
+        \theta_{t+1} &= \theta_t + \alpha \nabla_{\theta_t} \log \pi_{\theta_t}(a_t | s_t) A_{\pi}(s_t, a_t)\\
+        \theta_{t+1} &= \theta_t + \alpha \nabla_{\theta_t} \log \pi_{\theta_t}(a_t | s_t) \left( r_t(s_t, a_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t) \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t) \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \theta_t^T \phi(s_{t+1}) - \theta_t^T \phi(s_t) \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi(s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi(s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi(s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi
+        (s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
+        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi
+        (s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
+    \end{align*}
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 13}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 13]
+    
+    Consider a trajectory rollout of $(s, a_1, s, a_2, s, a_3)$.
+    The initial policy depicted in the figure below
+    for state $s$.The horizontal line also shows the value of the Advantage function for each (state,
+    action) pair. After applying the policy gradient update, what do you expect the probability of
+    each action to change to?
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[scale=0.5]{./prob_13.png}
+    \end{figure}
+
+    \subsection{Answer}
+
+    As given in the initial policy graph, the advantage function for $a_1$ is $100$, the advantage
+    function for $a_2$ is $10$, and the advantage function for $a_3$ is $-10$. The initial probability
+    of each action is $1/3$.\\
+
+    After applying the policy gradient update, we expect the probability of each action to change
+    as follows:
+
+    \begin{itemize}
+        \item The probability of $a_1$ will increase.
+        \item The probability of $a_2$ will decrease.
+        \item The probability of $a_3$ will decrease.
+    \end{itemize}
+
+    The only graph that satisfies these conditions is graph (b), therefore the answer is (b).
+
+\end{homeworkProblem}
+
 \end{document}
