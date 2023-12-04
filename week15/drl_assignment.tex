@@ -414,15 +414,12 @@
 
     Yes, there is a resemblance between actor-critic architecture and generalized policy iteration.
     In actor-critic architecture, the `Critic' part of the architecture is the value function.
-    The `Actor' part of the architecture is the policy. These are two separate neural networks.
-    In generalized policy iteration, there are two separate processes: policy evaluation and
-    policy improvement. Policy evaluation is the process of estimating the value function for
-    a given policy. Policy improvement is the process of improving the policy based on the
-    value function.\\
-
-    In actor-critic architecture, the value function is estimated by the `Critic' part of the
-    architecture. The policy is improved by the `Actor' part of the architecture. This is
-    similar to generalized policy iteration.
+    The `Actor' part of the architecture is the policy. These are two separate neural networks
+    that can be trained separately to improve $V$ and $\pi$ respectively.
+    In generalized policy iteration, there are similarly two separate processes: policy evaluation
+    to estimate the value function and policy improvement to improve the policy. These two processes
+    are iterated over until convergence, similar to how the actor-critic architecture is iterated
+    over until convergence.
 
 \end{homeworkProblem}
 
