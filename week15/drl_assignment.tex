@@ -460,38 +460,23 @@
 
     \subsection{Answer}
 
-    Since we are using the linear function approximation for the critic network, we can write
-    the value function as follows:
+    Let us first define some variables. Let $w$ be the weights of the critic network (value function).
+    Let $\theta$ be the weights of the actor network (policy). Let $\alpha^w$ be the learning
+    rate of the critic network, and let $\alpha^\theta$ be the learning rate of the actor network.
+    Also, let $\delta$ be the advantage function. Furthermore, let $\hat{v}$ be the value function
+    being approximated by the critic network.\\
+
+    Firstly, the advantage function is defined as follows:
 
     \begin{align*}
-        V_{\pi}(s) &= \theta^T \phi(s)
+        \delta &= R + \gamma \hat{v}(S', w) - \hat{v}(S, w)
     \end{align*}
 
-    Where $\theta$ is the parameter vector and $\phi(s)$ is the feature vector.\\
-
-    Since we are using the SoftMax policy with linear function approximation for the actor network,
-    we can write the policy as follows:
+    The update equations for the critic network and the actor network are as follows:
 
     \begin{align*}
-        \pi_{\theta}(a | s) &= \frac{e^{\theta^T \phi(s, a)}}{\sum_{b \in \mathcal{A}} e^{\theta^T \phi(s, b)}}
-    \end{align*}
-
-    Where $\theta$ is the parameter vector and $\phi(s, a)$ is the feature vector.\\
-
-    We can now write the parameter update equations for the actor and the critic network.
-
-    \begin{align*}
-        \theta_{t+1} &= \theta_t + \alpha \nabla_{\theta_t} \log \pi_{\theta_t}(a_t | s_t) A_{\pi}(s_t, a_t)\\
-        \theta_{t+1} &= \theta_t + \alpha \nabla_{\theta_t} \log \pi_{\theta_t}(a_t | s_t) \left( r_t(s_t, a_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t) \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma V_{\pi}(s_{t+1}) - V_{\pi}(s_t) \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \theta_t^T \phi(s_{t+1}) - \theta_t^T \phi(s_t) \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi(s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi(s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi(s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi
-        (s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
-        \theta_{t+1} &= \theta_t + \alpha \phi(s_t, a_t) \left( r_t(s_t, a_t) + \gamma \phi
-        (s_{t+1})^T \theta_t - \phi(s_t)^T \theta_t \right)\\
+        w &= w + \alpha^w \delta \frac{\partial \hat{v}(S, w)}{\partial w}\\
+        \theta &= \theta + \alpha^\theta \delta \frac{\partial \log \pi(A|S, \theta)}{\partial \theta}
     \end{align*}
 
 \end{homeworkProblem}
