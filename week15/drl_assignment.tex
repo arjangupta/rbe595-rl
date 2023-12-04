@@ -317,4 +317,66 @@
 
 \end{homeworkProblem}
 
+\pagebreak
+
+\nobreak\extramarks{Problem 8}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 8]
+
+    How does actor-critic architecture improve the “vanilla” policy gradient?
+
+    \subsection{Answer}
+
+    The actor-critic architecture improves the `vanilla' policy gradient in the following
+    ways:
+
+    \begin{enumerate}
+        \item providing an improvement on the advantage function which regular
+        baseline functions cannot provide. Specifically, REINFORCE-with-baseline tends
+        to learn slowly and produce high variance. Actor-critic methods can improve on these issues
+        by using temporal-difference (TD) learning as well
+        as n-step bootstrapping.
+        \item using neural networks to approximate the value function and form 
+        a distribution for the policy. This
+        provides gradients for both the value function and the policy, with which we
+        can optimize both the value function and the policy.
+    \end{enumerate}
+    
+    The `Critic' part of the actor-critic architecture is the estimate of the value function.
+    The `Actor' part of the actor-critic architecture is the policy. These are two separate
+    neural networks.
+
+\end{homeworkProblem}
+
+\pagebreak
+
+\nobreak\extramarks{Problem 9}{}\nobreak{}
+
+\begin{homeworkProblem}[Problem 9]
+
+    What is the Advantage function, $A_{\pi}(s_t, a_t)$, in actor-critic architecture? Write down the
+    equation for monte-carlo-based Advantage function and TD-based advantage function and
+    comment on the pro and cons of each on.
+
+    \subsection{Answer}
+
+    In order to properly explain the advantage function, let us look at
+    the formula for the `vanilla' policy gradient, which is as follows:
+
+    \begin{align}\label{eq:vanilla_policy_gradient}
+        \nabla_\theta J(\theta) &= \frac{1}{m} \sum_{i=1}^m \sum_{t=1}^T \nabla_\theta \log \pi_\theta (a_t^i | s_t^i) R(\tau^i)
+    \end{align}
+    
+    In general we can improve the vanilla policy gradient by subtracting a baseline such that
+    (\ref{eq:vanilla_policy_gradient}) becomes:
+
+    \begin{align}\label{eq:improved_policy_gradient}
+        \nabla_\theta J(\theta) &= \frac{1}{m} \sum_{i=1}^m \sum_{t=1}^T \nabla_\theta \log \pi_\theta (a_t^i | s_t^i) (R(\tau^i) - b(s_t^i))
+    \end{align}
+
+    This reduces the variance of the policy gradient. The $R(\tau^i) - b(s_t^i)$ term is called the
+    \textit{advantage function}. 
+
+\end{homeworkProblem}
+
 \end{document}
