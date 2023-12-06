@@ -49,3 +49,6 @@ slprj/
 *.slx.autosave
 
 *.zip
+
+.vscode
+
