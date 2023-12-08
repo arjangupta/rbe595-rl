@@ -29,6 +29,8 @@ command_actions[:, 1] = 0.0
 command_actions[:, 2] = 0.0
 command_actions[:, 3] = 0.8
 
+env.enable_onboard_cameras = True
+
 for i in range(0, 500):
     obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
         
