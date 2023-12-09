@@ -1,18 +1,12 @@
+# Modified by: Arjan Gupta & Taylor Bergeron
+
+# Original copyright:
 # Copyright (c) 2023, Autonomous Robots Lab, Norwegian University of Science and Technology
 # All rights reserved.
-
 # This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
+# LICENSE file in the root directory of the aeriel_gym_simulator project.
 
-import env_var_loader
-AERIEL_GYM_PATH = env_var_loader.get_aerial_gym_path()
-AERIEL_GYM_ENVS_BASE_PATH = env_var_loader.get_aerial_gym_envs_base_path()
-
-import sys
-sys.path.insert(0, AERIEL_GYM_PATH)
-sys.path.insert(0, AERIEL_GYM_ENVS_BASE_PATH)
-
-from base_config import BaseConfig
+from aerial_gym.envs.base.base_config import BaseConfig
 
 import numpy as np
 from aerial_gym import AERIAL_GYM_ROOT_DIR
