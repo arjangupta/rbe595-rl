@@ -24,7 +24,7 @@ def main():
 
     env.enable_onboard_cameras = True
 
-    for i in range(0, 5000):
+    for i in range(0, 100):
         obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
 
 if __name__ == "__main__":

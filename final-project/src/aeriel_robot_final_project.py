@@ -106,6 +106,9 @@ class AerialRobotFinalProject(BaseTask):
             cam_ref_env = self.cfg.viewer.ref_env
             
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
+        
+        # Image counter
+        self.image_counter = 0
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -209,6 +212,10 @@ class AerialRobotFinalProject(BaseTask):
         for env_id in range(self.num_envs):
             # the depth values are in -ve z axis, so we need to flip it to positive
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
+        # Save the image and increment the counter
+        plt.imsave("images/image_" + str(self.image_counter) + ".png", self.full_camera_array[0].cpu().numpy(), cmap='gray')
+        self.image_counter += 1
+        return
 
     def step(self, actions):
         # step physics and render each frame
