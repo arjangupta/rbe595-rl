@@ -51,6 +51,9 @@ class AerialRobotFinalProject(BaseTask):
         self.sim_device_id = sim_device
         self.headless = headless
 
+        # self.env_asset_manager = AssetManager(self.cfg, sim_device)
+        self.cam_resolution = (480,270)
+
         super().__init__(self.cfg, sim_params, physics_engine, sim_device, headless)
         self.root_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
 
@@ -91,6 +94,8 @@ class AerialRobotFinalProject(BaseTask):
                                    dtype=torch.float32, device=self.device, requires_grad=False)
 
         self.controller = Controller(self.cfg.control, self.device)
+
+        self.full_camera_array = torch.zeros((self.num_envs, 270, 480), device=self.device)
 
         if self.viewer:
             print("Creating viewer")
@@ -144,6 +149,23 @@ class AerialRobotFinalProject(BaseTask):
             self.env_spacing, self.env_spacing, self.env_spacing)
         self.actor_handles = []
         self.envs = []
+        self.camera_handles = []
+        self.camera_tensors = []
+
+        # Set Camera Properties
+        camera_props = gymapi.CameraProperties()
+        camera_props.enable_tensors = True
+        camera_props.width = self.cam_resolution[0]
+        camera_props.height = self.cam_resolution[1]
+        camera_props.far_plane = 15.0
+        camera_props.horizontal_fov = 87.0
+        # local camera transform
+        local_transform = gymapi.Transform()
+        # position of the camera relative to the body
+        local_transform.p = gymapi.Vec3(0.15, 0.00, 0.05)
+        # orientation of the camera relative to the body
+        local_transform.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
+
         for i in range(self.num_envs):
             # create env instance
             env_handle = self.gym.create_env(
@@ -161,13 +183,32 @@ class AerialRobotFinalProject(BaseTask):
                 env_handle, actor_handle)
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
+
+            cam_handle = self.gym.create_camera_sensor(env_handle, camera_props)
+            self.gym.attach_camera_to_body(cam_handle, env_handle, actor_handle, local_transform, gymapi.FOLLOW_TRANSFORM)
+            self.camera_handles.append(cam_handle)
+            camera_tensor = self.gym.get_camera_image_gpu_tensor(self.sim, env_handle, cam_handle, gymapi.IMAGE_DEPTH)
+            torch_cam_tensor = gymtorch.wrap_tensor(camera_tensor)
+            self.camera_tensors.append(torch_cam_tensor)
         
         self.robot_mass = 0
         for prop in self.robot_body_props:
             self.robot_mass += prop.mass
         print("Total robot mass: ", self.robot_mass)
         
-        print("\n\n\n\n\n ENVIRONMENT CREATED \n\n\n\n\n\n")
+        print("\n\n\n\n\n RBE 595 ENVIRONMENT CREATED \n\n\n\n\n\n")
+    
+    def render_cameras(self):        
+        self.gym.render_all_camera_sensors(self.sim)
+        self.gym.start_access_image_tensors(self.sim)
+        self.dump_images()
+        self.gym.end_access_image_tensors(self.sim)
+        return
+    
+    def dump_images(self):
+        for env_id in range(self.num_envs):
+            # the depth values are in -ve z axis, so we need to flip it to positive
+            self.full_camera_array[env_id] = -self.camera_tensors[env_id]
 
     def step(self, actions):
         # step physics and render each frame
@@ -179,6 +220,7 @@ class AerialRobotFinalProject(BaseTask):
             self.post_physics_step()
 
         self.render(sync_frame_time=False)
+        self.render_cameras()
         
         self.progress_buf += 1
         self.compute_observations()
