@@ -1,20 +1,8 @@
-import os
-from os.path import join, dirname
-from dotenv import load_dotenv
-
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
-
-AERIEL_GYM_PATH = os.environ.get("AERIEL_GYM_PATH")
-
-if AERIEL_GYM_PATH is None:
-    raise Exception("Please set the AERIEL_GYM_PATH environment variable")
-else:
-    print("AERIEL_GYM_PATH set as:", AERIEL_GYM_PATH)
+import env_var_loader
+AERIEL_GYM_PATH = env_var_loader.get_aerial_gym_path()
 
 import sys
 sys.path.insert(0, AERIEL_GYM_PATH)
-sys.path.insert(0, join(AERIEL_GYM_PATH, "/aerial_gym/envs/base/"))
 
 import isaacgym
 from aerial_gym.envs import *
