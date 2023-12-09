@@ -31,6 +31,12 @@ import time
 class AerialRobotFinalProject(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
+        print("Custom AerialRobotFinalProject constructor")
+        print("cfg:", cfg)
+        print("sim_params:", sim_params)
+        print("physics_engine:", physics_engine)
+        print("sim_device:", sim_device)
+        print("headless:", headless)
         self.cfg = cfg
 
         self.max_episode_length = int(self.cfg.env.episode_length_s / self.cfg.sim.dt)
@@ -84,6 +90,7 @@ class AerialRobotFinalProject(BaseTask):
         self.controller = Controller(self.cfg.control, self.device)
 
         if self.viewer:
+            print("Creating viewer")
             cam_pos_x, cam_pos_y, cam_pos_z = self.cfg.viewer.pos[0], self.cfg.viewer.pos[1], self.cfg.viewer.pos[2]
             cam_target_x, cam_target_y, cam_target_z = self.cfg.viewer.lookat[0], self.cfg.viewer.lookat[1], self.cfg.viewer.lookat[2]
             cam_pos = gymapi.Vec3(cam_pos_x, cam_pos_y, cam_pos_z)
