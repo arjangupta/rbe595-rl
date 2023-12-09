@@ -26,8 +26,6 @@ def main():
 
     for i in range(0, 5000):
         obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
-            
-        print("Done", i)
 
 if __name__ == "__main__":
     main()
