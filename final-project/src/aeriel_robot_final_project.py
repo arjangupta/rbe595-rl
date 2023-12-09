@@ -102,6 +102,7 @@ class AerialRobotFinalProject(BaseTask):
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
+        self._create_ground_plane()
         self._create_envs()
         self.progress_buf = torch.zeros(
             self.cfg.env.num_envs, device=self.sim_device, dtype=torch.long)
