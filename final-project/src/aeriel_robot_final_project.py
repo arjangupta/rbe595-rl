@@ -39,6 +39,9 @@ class AerialRobotFinalProject(BaseTask):
         print("headless:", headless)
         self.cfg = cfg
 
+        # Override num_envs to 1
+        self.cfg.env.num_envs = 1
+
         self.max_episode_length = int(self.cfg.env.episode_length_s / self.cfg.sim.dt)
         self.debug_viz = False
         num_actors = 1
@@ -119,6 +122,12 @@ class AerialRobotFinalProject(BaseTask):
             AERIAL_GYM_ROOT_DIR=AERIAL_GYM_ROOT_DIR)
         asset_root = os.path.dirname(asset_path)
         asset_file = os.path.basename(asset_path)
+
+        print("asset_path:", asset_path)
+        print("asset_root:", asset_root)
+        print("asset_file:", asset_file)
+
+        print("num_envs:", self.num_envs)
 
         asset_options = asset_class_to_AssetOptions(self.cfg.robot_asset)
 
