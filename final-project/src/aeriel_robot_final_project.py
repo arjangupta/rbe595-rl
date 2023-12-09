@@ -213,8 +213,8 @@ class AerialRobotFinalProject(BaseTask):
             # the depth values are in -ve z axis, so we need to flip it to positive
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
         # Save the image and increment the counter
-        plt.imsave("images/image_" + str(self.image_counter) + ".png", self.full_camera_array[0].cpu().numpy(), cmap='gray')
-        self.image_counter += 1
+        # plt.imsave("images/image_" + str(self.image_counter) + ".png", self.full_camera_array[0].cpu().numpy(), cmap='gray')
+        # self.image_counter += 1
         return
 
     def step(self, actions):
