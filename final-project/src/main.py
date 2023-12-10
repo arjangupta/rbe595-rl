@@ -1,9 +1,3 @@
-# import env_var_loader
-# AERIEL_GYM_PATH = env_var_loader.get_aerial_gym_path()
-
-# import sys
-# sys.path.insert(0, AERIEL_GYM_PATH)
-
 import isaacgym
 from aerial_gym.envs import *
 from aerial_gym.utils import get_args, task_registry
@@ -13,6 +7,7 @@ from aeriel_robot_final_project import AerialRobotFinalProject
 
 def main():
     task_registry.register( "quad_for_final_project", AerialRobotFinalProject, AerialRobotCfgFinalProject())
+    # env, env_cfg = task_registry.make_env("quad_for_final_project")
     env, env_cfg = task_registry.make_env("quad_with_obstacles")
 
     print("Number of environments", env_cfg.env.num_envs)
