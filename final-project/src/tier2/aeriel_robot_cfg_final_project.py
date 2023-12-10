@@ -11,6 +11,11 @@ from aerial_gym.envs.base.base_config import BaseConfig
 import numpy as np
 from aerial_gym import AERIAL_GYM_ROOT_DIR
 
+THIN_SEMANTIC_ID = 1
+TREE_SEMANTIC_ID = 2
+OBJECT_SEMANTIC_ID = 3
+WALL_SEMANTIC_ID = 8
+
 class AerialRobotCfgFinalProject(BaseConfig):
     seed = 1
     class env:
@@ -85,3 +90,237 @@ class AerialRobotCfgFinalProject(BaseConfig):
             max_gpu_contact_pairs = 2**23 #2**24 -> needed for 8000 envs and more
             default_buffer_size_multiplier = 5
             contact_collection = 0 # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
+
+    class asset_config:
+        folder_path = f"{AERIAL_GYM_ROOT_DIR}/resources/models/environment_assets"
+
+        include_asset_type = {
+            "thin": True,
+            "trees": False,
+            "objects": True
+        }
+
+        include_env_bound_type = {
+            "front_wall": False,
+            "left_wall": False,
+            "top_wall": False,
+            "back_wall": False,
+            "right_wall": False,
+            "bottom_wall": False}
+
+        env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space
+        env_lower_bound_max = [-5.0, -5.0, 0.0]  # lower bound for the environment space
+        env_upper_bound_min = [5.0, 5.0, 5.0]  # upper bound for the environment space
+        env_upper_bound_max = [5.0, 5.0, 5.0]  # upper bound for the environment space
+
+    class asset_state_params(robot_asset):
+        num_assets = 1  # number of assets to include
+
+        min_position_ratio = [0.5, 0.5, 0.5]  # min position as a ratio of the bounds
+        max_position_ratio = [0.5, 0.5, 0.5]  # max position as a ratio of the bounds
+
+        collision_mask = 1
+
+        collapse_fixed_joints = True
+        fix_base_link = True
+        links_per_asset = 1
+        set_whole_body_semantic_mask = False
+        set_semantic_mask_per_link = False
+        semantic_mask_link_list = []  # For empty list, all links are labeled
+        specific_filepath = None  # if not None, use this folder instead randomizing
+        color = None
+
+    class thin_asset_params(asset_state_params):
+        num_assets = 10
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        max_position_ratio = [0.95, 0.95, 0.95]  # min position as a ratio of the bounds
+        min_position_ratio = [0.05, 0.05, 0.05]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0,
+                              -1000.0]  # if > -900, use this value instead of randomizing   the ratios
+
+        min_euler_angles = [-np.pi, -np.pi, -np.pi]  # min euler angles
+        max_euler_angles = [np.pi, np.pi, np.pi]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = True
+        links_per_asset = 1
+        set_whole_body_semantic_mask = True
+        semantic_id = THIN_SEMANTIC_ID
+        set_semantic_mask_per_link = False
+        semantic_mask_link_list = []  ## If nothing is specified, all links are labeled
+        color = [170, 66, 66]
+
+    class tree_asset_params(asset_state_params):
+        num_assets = 10
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        max_position_ratio = [0.95, 0.95, 0.1]  # min position as a ratio of the bounds
+        min_position_ratio = [0.05, 0.05, 0.0]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0,
+                              -1000.0]  # if > -900, use this value instead of randomizing   the ratios
+
+        min_euler_angles = [0, -np.pi / 6.0, -np.pi]  # min euler angles
+        max_euler_angles = [0, np.pi / 6.0, np.pi]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = True
+        links_per_asset = 1
+        set_whole_body_semantic_mask = False
+        set_semantic_mask_per_link = True
+        semantic_mask_link_list = []  ## If nothing is specified, all links are labeled
+        semantic_id = TREE_SEMANTIC_ID
+        color = [70, 200, 100]
+
+    class object_asset_params(asset_state_params):
+        num_assets = 50
+
+        max_position_ratio = [0.95, 0.95, 0.95]  # min position as a ratio of the bounds
+        min_position_ratio = [0.05, 0.05, 0.05]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0, -np.pi / 6, -np.pi]  # min euler angles
+        max_euler_angles = [0, np.pi / 6, np.pi]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        links_per_asset = 1
+        set_whole_body_semantic_mask = False
+        set_semantic_mask_per_link = False
+        semantic_id = OBJECT_SEMANTIC_ID
+
+        # color = [80,255,100]
+
+    class left_wall(asset_state_params):
+        num_assets = 1
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        min_position_ratio = [0.5, 1.0, 0.5]  # min position as a ratio of the bounds
+        max_position_ratio = [0.5, 1.0, 0.5]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
+        max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = False
+        links_per_asset = 1
+        specific_filepath = "cube.urdf"
+        semantic_id = WALL_SEMANTIC_ID
+        color = [100, 200, 210]
+
+    class right_wall(asset_state_params):
+        num_assets = 1
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        min_position_ratio = [0.5, 0.0, 0.5]  # min position as a ratio of the bounds
+        max_position_ratio = [0.5, 0.0, 0.5]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
+        max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = False
+        links_per_asset = 1
+        specific_filepath = "cube.urdf"
+        semantic_id = WALL_SEMANTIC_ID
+        color = [100, 200, 210]
+
+    class top_wall(asset_state_params):
+        num_assets = 1
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        min_position_ratio = [0.5, 0.5, 1.0]  # min position as a ratio of the bounds
+        max_position_ratio = [0.5, 0.5, 1.0]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
+        max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = False
+        links_per_asset = 1
+        specific_filepath = "cube.urdf"
+        semantic_id = WALL_SEMANTIC_ID
+        color = [100, 200, 210]
+
+    class bottom_wall(asset_state_params):
+        num_assets = 1
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        min_position_ratio = [0.5, 0.5, 0.0]  # min position as a ratio of the bounds
+        max_position_ratio = [0.5, 0.5, 0.0]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
+        max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = False
+        links_per_asset = 1
+        specific_filepath = "cube.urdf"
+        semantic_id = WALL_SEMANTIC_ID
+        color = [100, 150, 150]
+
+    class front_wall(asset_state_params):
+        num_assets = 1
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        min_position_ratio = [1.0, 0.5, 0.5]  # min position as a ratio of the bounds
+        max_position_ratio = [1.0, 0.5, 0.5]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
+        max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = False
+        links_per_asset = 1
+        specific_filepath = "cube.urdf"
+        semantic_id = WALL_SEMANTIC_ID
+        color = [100, 200, 210]
+
+    class back_wall(asset_state_params):
+        num_assets = 1
+
+        collision_mask = 1  # objects with the same collision mask will not collide
+
+        min_position_ratio = [0.0, 0.5, 0.5]  # min position as a ratio of the bounds
+        max_position_ratio = [0.0, 0.5, 0.5]  # max position as a ratio of the bounds
+
+        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+
+        min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
+        max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
+
+        specified_euler_angle = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing
+
+        collapse_fixed_joints = False
+        links_per_asset = 1
+        specific_filepath = "cube.urdf"
+        semantic_id = WALL_SEMANTIC_ID
+        color = [100, 200, 210]
+

@@ -7,6 +7,8 @@
 # LICENSE file in the root directory of the aeriel_gym_simulator project.
 
 import math
+import sys
+
 import numpy as np
 import os
 import torch
@@ -19,10 +21,13 @@ from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
 from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
+from aerial_gym.utils.asset_manager import AssetManager
 
 import matplotlib.pyplot as plt
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 import time
+
+NUM_OBJECTS = 2
 
 class AerialRobotFinalProject(BaseTask):
 
@@ -47,7 +52,7 @@ class AerialRobotFinalProject(BaseTask):
         self.sim_device_id = sim_device
         self.headless = headless
 
-        # self.env_asset_manager = AssetManager(self.cfg, sim_device)
+        self.env_asset_manager = AssetManager(self.cfg, sim_device)
         self.cam_resolution = (480,270)
 
         super().__init__(self.cfg, sim_params, physics_engine, sim_device, headless)
@@ -56,7 +61,7 @@ class AerialRobotFinalProject(BaseTask):
         bodies_per_env = self.robot_num_bodies
 
         self.vec_root_tensor = gymtorch.wrap_tensor(
-            self.root_tensor).view(self.num_envs, num_actors, 13)
+            self.root_tensor).view(self.num_envs, num_actors, 13*(NUM_OBJECTS+1))
 
         self.root_states = self.vec_root_tensor[:, 0, :]
         self.root_positions = self.root_states[..., 0:3]
@@ -133,6 +138,9 @@ class AerialRobotFinalProject(BaseTask):
 
         print("num_envs:", self.num_envs)
 
+        self.segmentation_counter = 0
+        self.env_asset_handles = []
+
         asset_options = asset_class_to_AssetOptions(self.cfg.robot_asset)
 
         robot_asset = self.gym.load_asset(
@@ -189,6 +197,67 @@ class AerialRobotFinalProject(BaseTask):
             camera_tensor = self.gym.get_camera_image_gpu_tensor(self.sim, env_handle, cam_handle, gymapi.IMAGE_DEPTH)
             torch_cam_tensor = gymtorch.wrap_tensor(camera_tensor)
             self.camera_tensors.append(torch_cam_tensor)
+
+            env_asset_list = self.env_asset_manager.prepare_assets_for_simulation(self.gym, self.sim)
+            asset_counter = 0
+
+            # have the segmentation counter be the max defined semantic id + 1. Use this to set the semantic mask of objects that are
+            # do not have a defined semantic id in the config file, but still requre one. Increment for every instance in the next snippet
+            for i in range(NUM_OBJECTS):
+                dict_item = env_asset_list[i]
+                self.segmentation_counter = max(self.segmentation_counter, int(dict_item["semantic_id"]) + 1)
+
+            for i in range(NUM_OBJECTS):
+                dict_item = env_asset_list[i]
+                folder_path = dict_item["asset_folder_path"]
+                filename = dict_item["asset_file_name"]
+                asset_options = dict_item["asset_options"]
+                whole_body_semantic = dict_item["body_semantic_label"]
+                per_link_semantic = dict_item["link_semantic_label"]
+                semantic_masked_links = dict_item["semantic_masked_links"]
+                semantic_id = dict_item["semantic_id"]
+                color = dict_item["color"]
+                collision_mask = dict_item["collision_mask"]
+
+                loaded_asset = self.gym.load_asset(self.sim, folder_path, filename, asset_options)
+
+                assert not (whole_body_semantic and per_link_semantic)
+                if semantic_id < 0:
+                    object_segmentation_id = self.segmentation_counter
+                    self.segmentation_counter += 1
+                else:
+                    object_segmentation_id = semantic_id
+
+                asset_counter += 1
+
+                env_asset_handle = self.gym.create_actor(env_handle, loaded_asset, start_pose,
+                                                         "env_asset_" + str(asset_counter), i, collision_mask,
+                                                         object_segmentation_id)
+                self.env_asset_handles.append(env_asset_handle)
+                if len(self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)) > 1:
+                    print("Env asset has rigid body with more than 1 link: ",
+                          len(self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)))
+                    sys.exit(0)
+
+                if per_link_semantic:
+                    rigid_body_names = None
+                    if len(semantic_masked_links) == 0:
+                        rigid_body_names = self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)
+                    else:
+                        rigid_body_names = semantic_masked_links
+                    for rb_index in range(len(rigid_body_names)):
+                        self.segmentation_counter += 1
+                        self.gym.set_rigid_body_segmentation_id(env_handle, env_asset_handle, rb_index,
+                                                                self.segmentation_counter)
+
+                if color is None:
+                    color = np.random.randint(low=50, high=200, size=3)
+
+                self.gym.set_rigid_body_color(env_handle, env_asset_handle, 0, gymapi.MESH_VISUAL,
+                                              gymapi.Vec3(color[0] / 255, color[1] / 255, color[2] / 255))
+
+            self.envs.append(env_handle)
+            self.actor_handles.append(actor_handle)
         
         self.robot_mass = 0
         for prop in self.robot_body_props:

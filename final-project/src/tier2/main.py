@@ -7,8 +7,8 @@ from aeriel_robot_final_project import AerialRobotFinalProject
 
 def main():
     task_registry.register( "quad_for_final_project", AerialRobotFinalProject, AerialRobotCfgFinalProject())
-    # env, env_cfg = task_registry.make_env("quad_for_final_project")
-    env, env_cfg = task_registry.make_env("quad_with_obstacles")
+    env, env_cfg = task_registry.make_env("quad_for_final_project")
+    # env, env_cfg = task_registry.make_env("quad_with_obstacles")
 
     print("Number of environments", env_cfg.env.num_envs)
     command_actions = torch.zeros((env_cfg.env.num_envs, env_cfg.env.num_actions))
