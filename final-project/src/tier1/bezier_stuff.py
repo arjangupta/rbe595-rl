@@ -29,8 +29,29 @@ def bezier_test():
         )
     plt.show()
     
+def matrix_rotate():
+    matrix10 = np.matrix(
+        [[0.0, 0.5, 0.5, 1.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 0.0]],
+        dtype=np.float32
+    )
+    print("matrix10")
+    print(matrix10)
 
+    x_rot_3d_90 = np.matrix(
+        [[1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 1.0, 0.0]],
+        dtype=np.float32
+    )
+
+    # Rotate and print
+    matrix10_rot = x_rot_3d_90 * matrix10
+    print("matrix10_rot")
+    print(matrix10_rot)
 
 if __name__ == "__main__":
     bezier_test()
+    matrix_rotate()
 
