@@ -205,10 +205,10 @@ class AerialRobotFinalProject(BaseTask):
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
         return
 
-    def step(self, actions):
+    def step(self, target_pos):
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(actions)
+            self.pre_physics_step(target_pos)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
@@ -262,7 +262,7 @@ class AerialRobotFinalProject(BaseTask):
         self.reset_buf[env_ids] = 1
         self.progress_buf[env_ids] = 0
 
-    def pre_physics_step(self, _actions):
+    def pre_physics_step(self, _target_pos):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
@@ -270,16 +270,16 @@ class AerialRobotFinalProject(BaseTask):
         self.counter += 1
 
         
-        actions = _actions.to(self.device)
+        target_pos = _target_pos.to(self.device)
 
-        # Clamp the actions by looking at the increments
-        increment = actions - self.root_positions
+        # Clamp the target_pos by looking at the increments
+        increment = target_pos - self.root_positions
         increment = tensor_clamp(increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
-        actions = increment + self.root_positions
+        target_pos = increment + self.root_positions
 
-        self.action_input[:] = torch.cat([actions[0], torch.tensor([0], device=self.device)])
+        self.action_input[:] = torch.cat([target_pos[0], torch.tensor([0], device=self.device)])
 
-        # clear actions for reset envs
+        # clear target_pos for reset envs
         self.forces[:] = 0.0
         self.torques[:, :] = 0.0
 
@@ -288,7 +288,7 @@ class AerialRobotFinalProject(BaseTask):
         self.torques[:, 0] = output_torques_inertia_normalized
         self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
 
-        # apply actions
+        # apply target_pos
         self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(
             self.forces), gymtorch.unwrap_tensor(self.torques), gymapi.LOCAL_SPACE)
 
