@@ -27,12 +27,7 @@ import time
 class AerialRobotFinalProject(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
-        print("Custom AerialRobotFinalProject constructor")
-        print("cfg:", cfg)
-        print("sim_params:", sim_params)
-        print("physics_engine:", physics_engine)
-        print("sim_device:", sim_device)
-        print("headless:", headless)
+        print("\n\n\n\n\n CREATING AerialRobot for RBE 595 Final Project - Tier 1 \n\n\n\n\n\n"")
         self.cfg = cfg
 
         # Override num_envs to 1
