@@ -32,24 +32,55 @@ def bezier_test():
 def matrix_rotate():
     matrix10 = np.matrix(
         [[0.0, 0.5, 0.5, 1.0],
-        [0.0, 0.0, 1.0, 1.0],
-        [0.0, 0.0, 0.0, 0.0]],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0]],
         dtype=np.float32
     )
+    np.set_printoptions(precision=2)
     print("matrix10")
     print(matrix10)
 
-    x_rot_3d_90 = np.matrix(
+    x_rot_3d_45 = np.matrix(
         [[1.0, 0.0, 0.0],
-        [0.0, 0.0, -1.0],
-        [0.0, 1.0, 0.0]],
+        [0.0, np.cos(np.deg2rad(45)), -np.sin(np.deg2rad(45))],
+        [0.0, np.sin(np.deg2rad(45)), np.cos(np.deg2rad(45))]],
         dtype=np.float32
     )
 
     # Rotate and print
-    matrix10_rot = x_rot_3d_90 * matrix10
-    print("matrix10_rot")
-    print(matrix10_rot)
+    matrix11 = x_rot_3d_45 * matrix10
+    print("matrix11")
+    print(matrix11)
+
+    # Rotate and print
+    matrix12 = x_rot_3d_45 * matrix11
+    print("matrix12")
+    print(matrix12)
+
+    # Rotate and print
+    matrix13 = x_rot_3d_45 * matrix12
+    print("matrix13")
+    print(matrix13)
+
+    # Rotate and print
+    matrix14 = x_rot_3d_45 * matrix13
+    print("matrix14")
+    print(matrix14)
+
+    # Rotate and print
+    matrix15 = x_rot_3d_45 * matrix14
+    print("matrix15")
+    print(matrix15)
+
+    # Rotate and print
+    matrix16 = x_rot_3d_45 * matrix15
+    print("matrix16")
+    print(matrix16)
+
+    # Rotate and print
+    matrix17 = x_rot_3d_45 * matrix16
+    print("matrix17")
+    print(matrix17)
 
 if __name__ == "__main__":
     bezier_test()
