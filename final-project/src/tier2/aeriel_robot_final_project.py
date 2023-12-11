@@ -27,8 +27,6 @@ import matplotlib.pyplot as plt
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 import time
 
-NUM_OBJECTS = 2
-
 class AerialRobotFinalProject(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
@@ -64,9 +62,9 @@ class AerialRobotFinalProject(BaseTask):
 
         print(f"!!!! self.num_envs {self.num_envs}, num_actors {num_actors}, bodies_per_env {bodies_per_env}")
         self.vec_root_tensor = gymtorch.wrap_tensor(
-            self.root_tensor).view(self.num_envs, num_actors, 13*(NUM_OBJECTS+1))
-            # self.root_tensor).view(self.num_envs, num_actors, 13)
-git
+            # self.root_tensor).view(self.num_envs, num_actors, 13*(NUM_OBJECTS+1))
+            self.root_tensor).view(self.num_envs, num_actors, 13)
+
         self.root_states = self.vec_root_tensor[:, 0, :]
         self.root_positions = self.root_states[..., 0:3]
         self.root_quats = self.root_states[..., 3:7]

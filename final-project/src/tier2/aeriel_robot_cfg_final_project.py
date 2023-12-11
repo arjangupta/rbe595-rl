@@ -95,7 +95,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         folder_path = f"{AERIAL_GYM_ROOT_DIR}/resources/models/environment_assets"
 
         include_asset_type = {
-            "thin": True,
+            "thin": False,
             "trees": False,
             "objects": True
         }
@@ -155,7 +155,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         color = [170, 66, 66]
 
     class tree_asset_params(asset_state_params):
-        num_assets = 1
+        num_assets = 10
 
         collision_mask = 1  # objects with the same collision mask will not collide
 
@@ -179,7 +179,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         color = [70, 200, 100]
 
     class object_asset_params(asset_state_params):
-        num_assets = 50
+        num_assets = 1
 
         max_position_ratio = [0.95, 0.95, 0.95]  # min position as a ratio of the bounds
         min_position_ratio = [0.05, 0.05, 0.05]  # max position as a ratio of the bounds
