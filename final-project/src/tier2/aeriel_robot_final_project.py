@@ -188,7 +188,7 @@ class AerialRobotFinalProject(BaseTask):
 
             actor_handle = self.gym.create_actor(
                 env_handle, robot_asset, start_pose, self.cfg.robot_asset.name, i, self.cfg.robot_asset.collision_mask, 0)
-            
+
             pos = torch.tensor([2, 0, 0], device=self.device)
             wall_pose = gymapi.Transform()
             wall_pose.p = gymapi.Vec3(*pos)
@@ -266,14 +266,14 @@ class AerialRobotFinalProject(BaseTask):
 
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
-        
+
         self.robot_mass = 0
         for prop in self.robot_body_props:
             self.robot_mass += prop.mass
         print("Total robot mass: ", self.robot_mass)
-        
+
         print("\n\n\n\n\n RBE 595 ENVIRONMENT CREATED \n\n\n\n\n\n")
-    
+
     def render_cameras(self):        
         self.gym.render_all_camera_sensors(self.sim)
         self.gym.start_access_image_tensors(self.sim)
@@ -315,6 +315,20 @@ class AerialRobotFinalProject(BaseTask):
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
+
+        self.env_asset_manager.randomize_pose()
+
+        self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
+
+        euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
+        self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1],
+                                                                          euler_angles[..., 2])
+        self.env_asset_root_states[env_ids, :, 7:13] = 0.0
+
+        # get environment lower and upper bounds
+        self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)
+        self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
+
         self.root_states[env_ids] = self.initial_root_states[env_ids]
         self.root_states[env_ids,
                          0:3] = 2.0*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
