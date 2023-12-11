@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 def bezier_test():
     nodes = np.asfortranarray([
-        [0.0, 0.625, 1.0],
-        [0.0, 0.5, 0.5]
+        [0.0, 0.5, 0.5, 1.0],
+        [0.0, 0.0, 1.0, 1.0]
     ])
-    curve = bezier.Curve(nodes, degree=2)
+    curve = bezier.Curve(nodes, degree=3)
     s_vals = np.linspace(0.0, 1.0, 10)
     points = curve.evaluate_multi(s_vals)
     print(points)
@@ -16,7 +16,7 @@ def bezier_test():
     ax.plot(nodes[0, :], nodes[1, :], "o--", color="black")
     ax.plot(points[0, :], points[1, :], "o--", color="red")
     ax.axis("scaled")
-    ax.set_title("A quadratic Bézier curve")
+    ax.set_title("Quadrotor cubic Bézier curve")
     # Label coordinates of curve points
     for i, point in enumerate(points.T):
         ax.text(
