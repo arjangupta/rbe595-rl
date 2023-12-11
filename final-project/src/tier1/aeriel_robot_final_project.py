@@ -27,7 +27,7 @@ import time
 class AerialRobotFinalProject(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
-        print("\n\n\n\n\n CREATING AerialRobot for RBE 595 Final Project - Tier 1 \n\n\n\n\n\n"")
+        print("\n\n\n\n\n CREATING AerialRobot for RBE 595 Final Project - Tier 1 \n\n\n\n\n\n")
         self.cfg = cfg
 
         # Override num_envs to 1
@@ -258,10 +258,10 @@ class AerialRobotFinalProject(BaseTask):
         
         actions = _actions.to(self.device)
 
-        # Clamp the action such that the drone can only ever move by 1 meter in any direction
-        # TODO: Revisit this in case actions could be negative
-        clamp_check = actions - self.root_positions > 1
-        actions = torch.where(clamp_check, self.root_positions + 1, actions)
+        # Clamp the actions by looking at the increments
+        increment = actions - self.root_positions
+        increment = tensor_clamp(increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+        actions = increment + self.root_positions
 
         self.action_input[:] = torch.cat([actions[0], torch.tensor([0], device=self.device)])
 
