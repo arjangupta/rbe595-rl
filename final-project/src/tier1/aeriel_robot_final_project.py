@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 import time
 
-class AerialRobotFinalProject(BaseTask):
+class AerialRobotFinalProjectTier1(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
         print("\n\n\n\n\n CREATING AerialRobot for RBE 595 Final Project - Tier 1 \n\n\n\n\n\n")

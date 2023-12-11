@@ -11,7 +11,7 @@ from aerial_gym.envs.base.base_config import BaseConfig
 import numpy as np
 from aerial_gym import AERIAL_GYM_ROOT_DIR
 
-class AerialRobotCfgFinalProject(BaseConfig):
+class AerialRobotCfgFinalProjectTier1(BaseConfig):
     seed = 1
     class env:
         num_envs = 65536
