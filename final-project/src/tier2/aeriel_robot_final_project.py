@@ -1,3 +1,9 @@
+# Copyright (c) 2023, Autonomous Robots Lab, Norwegian University of Science and Technology
+# All rights reserved.
+
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 # Modified by: Arjan Gupta & Taylor Bergeron
 
 # Original copyright:
@@ -30,39 +36,40 @@ import time
 class AerialRobotFinalProject(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
-        print("Custom AerialRobotFinalProject constructor")
-        print("cfg:", cfg)
-        print("sim_params:", sim_params)
-        print("physics_engine:", physics_engine)
-        print("sim_device:", sim_device)
-        print("headless:", headless)
         self.cfg = cfg
 
-        # Override num_envs to 1
+        # Override num envs to 1
         self.cfg.env.num_envs = 1
 
+        # Switch on cameras
+        self.cfg.env.enable_onboard_cameras = True
+
         self.max_episode_length = int(self.cfg.env.episode_length_s / self.cfg.sim.dt)
-        self.debug_viz = False
-        # num_actors = 1
+        self.debug_viz = True
 
         self.sim_params = sim_params
         self.physics_engine = physics_engine
         self.sim_device_id = sim_device
         self.headless = headless
 
+        self.enable_onboard_cameras = self.cfg.env.enable_onboard_cameras
+
         self.env_asset_manager = AssetManager(self.cfg, sim_device)
-        self.cam_resolution = (480,270)
+        self.cam_resolution = (480, 270)
 
         super().__init__(self.cfg, sim_params, physics_engine, sim_device, headless)
         self.root_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
         self.contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
 
-        num_actors = self.env_asset_manager.get_env_actor_count() + 1 # Number of obstacles in the environment + one robot
-        bodies_per_env = self.env_asset_manager.get_env_link_count() + self.robot_num_bodies # Number of links in the environment + robot
+        self.gym.refresh_actor_root_state_tensor(self.sim)
+        self.gym.refresh_net_contact_force_tensor(self.sim)
 
-        print(f"!!!! self.num_envs {self.num_envs}, num_actors {num_actors}, bodies_per_env {bodies_per_env}")
+        num_actors = self.env_asset_manager.get_env_actor_count() + 1  # Number of obstacles in the environment + one robot
+        bodies_per_env = self.env_asset_manager.get_env_link_count() + self.robot_num_bodies  # Number of links in the environment + robot
+
+        print(f"!!!! self.num_envs {self.num_envs}, num_actors {num_actors}")
+
         self.vec_root_tensor = gymtorch.wrap_tensor(
-            # self.root_tensor).view(self.num_envs, num_actors, 13*(NUM_OBJECTS+1))
             self.root_tensor).view(self.num_envs, num_actors, 13)
 
         self.root_states = self.vec_root_tensor[:, 0, :]
@@ -76,13 +83,12 @@ class AerialRobotFinalProject(BaseTask):
         self.privileged_obs_buf = None
         if self.vec_root_tensor.shape[1] > 1:
             if self.get_privileged_obs:
-                self.privileged_obs_buf = self.env_asset_root_states
+                self.privileged_obs_buf = self.env_asset_root_states.clone()
+
         self.contact_forces = gymtorch.wrap_tensor(self.contact_force_tensor).view(self.num_envs, bodies_per_env, 3)[:,
                               0]
 
         self.collisions = torch.zeros(self.num_envs, device=self.device)
-
-        # self.gym.refresh_actor_root_state_tensor(self.sim)
 
         self.initial_root_states = self.root_states.clone()
         self.counter = 0
@@ -102,25 +108,30 @@ class AerialRobotFinalProject(BaseTask):
 
         self.controller = Controller(self.cfg.control, self.device)
 
-        self.full_camera_array = torch.zeros((self.num_envs, 270, 480), device=self.device)
+        # Getting environment bounds
+        self.env_lower_bound = torch.zeros(
+            (self.num_envs, 3), dtype=torch.float32, device=self.device)
+        self.env_upper_bound = torch.zeros(
+            (self.num_envs, 3), dtype=torch.float32, device=self.device)
+
+        if self.cfg.env.enable_onboard_cameras:
+            self.full_camera_array = torch.zeros((self.num_envs, 270, 480), device=self.device)
 
         if self.viewer:
-            print("Creating viewer")
             cam_pos_x, cam_pos_y, cam_pos_z = self.cfg.viewer.pos[0], self.cfg.viewer.pos[1], self.cfg.viewer.pos[2]
-            cam_target_x, cam_target_y, cam_target_z = self.cfg.viewer.lookat[0], self.cfg.viewer.lookat[1], self.cfg.viewer.lookat[2]
+            cam_target_x, cam_target_y, cam_target_z = self.cfg.viewer.lookat[0], self.cfg.viewer.lookat[1], \
+                                                       self.cfg.viewer.lookat[2]
             cam_pos = gymapi.Vec3(cam_pos_x, cam_pos_y, cam_pos_z)
             cam_target = gymapi.Vec3(cam_target_x, cam_target_y, cam_target_z)
             cam_ref_env = self.cfg.viewer.ref_env
-            
+
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
-        
-        # Image counter
-        self.image_counter = 0
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
-        self._create_ground_plane()
+        if self.cfg.env.create_ground_plane:
+            self._create_ground_plane()
         self._create_envs()
         self.progress_buf = torch.zeros(
             self.cfg.env.num_envs, device=self.sim_device, dtype=torch.long)
@@ -138,15 +149,6 @@ class AerialRobotFinalProject(BaseTask):
         asset_root = os.path.dirname(asset_path)
         asset_file = os.path.basename(asset_path)
 
-        print("asset_path:", asset_path)
-        print("asset_root:", asset_root)
-        print("asset_file:", asset_file)
-
-        print("num_envs:", self.num_envs)
-
-        self.segmentation_counter = 0
-        self.env_asset_handles = []
-
         asset_options = asset_class_to_AssetOptions(self.cfg.robot_asset)
 
         robot_asset = self.gym.load_asset(
@@ -155,12 +157,16 @@ class AerialRobotFinalProject(BaseTask):
         self.robot_num_bodies = self.gym.get_asset_rigid_body_count(robot_asset)
 
         start_pose = gymapi.Transform()
+        # create env instance
+        pos = torch.tensor([0, 0, 0], device=self.device)
+        start_pose.p = gymapi.Vec3(*pos)
         self.env_spacing = self.cfg.env.env_spacing
         env_lower = gymapi.Vec3(-self.env_spacing, -
-                                self.env_spacing, -self.env_spacing)
+        self.env_spacing, -self.env_spacing)
         env_upper = gymapi.Vec3(
             self.env_spacing, self.env_spacing, self.env_spacing)
         self.actor_handles = []
+        self.env_asset_handles = []
         self.envs = []
         self.camera_handles = []
         self.camera_tensors = []
@@ -179,30 +185,27 @@ class AerialRobotFinalProject(BaseTask):
         # orientation of the camera relative to the body
         local_transform.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
+        self.segmentation_counter = 0
+
         for i in range(self.num_envs):
-            # create env instance
-            env_handle = self.gym.create_env(
-                self.sim, env_lower, env_upper, int(np.sqrt(self.num_envs)))
-            pos = torch.tensor([0, 0, 0], device=self.device)
-            start_pose.p = gymapi.Vec3(*pos)
-
-            actor_handle = self.gym.create_actor(
-                env_handle, robot_asset, start_pose, self.cfg.robot_asset.name, i, self.cfg.robot_asset.collision_mask, 0)
-
-            pos = torch.tensor([2, 0, 0], device=self.device)
-            wall_pose = gymapi.Transform()
-            wall_pose.p = gymapi.Vec3(*pos)
-            self.robot_body_props = self.gym.get_actor_rigid_body_properties(
-                env_handle, actor_handle)
+            # create environment
+            env_handle = self.gym.create_env(self.sim, env_lower, env_upper, int(np.sqrt(self.num_envs)))
+            # insert robot asset
+            actor_handle = self.gym.create_actor(env_handle, robot_asset, start_pose, "robot", i,
+                                                 self.cfg.robot_asset.collision_mask, 0)
+            # append to lists
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
-            cam_handle = self.gym.create_camera_sensor(env_handle, camera_props)
-            self.gym.attach_camera_to_body(cam_handle, env_handle, actor_handle, local_transform, gymapi.FOLLOW_TRANSFORM)
-            self.camera_handles.append(cam_handle)
-            camera_tensor = self.gym.get_camera_image_gpu_tensor(self.sim, env_handle, cam_handle, gymapi.IMAGE_DEPTH)
-            torch_cam_tensor = gymtorch.wrap_tensor(camera_tensor)
-            self.camera_tensors.append(torch_cam_tensor)
+            if self.enable_onboard_cameras:
+                cam_handle = self.gym.create_camera_sensor(env_handle, camera_props)
+                self.gym.attach_camera_to_body(cam_handle, env_handle, actor_handle, local_transform,
+                                               gymapi.FOLLOW_TRANSFORM)
+                self.camera_handles.append(cam_handle)
+                camera_tensor = self.gym.get_camera_image_gpu_tensor(self.sim, env_handle, cam_handle,
+                                                                     gymapi.IMAGE_DEPTH)
+                torch_cam_tensor = gymtorch.wrap_tensor(camera_tensor)
+                self.camera_tensors.append(torch_cam_tensor)
 
             env_asset_list = self.env_asset_manager.prepare_assets_for_simulation(self.gym, self.sim)
             asset_counter = 0
@@ -267,28 +270,13 @@ class AerialRobotFinalProject(BaseTask):
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
+        self.robot_body_props = self.gym.get_actor_rigid_body_properties(self.envs[0], self.actor_handles[0])
         self.robot_mass = 0
         for prop in self.robot_body_props:
             self.robot_mass += prop.mass
         print("Total robot mass: ", self.robot_mass)
 
-        print("\n\n\n\n\n RBE 595 ENVIRONMENT CREATED \n\n\n\n\n\n")
-
-    def render_cameras(self):        
-        self.gym.render_all_camera_sensors(self.sim)
-        self.gym.start_access_image_tensors(self.sim)
-        self.dump_images()
-        self.gym.end_access_image_tensors(self.sim)
-        return
-    
-    def dump_images(self):
-        for env_id in range(self.num_envs):
-            # the depth values are in -ve z axis, so we need to flip it to positive
-            self.full_camera_array[env_id] = -self.camera_tensors[env_id]
-        # Save the image and increment the counter
-        # plt.imsave("images/image_" + str(self.image_counter) + ".png", self.full_camera_array[0].cpu().numpy(), cmap='gray')
-        # self.image_counter += 1
-        return
+        print("\n\n\n\n\n ENVIRONMENT CREATED \n\n\n\n\n\n")
 
     def step(self, actions):
         # step physics and render each frame
@@ -300,11 +288,36 @@ class AerialRobotFinalProject(BaseTask):
             self.post_physics_step()
 
         self.render(sync_frame_time=False)
-        self.render_cameras()
-        
+        if self.enable_onboard_cameras:
+            self.render_cameras()
+
         self.progress_buf += 1
+
+        self.check_collisions()
         self.compute_observations()
         self.compute_reward()
+
+        # Save depth image to file
+        # if self.debug_viz:
+        #     if self.counter % 250 == 0:
+        #         print("self.counter:", self.counter)
+        #         print("Saving depth image")
+        #         self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
+        #         print("Saving segmentation image")
+        #         self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_SEGMENTATION, "segmentation_image_"+str(self.counter)+".png")
+        #         print("Saving rgb image")
+        #         self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_COLOR, "rgb_image_"+str(self.counter)+".png")
+
+        # Store depth image in a buffer
+        # self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
+        # if self.enable_onboard_cameras:
+        #     depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
+        #     self.depth_image_buf[0] = torch.from_numpy(depth_image)
+
+        if self.cfg.env.reset_on_collision:
+            ones = torch.ones_like(self.reset_buf)
+            self.reset_buf = torch.where(self.collisions > 0, ones, self.reset_buf)
+
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
             self.reset_idx(reset_env_ids)
@@ -315,6 +328,8 @@ class AerialRobotFinalProject(BaseTask):
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
+        if 0 in env_ids:
+            print("\n\n\n RESETTING ENV 0 \n\n\n")
 
         self.env_asset_manager.randomize_pose()
 
@@ -328,21 +343,26 @@ class AerialRobotFinalProject(BaseTask):
         # get environment lower and upper bounds
         self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)
         self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
+        drone_pos_rand_sample = torch.rand((num_resets, 3), device=self.device)
 
-        self.root_states[env_ids] = self.initial_root_states[env_ids]
-        self.root_states[env_ids,
-                         0:3] = 2.0*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
-        self.root_states[env_ids,
-                         7:10] = 0.2*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
-        self.root_states[env_ids,
-                         10:13] = 0.2*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        drone_positions = (self.env_upper_bound[env_ids] - self.env_lower_bound[env_ids] -
+                           0.50) * drone_pos_rand_sample + (self.env_lower_bound[env_ids] + 0.25)
 
-        self.root_states[env_ids, 3:7] = 0
-        self.root_states[env_ids, 6] = 1.0
+        # set drone positions that are sampled within environment bounds
+
+        self.root_states[env_ids,
+        0:3] = drone_positions
+        self.root_states[env_ids,
+        7:10] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        self.root_states[env_ids,
+        10:13] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+
+        self.root_states[env_ids, 3:6] = 0  # standard orientation, can be randomized
+        self.root_states[env_ids, 6] = 1
 
         self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
-        self.reset_buf[env_ids] = 1
         self.progress_buf[env_ids] = 0
+        self.reset_buf[env_ids] = 1
 
     def pre_physics_step(self, _actions):
         # resets
@@ -350,7 +370,6 @@ class AerialRobotFinalProject(BaseTask):
             print("self.counter:", self.counter)
         self.counter += 1
 
-        
         actions = _actions.to(self.device)
         actions = tensor_clamp(
             actions, self.action_lower_limits, self.action_upper_limits)
@@ -360,14 +379,26 @@ class AerialRobotFinalProject(BaseTask):
         self.forces[:] = 0.0
         self.torques[:, :] = 0.0
 
-        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(self.root_states, self.action_input)
+        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(self.root_states,
+                                                                                            self.action_input)
         self.forces[:, 0, 2] = self.robot_mass * (-self.sim_params.gravity.z) * output_thrusts_mass_normalized
         self.torques[:, 0] = output_torques_inertia_normalized
         self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
 
+        # Add random forces to robot body
+        self.forces[:, 0, 0] += torch.rand((self.num_envs,), device=self.device) * 10
+        self.forces[:, 0, 1] += torch.rand((self.num_envs,), device=self.device) * 10
+
         # apply actions
         self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(
             self.forces), gymtorch.unwrap_tensor(self.torques), gymapi.LOCAL_SPACE)
+
+    def render_cameras(self):
+        self.gym.render_all_camera_sensors(self.sim)
+        self.gym.start_access_image_tensors(self.sim)
+        self.dump_images()
+        self.gym.end_access_image_tensors(self.sim)
+        return
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
@@ -378,6 +409,11 @@ class AerialRobotFinalProject(BaseTask):
         zeros = torch.zeros((self.num_envs), device=self.device)
         self.collisions[:] = 0
         self.collisions = torch.where(torch.norm(self.contact_forces, dim=1) > 0.1, ones, zeros)
+
+    def dump_images(self):
+        for env_id in range(self.num_envs):
+            # the depth values are in -ve z axis, so we need to flip it to positive
+            self.full_camera_array[env_id] = -self.camera_tensors[env_id]
 
     def compute_observations(self):
         self.obs_buf[..., :3] = self.root_positions
@@ -411,6 +447,7 @@ def quat_rotate(q, v):
             shape[0], 3, 1)).squeeze(-1) * 2.0
     return a + b + c
 
+
 @torch.jit.script
 def quat_axis(q, axis=0):
     # type: (Tensor, int) -> Tensor
@@ -420,16 +457,17 @@ def quat_axis(q, axis=0):
 
 
 @torch.jit.script
-def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length):
+def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf,
+                              max_episode_length):
     # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float) -> Tuple[Tensor, Tensor]
+
+    ## The reward function set here is arbitrary and the user is encouraged to modify this as per their need to achieve collision avoidance.
 
     # distance to target
     target_dist = torch.sqrt(root_positions[..., 0] * root_positions[..., 0] +
                              root_positions[..., 1] * root_positions[..., 1] +
                              (root_positions[..., 2]) * (root_positions[..., 2]))
     pos_reward = 2.0 / (1.0 + target_dist * target_dist)
-
-    dist_reward = (20.0 - target_dist) / 40.0
 
     # uprightness
     ups = quat_axis(root_quats, 2)
@@ -442,7 +480,7 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # combined reward
     # uprigness and spinning only matter when close to the target
-    reward = pos_reward + pos_reward * (up_reward + spinnage_reward) + dist_reward
+    reward = pos_reward + pos_reward * (up_reward + spinnage_reward)
 
     # resets due to misbehavior
     ones = torch.ones_like(reset_buf)
@@ -451,6 +489,6 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # resets due to episode length
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
-    reset = torch.where(torch.norm(root_positions, dim=1) > 10.0, ones, reset)
+    reset = torch.where(torch.norm(root_positions, dim=1) > 20, ones, reset)
 
     return reward, reset
