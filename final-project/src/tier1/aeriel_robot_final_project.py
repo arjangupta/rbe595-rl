@@ -17,7 +17,7 @@ from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
 from isaacgym import gymutil, gymtorch, gymapi
 from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
-from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject as AerialRobotCfg
+from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1 as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
 
 import matplotlib.pyplot as plt
