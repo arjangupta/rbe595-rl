@@ -259,6 +259,7 @@ class AerialRobotFinalProject(BaseTask):
         actions = _actions.to(self.device)
 
         # Clamp the action such that the drone can only ever move by 1 meter in any direction
+        # TODO: Revisit this in case actions could be negative
         clamp_check = actions - self.root_positions > 1
         actions = torch.where(clamp_check, self.root_positions + 1, actions)
 
