@@ -7,15 +7,15 @@ from aeriel_robot_final_project import AerialRobotFinalProject
 
 def main():
     task_registry.register( "quad_for_final_project", AerialRobotFinalProject, AerialRobotCfgFinalProject())
-    # env, env_cfg = task_registry.make_env("quad_for_final_project")
-    env, env_cfg = task_registry.make_env("quad_with_obstacles")
+    env, env_cfg = task_registry.make_env("quad_for_final_project")
+    # env, env_cfg = task_registry.make_env("quad_with_obstacles")
 
     print("Number of environments", env_cfg.env.num_envs)
     command_actions = torch.zeros((env_cfg.env.num_envs, env_cfg.env.num_actions))
-    command_actions[:, 0] = 0.0
-    command_actions[:, 1] = 0.0
-    command_actions[:, 2] = 0.0
-    command_actions[:, 3] = 0.8
+    command_actions[:, 0] = 5.0
+    command_actions[:, 1] = 5.0
+    command_actions[:, 2] = 5.0
+    command_actions[:, 3] = 0.0
 
     env.enable_onboard_cameras = True
 
