@@ -11,11 +11,11 @@ def main():
     # env, env_cfg = task_registry.make_env("quad_with_obstacles")
 
     print("Number of environments", env_cfg.env.num_envs)
-    command_actions = torch.zeros((env_cfg.env.num_envs, env_cfg.env.num_actions))
+    command_actions = torch.zeros((env_cfg.env.num_envs, 3))
     command_actions[:, 0] = 5.0
     command_actions[:, 1] = 5.0
     command_actions[:, 2] = 5.0
-    command_actions[:, 3] = 0.0
+    # command_actions[:, 3] = 0.0
 
     env.enable_onboard_cameras = True
 

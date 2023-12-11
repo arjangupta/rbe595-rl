@@ -257,13 +257,17 @@ class AerialRobotFinalProject(BaseTask):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
+            print("self.root_positions:", self.root_positions)
         self.counter += 1
 
         
         actions = _actions.to(self.device)
-        actions = tensor_clamp(
-            actions, self.action_lower_limits, self.action_upper_limits)
-        self.action_input[:] = actions
+
+        # Clamp the action such that the drone can only ever move by 1 meter in any direction
+        clamp_check = actions - self.root_positions > 1
+        actions = torch.where(clamp_check, self.root_positions + 1, actions)
+
+        self.action_input[:] = torch.cat([actions[0], torch.tensor([0], device=self.device)])
 
         # clear actions for reset envs
         self.forces[:] = 0.0
