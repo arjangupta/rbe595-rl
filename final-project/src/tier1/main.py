@@ -6,6 +6,7 @@ from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1
 from aeriel_robot_final_project import AerialRobotFinalProjectTier1
 
 import bezier
+import numpy as np
 
 def main():
     task_registry.register( "quad_for_final_project", AerialRobotFinalProjectTier1, AerialRobotCfgFinalProjectTier1())
@@ -20,5 +21,17 @@ def main():
     for i in range(0, 5000):
         obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
 
+def bezier_test():
+    nodes = np.asfortranarray([
+        [0.0, 0.5, 1.0],
+        [0.0, 0.5, 1.0],
+        [0.0, 0.5, 1.0],
+    ])
+    curve = bezier.Curve(nodes, degree=2)
+    s_vals = np.linspace(0.0, 1.0, 10)
+    points = curve.evaluate_multi(s_vals)
+    print(points)
+
 if __name__ == "__main__":
-    main()
+    # main()
+    bezier_test()
