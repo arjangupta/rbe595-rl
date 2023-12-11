@@ -19,7 +19,7 @@ WALL_SEMANTIC_ID = 8
 class AerialRobotCfgFinalProject(BaseConfig):
     seed = 1
     class env:
-        num_envs = 65536
+        num_envs = 64
         num_observations = 13
         get_privileged_obs = False # if True the states of all entitites in the environment will be returned as privileged observations, otherwise None will be returned
         num_actions = 4
@@ -155,7 +155,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         color = [170, 66, 66]
 
     class tree_asset_params(asset_state_params):
-        num_assets = 10
+        num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
 

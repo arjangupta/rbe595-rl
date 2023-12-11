@@ -45,7 +45,7 @@ class AerialRobotFinalProject(BaseTask):
 
         self.max_episode_length = int(self.cfg.env.episode_length_s / self.cfg.sim.dt)
         self.debug_viz = False
-        num_actors = 1
+        # num_actors = 1
 
         self.sim_params = sim_params
         self.physics_engine = physics_engine
@@ -57,26 +57,34 @@ class AerialRobotFinalProject(BaseTask):
 
         super().__init__(self.cfg, sim_params, physics_engine, sim_device, headless)
         self.root_tensor = self.gym.acquire_actor_root_state_tensor(self.sim)
+        self.contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
 
-        bodies_per_env = self.robot_num_bodies
+        num_actors = self.env_asset_manager.get_env_actor_count() + 1 # Number of obstacles in the environment + one robot
+        bodies_per_env = self.env_asset_manager.get_env_link_count() + self.robot_num_bodies # Number of links in the environment + robot
 
+        print(f"!!!! self.num_envs {self.num_envs}, num_actors {num_actors}, bodies_per_env {bodies_per_env}")
         self.vec_root_tensor = gymtorch.wrap_tensor(
             self.root_tensor).view(self.num_envs, num_actors, 13*(NUM_OBJECTS+1))
-
+            # self.root_tensor).view(self.num_envs, num_actors, 13)
+git
         self.root_states = self.vec_root_tensor[:, 0, :]
         self.root_positions = self.root_states[..., 0:3]
         self.root_quats = self.root_states[..., 3:7]
         self.root_linvels = self.root_states[..., 7:10]
         self.root_angvels = self.root_states[..., 10:13]
 
+        self.env_asset_root_states = self.vec_root_tensor[:, 1:, :]
+
         self.privileged_obs_buf = None
         if self.vec_root_tensor.shape[1] > 1:
-            self.env_asset_root_states = self.vec_root_tensor[:, 1:, :]
             if self.get_privileged_obs:
                 self.privileged_obs_buf = self.env_asset_root_states
-                
+        self.contact_forces = gymtorch.wrap_tensor(self.contact_force_tensor).view(self.num_envs, bodies_per_env, 3)[:,
+                              0]
 
-        self.gym.refresh_actor_root_state_tensor(self.sim)
+        self.collisions = torch.zeros(self.num_envs, device=self.device)
+
+        # self.gym.refresh_actor_root_state_tensor(self.sim)
 
         self.initial_root_states = self.root_states.clone()
         self.counter = 0
@@ -203,12 +211,14 @@ class AerialRobotFinalProject(BaseTask):
 
             # have the segmentation counter be the max defined semantic id + 1. Use this to set the semantic mask of objects that are
             # do not have a defined semantic id in the config file, but still requre one. Increment for every instance in the next snippet
-            for i in range(NUM_OBJECTS):
-                dict_item = env_asset_list[i]
+            # for i in range(NUM_OBJECTS):
+            #     dict_item = env_asset_list[i]
+            for dict_item in env_asset_list:
                 self.segmentation_counter = max(self.segmentation_counter, int(dict_item["semantic_id"]) + 1)
 
-            for i in range(NUM_OBJECTS):
-                dict_item = env_asset_list[i]
+            # for i in range(NUM_OBJECTS):
+            #     dict_item = env_asset_list[i]
+            for dict_item in env_asset_list:
                 folder_path = dict_item["asset_folder_path"]
                 filename = dict_item["asset_file_name"]
                 asset_options = dict_item["asset_options"]
@@ -349,6 +359,13 @@ class AerialRobotFinalProject(BaseTask):
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
+        self.gym.refresh_net_contact_force_tensor(self.sim)
+
+    def check_collisions(self):
+        ones = torch.ones((self.num_envs), device=self.device)
+        zeros = torch.zeros((self.num_envs), device=self.device)
+        self.collisions[:] = 0
+        self.collisions = torch.where(torch.norm(self.contact_forces, dim=1) > 0.1, ones, zeros)
 
     def compute_observations(self):
         self.obs_buf[..., :3] = self.root_positions
