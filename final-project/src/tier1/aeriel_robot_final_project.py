@@ -98,8 +98,8 @@ class AerialRobotFinalProject(BaseTask):
             
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
         
-        # Image counter
-        self.image_counter = 0
+        # To save images
+        self.save_images = False
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -203,9 +203,6 @@ class AerialRobotFinalProject(BaseTask):
         for env_id in range(self.num_envs):
             # the depth values are in -ve z axis, so we need to flip it to positive
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
-        # Save the image and increment the counter
-        # plt.imsave("images/image_" + str(self.image_counter) + ".png", self.full_camera_array[0].cpu().numpy(), cmap='gray')
-        # self.image_counter += 1
         return
 
     def step(self, actions):
@@ -223,6 +220,23 @@ class AerialRobotFinalProject(BaseTask):
         self.progress_buf += 1
         self.compute_observations()
         self.compute_reward()
+
+        # Save depth image to file
+        if self.save_images:
+            if self.counter % 2000 == 0:
+                print("self.counter:", self.counter)
+                print("Saving depth image")
+                self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
+                print("Saving rgb image")
+                self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_COLOR, "rgb_image_"+str(self.counter)+".png")
+        
+        # FOR TRAINING THE NN (only where images are needed)
+        # Store depth image in a buffer
+        # self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
+        # if self.enable_onboard_cameras:
+        #     depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
+        #     self.depth_image_buf[0] = torch.from_numpy(depth_image)
+
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
             self.reset_idx(reset_env_ids)
