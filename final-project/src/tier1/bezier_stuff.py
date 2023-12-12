@@ -82,7 +82,35 @@ def matrix_rotate():
     print("matrix17")
     print(matrix17)
 
+def stay_still():
+    nodes_0 = np.asfortranarray([
+        [0.0, 0.0],
+        [0.0, 0.0]
+    ])
+    curve_0 = bezier.Curve(nodes_0, degree=1)
+    s_vals = np.linspace(0.0, 1.0, 10)
+    points = curve_0.evaluate_multi(s_vals)
+    print(points)
+    # Plot the curve and control points
+    ax = curve_0.plot(10)
+    ax.plot(nodes_0[0, :], nodes_0[1, :], "o--", color="black")
+    ax.plot(points[0, :], points[1, :], "o--", color="red")
+    ax.axis("scaled")
+    ax.set_title("Stay still curve")
+    # Label coordinates of curve points
+    for i, point in enumerate(points.T):
+        ax.text(
+            point[0] + 0.02,
+            point[1] - 0.01,
+            "({:.3f}, {:.3f})".format(*point),
+            ha="left",
+            va="top",
+            fontsize=10,
+        )
+    plt.show()
+
 if __name__ == "__main__":
     bezier_test()
     matrix_rotate()
+    # stay_still()
 
