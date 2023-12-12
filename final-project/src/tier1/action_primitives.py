@@ -88,6 +88,9 @@ class QuadActionPrimitive:
         ])
         curve_0 = bezier.Curve(nodes_0, degree=1)
         self.actions.append(curve_0)
+        if self.debug:
+            print("matrix0")
+            print(nodes_0)
 
         # Generate straight line actions (1-8)
         self.straight_line_rotations()
@@ -98,6 +101,22 @@ class QuadActionPrimitive:
         # Generate curved line actions (10-17)
         self.curved_line_rotations()
 
+    def get_sampled_curve(self, action, num_samples=5):
+        # Get curve
+        curve = self.actions[action]
+        # Sample curve
+        s_vals = np.linspace(0.0, 1.0, num_samples)
+        points = curve.evaluate_multi(s_vals)
+        return points
+
 if __name__ == "__main__":
     # Test
-    qap = QuadActionPrimitive(debug=True)
+    qap = QuadActionPrimitive(debug=False)
+    # Choose an action at random
+    print("Picking an action at random")
+    action = np.random.randint(0, qap.NUM_ACTIONS)
+    print("action: " + str(action))
+    # Get sampled curve
+    points = qap.get_sampled_curve(action)
+    print("points:")
+    print(points)
