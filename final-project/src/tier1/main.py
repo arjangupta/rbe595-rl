@@ -31,8 +31,9 @@ def main():
             # Set command actions
             command_actions = torch.from_numpy(points[:,j])
             print(f"command_actions: {command_actions}")
-            # Step through the environment
-            obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
+            for k in range(0, 100):
+                # Step through the environment repeatedly
+                obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
 
 if __name__ == "__main__":
     main()

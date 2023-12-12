@@ -194,10 +194,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
         return
 
-    def step(self, target_pos):
+    def step(self, position_increment):
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(target_pos)
+            self.pre_physics_step(position_increment)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
@@ -253,24 +253,25 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         print("\n\nResetting env\n\n")
 
-    def pre_physics_step(self, _target_pos):
+    def get_current_position(self):
+        return self.root_positions
+
+    def pre_physics_step(self, _position_increment):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
             print("self.root_positions:", self.root_positions)
         self.counter += 1
 
-        
-        target_pos = _target_pos.to(self.device)
+        position_increment = _position_increment.to(self.device)
 
-        # Clamp the target_pos by looking at the increments
-        increment = target_pos - self.root_positions
-        increment = tensor_clamp(increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
-        target_pos = increment + self.root_positions
+        # Clamp the position_increment by looking at the increments
+        position_increment = tensor_clamp(
+            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
 
-        self.action_input[:] = torch.cat([target_pos[0], torch.tensor([0], device=self.device)])
+        self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
 
-        # clear target_pos for reset envs
+        # clear position_increment for reset envs
         self.forces[:] = 0.0
         self.torques[:, :] = 0.0
 
@@ -279,7 +280,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.torques[:, 0] = output_torques_inertia_normalized
         self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
 
-        # apply target_pos
+        # apply position_increment
         self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(
             self.forces), gymtorch.unwrap_tensor(self.torques), gymapi.LOCAL_SPACE)
 
