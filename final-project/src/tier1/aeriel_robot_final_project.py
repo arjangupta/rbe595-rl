@@ -27,7 +27,6 @@ import time
 class AerialRobotFinalProjectTier1(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
-        print("\n\n\n\n\n CREATING AerialRobot for RBE 595 Final Project - Tier 1 \n\n\n\n\n\n")
         self.cfg = cfg
 
         # Override num_envs to 1
@@ -89,7 +88,6 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.full_camera_array = torch.zeros((self.num_envs, 270, 480), device=self.device)
 
         if self.viewer:
-            print("Creating viewer")
             cam_pos_x, cam_pos_y, cam_pos_z = self.cfg.viewer.pos[0], self.cfg.viewer.pos[1], self.cfg.viewer.pos[2]
             cam_target_x, cam_target_y, cam_target_z = self.cfg.viewer.lookat[0], self.cfg.viewer.lookat[1], self.cfg.viewer.lookat[2]
             cam_pos = gymapi.Vec3(cam_pos_x, cam_pos_y, cam_pos_z)
@@ -116,17 +114,11 @@ class AerialRobotFinalProjectTier1(BaseTask):
         return
 
     def _create_envs(self):
-        print("\n\n\n\n\n CREATING ENVIRONMENT \n\n\n\n\n\n")
+        print("\nCREATING AerialRobot for RBE 595 Final Project - Tier 1\n")
         asset_path = self.cfg.robot_asset.file.format(
             AERIAL_GYM_ROOT_DIR=AERIAL_GYM_ROOT_DIR)
         asset_root = os.path.dirname(asset_path)
         asset_file = os.path.basename(asset_path)
-
-        print("asset_path:", asset_path)
-        print("asset_root:", asset_root)
-        print("asset_file:", asset_file)
-
-        print("num_envs:", self.num_envs)
 
         asset_options = asset_class_to_AssetOptions(self.cfg.robot_asset)
 
@@ -188,10 +180,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.robot_mass = 0
         for prop in self.robot_body_props:
             self.robot_mass += prop.mass
-        print("Total robot mass: ", self.robot_mass)
         
-        print("\n\n\n\n\n RBE 595 ENVIRONMENT CREATED \n\n\n\n\n\n")
-    
     def render_cameras(self):        
         self.gym.render_all_camera_sensors(self.sim)
         self.gym.start_access_image_tensors(self.sim)
@@ -262,7 +251,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.reset_buf[env_ids] = 1
         self.progress_buf[env_ids] = 0
 
-        print("Resetting envs:", env_ids)
+        print("\n\nResetting env\n\n")
 
     def pre_physics_step(self, _target_pos):
         # resets
