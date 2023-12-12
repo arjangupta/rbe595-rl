@@ -1,3 +1,5 @@
+import random
+
 import isaacgym
 from aerial_gym.envs import *
 from aerial_gym.utils import get_args, task_registry
@@ -6,7 +8,23 @@ from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject
 from aeriel_robot_final_project import AerialRobotFinalProject
 
 def main():
-    task_registry.register( "quad_for_final_project", AerialRobotFinalProject, AerialRobotCfgFinalProject())
+
+    map = random.randint(0,9)
+
+    # asset_type_to_dict_map = {
+    #     "thin": cfg.thin_asset_params,
+    #     "trees": cfg.tree_asset_params,
+    #     "objects": cfg.object_asset_params,
+    #     "long_left_wall": cfg.left_wall,
+    #     "long_right_wall": cfg.right_wall,
+    #     "back_wall": cfg.back_wall,
+    #     "front_wall": cfg.front_wall,
+    #     "bottom_wall": cfg.bottom_wall,
+    #     "top_wall": cfg.top_wall}
+
+    cfg = AerialRobotCfgFinalProject(map)
+
+    task_registry.register( "quad_for_final_project", AerialRobotFinalProject, cfg)
     env, env_cfg = task_registry.make_env("quad_for_final_project")
     # env, env_cfg = task_registry.make_env("quad_with_obstacles")
 

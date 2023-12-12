@@ -17,6 +17,11 @@ OBJECT_SEMANTIC_ID = 3
 WALL_SEMANTIC_ID = 8
 
 class AerialRobotCfgFinalProject(BaseConfig):
+
+    def __init__(self, map):
+        self.map = map
+        # self.asset_dict = asset_dict
+
     seed = 1
 
     class env:
@@ -30,6 +35,10 @@ class AerialRobotCfgFinalProject(BaseConfig):
         enable_onboard_cameras = False  # enable onboard cameras
         reset_on_collision = True  # reset environment when contact force on quadrotor is above a threshold
         create_ground_plane = True  # create a ground plane
+
+        """For the walls, if at 0,0,0, will appear with half above ground plane, half below. The 
+        wall is 20x20. The location of the wall is from its center, so to have the bottom
+        flush with the ground, it needs to be 10z"""
 
     class viewer:
         ref_env = 0
@@ -184,7 +193,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         min_position_ratio = [0.5, 1.0, 0.5]  # min position as a ratio of the bounds
         max_position_ratio = [0.5, 1.0, 0.5]  # max position as a ratio of the bounds
 
-        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+        specified_position = [0, 10, 10]  # if > -900, use this value instead of randomizing the ratios
 
         min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
         max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
@@ -205,7 +214,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         min_position_ratio = [0.5, 0.0, 0.5]  # min position as a ratio of the bounds
         max_position_ratio = [0.5, 0.0, 0.5]  # max position as a ratio of the bounds
 
-        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+        specified_position = [0, -10, 10]  # if > -900, use this value instead of randomizing the ratios
 
         min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
         max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
@@ -247,7 +256,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         min_position_ratio = [0.5, 0.5, 0.0]  # min position as a ratio of the bounds
         max_position_ratio = [0.5, 0.5, 0.0]  # max position as a ratio of the bounds
 
-        specified_position = [-1000.0, -1000.0, -1000.0]  # if > -900, use this value instead of randomizing the ratios
+        specified_position = [1000.0, 1000.0, 1000.0]  # if > -900, use this value instead of randomizing the ratios
 
         min_euler_angles = [0.0, 0.0, 0.0]  # min euler angles
         max_euler_angles = [0.0, 0.0, 0.0]  # max euler angles
@@ -306,17 +315,17 @@ class AerialRobotCfgFinalProject(BaseConfig):
         folder_path = f"{AERIAL_GYM_ROOT_DIR}/resources/models/environment_assets"
 
         include_asset_type = {
-            "thin": True,
+            "thin": False,
             "trees": False,
             "objects": True
         }
 
         include_env_bound_type = {
             "front_wall": False,
-            "left_wall": False,
+            "long_left_wall": True,
             "top_wall": False,
             "back_wall": False,
-            "right_wall": False,
+            "long_right_wall": True,
             "bottom_wall": False}
 
         env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space

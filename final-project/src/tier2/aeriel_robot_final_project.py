@@ -27,7 +27,7 @@ from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
 from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
-from aerial_gym.utils.asset_manager import AssetManager
+from aeriel_asset_manager_final_project import AssetManager
 
 import matplotlib.pyplot as plt
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
@@ -54,7 +54,7 @@ class AerialRobotFinalProject(BaseTask):
 
         self.enable_onboard_cameras = self.cfg.env.enable_onboard_cameras
 
-        self.env_asset_manager = AssetManager(self.cfg, sim_device)
+        self.env_asset_manager = AssetManager(self.cfg, sim_device, self.pick_random_dict_map())
         self.cam_resolution = (480, 270)
 
         super().__init__(self.cfg, sim_params, physics_engine, sim_device, headless)
@@ -126,6 +126,21 @@ class AerialRobotFinalProject(BaseTask):
             cam_ref_env = self.cfg.viewer.ref_env
 
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
+
+
+    def pick_random_dict_map(self):
+        asset_type_to_dict_map = {
+            "thin": self.cfg.thin_asset_params,
+            "trees": self.cfg.tree_asset_params,
+            "objects": self.cfg.object_asset_params,
+            "long_left_wall": self.cfg.left_wall,
+            "long_right_wall": self.cfg.right_wall,
+            "back_wall": self.cfg.back_wall,
+            "front_wall": self.cfg.front_wall,
+            "bottom_wall": self.cfg.bottom_wall,
+            "top_wall": self.cfg.top_wall}
+        return asset_type_to_dict_map
+
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -363,6 +378,7 @@ class AerialRobotFinalProject(BaseTask):
         self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
+        self.env_asset_manager.asset_type_to_dict_map = self.pick_random_dict_map()
 
     def pre_physics_step(self, _actions):
         # resets
