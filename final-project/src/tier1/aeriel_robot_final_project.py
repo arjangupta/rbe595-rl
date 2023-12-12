@@ -262,6 +262,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.reset_buf[env_ids] = 1
         self.progress_buf[env_ids] = 0
 
+        print("Resetting envs:", env_ids)
+
     def pre_physics_step(self, _target_pos):
         # resets
         if self.counter % 250 == 0:
