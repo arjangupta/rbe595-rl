@@ -19,7 +19,7 @@ class AerialRobotCfgFinalProjectTier1(BaseConfig):
         get_privileged_obs = False # if True the states of all entitites in the environment will be returned as privileged observations, otherwise None will be returned
         num_actions = 4
         env_spacing = 1
-        episode_length_s = 8 # episode length in seconds
+        episode_length_s = 3600 # episode length in seconds
         num_control_steps_per_env_step = 1 # number of physics steps per env step
 
     class control:

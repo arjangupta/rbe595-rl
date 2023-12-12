@@ -30,8 +30,12 @@ def main():
         for j in range(0, 5):
             # Set command actions
             command_actions = torch.from_numpy(points[:,j])
-            print(f"command_actions: {command_actions}")
-            for k in range(0, 100):
+            if i % 250 == 0:
+                print(f"command_actions: {command_actions}")
+            for k in range(0, 50):
+                if j == 4 and k == 49:
+                    curr_pos = env.get_current_position()
+                    print(f"Reached target pos of action: {curr_pos}")
                 # Step through the environment repeatedly
                 obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
 

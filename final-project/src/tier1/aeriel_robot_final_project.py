@@ -99,6 +99,9 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # To save images
         self.save_images = False
 
+        # Action display fixed coordinate
+        self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
+
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
@@ -260,14 +263,20 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
-            print("self.root_positions:", self.root_positions)
         self.counter += 1
 
+        # Move the position_increment to the device
         position_increment = _position_increment.to(self.device)
 
-        # Clamp the position_increment by looking at the increments
+        # Clamp the position_increment by looking at the action limits
         position_increment = tensor_clamp(
             position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+        
+        # Increment the position with current position
+        # position_increment = position_increment + self.root_positions[0]
+
+        # Increment the position with fixed coordinate
+        position_increment = position_increment + self.action_display_fixed_coordinate[0]
 
         self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
 
@@ -275,8 +284,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.forces[:] = 0.0
         self.torques[:, :] = 0.0
 
-        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(self.root_states, self.action_input)
-        self.forces[:, 0, 2] = self.robot_mass * (-self.sim_params.gravity.z) * output_thrusts_mass_normalized
+        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(
+            self.root_states, self.action_input)
+        self.forces[:, 0, 2] = self.robot_mass * (
+            -self.sim_params.gravity.z) * output_thrusts_mass_normalized
         self.torques[:, 0] = output_torques_inertia_normalized
         self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
 
