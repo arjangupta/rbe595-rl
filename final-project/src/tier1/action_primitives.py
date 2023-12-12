@@ -1,7 +1,7 @@
 import bezier
 import numpy as np
 
-class QuadActionPrimitive:
+class QuadActionPrimitives:
     def __init__(self, debug=False):
         # Set up debug flag
         self.debug = debug
@@ -84,6 +84,7 @@ class QuadActionPrimitive:
         # Action 0 (just stay still)
         nodes_0 = np.asfortranarray([
             [0.0, 0.0],
+            [0.0, 0.0],
             [0.0, 0.0]
         ])
         curve_0 = bezier.Curve(nodes_0, degree=1)
@@ -111,7 +112,7 @@ class QuadActionPrimitive:
 
 if __name__ == "__main__":
     # Test
-    qap = QuadActionPrimitive(debug=False)
+    qap = QuadActionPrimitives(debug=False)
     # Choose an action at random
     print("Picking an action at random")
     action = np.random.randint(0, qap.NUM_ACTIONS)
@@ -120,3 +121,6 @@ if __name__ == "__main__":
     points = qap.get_sampled_curve(action)
     print("points:")
     print(points)
+    # Print first column
+    print("points[:,0]")
+    print(points[:,0])
