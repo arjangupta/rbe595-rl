@@ -34,21 +34,37 @@ class ReplayMemory(object):
     
 class QuadrotorNeuralNetwork(nn.Module):
 
-    def __init__(self, n_observations, n_actions):
+    def __init__(self, n_rel_x, n_rel_y, n_rel_z, n_actions):
         super(QuadrotorNeuralNetwork, self).__init__()
-        self.layer1 = nn.Linear(n_observations, 128)
-        self.layer2 = nn.Linear(128, 128)
-        self.layer3 = nn.Linear(128, n_actions)
+        # Separated layers for each relative position
+        self.x_layer1 = nn.Linear(n_rel_x, 8)
+        self.x_layer2 = nn.Linear(8, 8)
+        self.y_layer1 = nn.Linear(n_rel_y, 8)
+        self.y_layer2 = nn.Linear(8, 4)
+        self.z_layer1 = nn.Linear(n_rel_z, 8)
+        self.z_layer2 = nn.Linear(8, 4)
+        # Join the layers
+        self.joint_layer1 = nn.Linear((8 + 4 + 4), 8)
+        self.joint_layer2 = nn.Linear(8, 32)
+        self.output_layer = nn.Linear(32, n_actions)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, x):
-        x = F.relu(self.layer1(x))
-        x = F.relu(self.layer2(x))
-        return self.layer3(x)
+    def forward(self, rel_x, rel_y, rel_z):
+        x = F.relu(self.x_layer1(rel_x))
+        x = F.relu(self.x_layer2(x))
+        y = F.relu(self.y_layer1(rel_y))
+        y = F.relu(self.y_layer2(y))
+        z = F.relu(self.z_layer1(rel_z))
+        z = F.relu(self.z_layer2(z))
+        joint = torch.cat((x, y, z), dim=1)
+        joint = F.relu(self.joint_layer1(joint))
+        joint = F.relu(self.joint_layer2(joint))
+        return self.output_layer(joint)
 
 class DeepQLearningAgent:
-    def __init__():    
+    def __init__(self, gym_iface):
+        self.gym_iface = gym_iface
         # BATCH_SIZE is the number of transitions sampled from the replay buffer
         # GAMMA is the discount factor as mentioned in the previous section
         # EPS_START is the starting value of epsilon
@@ -56,22 +72,23 @@ class DeepQLearningAgent:
         # EPS_DECAY controls the rate of exponential decay of epsilon, higher means a slower decay
         # TAU is the update rate of the target network
         # LR is the learning rate of the ``AdamW`` optimizer
-        BATCH_SIZE = 128
-        GAMMA = 0.99
-        EPS_START = 0.9
-        EPS_END = 0.05
-        EPS_DECAY = 1000
-        TAU = 0.005
-        LR = 1e-4
+        self.BATCH_SIZE = 128
+        self.GAMMA = 0.99
+        self.EPS_START = 0.9
+        self.EPS_END = 0.05
+        self.EPS_DECAY = 1000
+        self.TAU = 0.005
+        self.LR = 1e-4
 
         # Get number of actions from gym action space
-        n_actions = env.action_space.n
-        # Get the number of state observations
-        state, info = env.reset()
-        n_observations = len(state)
+        n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
 
-        policy_net = QuadrotorNeuralNetwork(n_observations, n_actions).to(device)
-        target_net = QuadrotorNeuralNetwork(n_observations, n_actions).to(device)
+        # Declare the policy and target networks
+        n_rel_x = 1
+        n_rel_y = 1
+        n_rel_z = 1
+        policy_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)
+        target_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)
         target_net.load_state_dict(policy_net.state_dict())
 
         optimizer = optim.AdamW(policy_net.parameters(), lr=LR, amsgrad=True)
