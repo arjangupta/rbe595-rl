@@ -107,7 +107,7 @@ class DeepQLearningAgent:
                 # found, so we pick action with the larger expected reward.
                 return self.policy_net(rel_x, rel_y, rel_z).max(1).indices.view(1, 1)
         else:
-            return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
+            return torch.tensor([[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]], device=device, dtype=torch.long)
 
     def optimize_model(self):
         if len(self.memory) < self.BATCH_SIZE:
@@ -155,26 +155,27 @@ class DeepQLearningAgent:
         torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
 
-    def run(self):
+    def train(self):
         if torch.cuda.is_available():
             num_episodes = 5000
         else:
             num_episodes = 1000
 
-        for i_episode in range(num_episodes):
-            # Initialize the environment and get it's state
-            state = self.gym_iface.get_initial_state()
-            state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+        for ep in range(num_episodes):
+            state = self.gym_iface.get_current_position()
+            # state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+            curr_pos_x = state[0], curr_pos_y = state[1], curr_pos_z = state[2]
             for t in count():
-                action = self.select_action(state)
-                observation, reward, terminated, truncated, _ = self.gym_iface.step(action.item())
+                action = self.select_action(curr_pos_x, curr_pos_y, curr_pos_z)
+                # observation, reward, terminated, truncated, _ =
+                next_state, reward = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
-                done = terminated or truncated
+                # done = terminated or truncated
 
-                if terminated:
-                    next_state = None
-                else:
-                    next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+                # if terminated:
+                #     next_state = None
+                # else:
+                #     next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
 
                 # Store the transition in memory
                 self.memory.push(state, action, next_state, reward)
@@ -187,13 +188,8 @@ class DeepQLearningAgent:
 
                 # Soft update of the target network's weights
                 # θ′ ← τ θ + (1 −τ )θ′
-                target_net_state_dict = target_net.state_dict()
-                policy_net_state_dict = policy_net.state_dict()
+                target_net_state_dict = self.target_net.state_dict()
+                policy_net_state_dict = self.policy_net.state_dict()
                 for key in policy_net_state_dict:
                     target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
-                target_net.load_state_dict(target_net_state_dict)
-
-                if done:
-                    episode_durations.append(t + 1)
-                    plot_durations()
-                    break
+                self.target_net.load_state_dict(target_net_state_dict)

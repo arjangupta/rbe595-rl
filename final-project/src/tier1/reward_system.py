@@ -4,7 +4,7 @@ given in Camci et al. 2020.
 """
 import numpy as np
 
-class RewardSystem:
+class QuadRewardSystem:
     def __init__(self):
         # Initialize reward variables from paper
         

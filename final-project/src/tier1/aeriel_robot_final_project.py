@@ -273,10 +273,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
             position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
         
         # Increment the position with current position
-        # position_increment = position_increment + self.root_positions[0]
+        position_increment = position_increment + self.root_positions[0]
 
         # Increment the position with fixed coordinate
-        position_increment = position_increment + self.action_display_fixed_coordinate[0]
+        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
 
         self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
 
