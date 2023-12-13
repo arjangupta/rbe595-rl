@@ -11,10 +11,6 @@ def main():
     env, env_cfg = task_registry.make_env("quad_for_final_project")
 
     command_actions = torch.zeros((env_cfg.env.num_envs, 3))
-    # command_actions[:, 0] = 5.0
-    # command_actions[:, 1] = 5.0
-    # command_actions[:, 2] = 5.0
-    # # command_actions[:, 3] = 0.0
 
     # Declare action primitives
     action_primitives = QuadActionPrimitives()
