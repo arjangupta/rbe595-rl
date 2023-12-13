@@ -18,10 +18,6 @@ WALL_SEMANTIC_ID = 8
 
 class AerialRobotCfgFinalProject(BaseConfig):
 
-    def __init__(self, map):
-        self.map = map
-        # self.asset_dict = asset_dict
-
     seed = 1
 
     class env:
@@ -321,12 +317,14 @@ class AerialRobotCfgFinalProject(BaseConfig):
         }
 
         include_env_bound_type = {
-            "front_wall": False,
+            "front_wall": True,
             "long_left_wall": False,
             "top_wall": False,
             "back_wall": False,
             "long_right_wall": False,
-            "bottom_wall": False}
+            "bottom_wall": False,
+            "squiggle_wall": False
+        }
 
         env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space
         env_lower_bound_max = [-5.0, -5.0, 0.0]  # lower bound for the environment space

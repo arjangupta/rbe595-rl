@@ -1,4 +1,3 @@
-import random
 
 import isaacgym
 from aerial_gym.envs import *
@@ -9,11 +8,7 @@ from aeriel_robot_final_project import AerialRobotFinalProject
 
 def main():
 
-    map = random.randint(0,9)
-
-    cfg = AerialRobotCfgFinalProject(map)
-
-    task_registry.register( "quad_for_final_project", AerialRobotFinalProject, cfg)
+    task_registry.register( "quad_for_final_project", AerialRobotFinalProject, AerialRobotCfgFinalProject())
     env, env_cfg = task_registry.make_env("quad_for_final_project")
     # env, env_cfg = task_registry.make_env("quad_with_obstacles")
 
