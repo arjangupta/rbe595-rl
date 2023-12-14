@@ -133,6 +133,9 @@ class DeepQLearningAgent:
         state_batch = torch.cat(batch.state)
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
+        print("state_batch: ", state_batch)
+        print("action_batch: ", action_batch)
+        print("reward_batch: ", reward_batch)
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken. These are the actions which would've been taken
