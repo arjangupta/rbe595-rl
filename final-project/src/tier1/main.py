@@ -20,8 +20,16 @@ class GymInterface:
         self.action_primitives = QuadActionPrimitives()
         # Declare reward function
         self.reward_function = QuadRewardSystem()
+        # Set device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # Set goal position
+        self.env.goal_position = torch.tensor([7.0, 7.0, 2.0], dtype=torch.float32, device=self.device)
+        # Get initial drone position
+        self.initial_position = self.get_current_position()
 
     def step(self, action):
+        # Capture starting relative position
+        self.reward_function.dt_start = self.get_relative_position()
         # Get action bezier curve as sampled points
         num_samples = 5
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
@@ -32,10 +40,34 @@ class GymInterface:
             for _ in range(0, 50):
                 # Step through the environment repeatedly
                 obs, priviliged_obs, rewards, resets, extras = self.env.step(self.command_actions)
-        return self.get_current_position(), self.reward_function.determine_reward(resets[0])
+        # Capture ending relative position
+        self.reward_function.dt_end = self.get_relative_position()
+        return self.get_current_position(), self.reward_function.determine_reward(False)
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
+
+    def calculate_perpendicular_intersection(A, B, C):
+        # A, B and C are expected to be
+        # PyTorch tensors representing points
+        # in the form [x, y, z]
+        AB = B - A
+        AC = C - A
+        # Calculate the unit vector of AB
+        AB_unit = AB / torch.norm(AB)
+        # Project AC onto AB to get AD
+        AD = torch.dot(AC, AB_unit) * AB_unit
+        # Add AD to A to get the coordinates of D
+        D = A + AD
+        return D
+
+    def get_relative_position(self):
+        # The relative position is the deviation from the straight line path
+        # between the initial position and the goal position
+        return self.calculate_deviation_3d(
+            self.initial_position,
+            self.env.goal_position,
+            self.get_current_position())
 
 def main():
     gym_iface = GymInterface()
