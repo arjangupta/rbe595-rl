@@ -29,7 +29,7 @@ class GymInterface:
 
     def step(self, action):
         # Capture starting relative position
-        self.reward_function.dt_start = self.get_relative_position()
+        self.reward_function.dt_start = self.get_perpendicular_distance()
         # Get action bezier curve as sampled points
         num_samples = 5
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
@@ -41,28 +41,39 @@ class GymInterface:
                 # Step through the environment repeatedly
                 obs, priviliged_obs, rewards, resets, extras = self.env.step(self.command_actions)
         # Capture ending relative position
-        self.reward_function.dt_end = self.get_relative_position()
-        return self.get_current_position(), self.reward_function.determine_reward(False)
+        self.reward_function.dt_end = self.get_perpendicular_distance()
+        return self.get_relative_postion(), self.reward_function.determine_reward(False)
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
     
     def calculate_3d_distance(A, B, C):
-        # A, B and C are expected to be
-        # PyTorch tensors representing points
-        # in the form [x, y, z]
+        """Returns the euclidean distance of the point C
+        from the line AB.
+            A, B and C are expected to be
+        PyTorch tensors representing points
+        in the form [x, y, z]"""
         AB = B - A
         AC = C - A
         cross_product = torch.cross(AB, AC)
-        numerator = torch.norm(cross_product)
-        denominator = torch.norm(AB)
+        parallelogram_area = torch.norm(cross_product)
+        length_AB = torch.norm(AB) # which is the base of the parallelogram
+        return parallelogram_area / length_AB # which is the height of the parallelogram
 
-        return numerator / denominator
+    def get_perpendicular_distance(self):
+        """The relative distance is the perpendicular deviation
+        from the straight line path between the initial position
+        and the goal position"""
+        return self.calculate_3d_distance(
+            self.initial_position,
+            self.env.goal_position,
+            self.get_current_position())
 
     def calculate_perpendicular_intersection(A, B, C):
-        # A, B and C are expected to be
-        # PyTorch tensors representing points
-        # in the form [x, y, z]
+        """Returns the point D which is the intersection of the
+        perpendicular line from C to the line AB.
+            A, B and C are PyTorch tensors
+        representing points in the form [x, y, z]"""
         AB = B - A
         AC = C - A
         # Calculate the unit vector of AB
@@ -73,13 +84,15 @@ class GymInterface:
         D = A + AD
         return D
 
-    def get_relative_position(self):
-        # The relative position is the deviation from the straight line path
-        # between the initial position and the goal position
-        return self.calculate_deviation_3d(
+    def get_relative_postion(self):
+        """The relative position is the vector from the drone
+        to the moving setpoint"""
+        current_position = self.get_current_position()
+        moving_setpoint = self.calculate_perpendicular_intersection(
             self.initial_position,
             self.env.goal_position,
-            self.get_current_position())
+            current_position)
+        return moving_setpoint - current_position
 
 def main():
     gym_iface = GymInterface()
