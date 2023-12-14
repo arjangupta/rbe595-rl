@@ -370,6 +370,6 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # resets due to episode length
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
-    reset = torch.where(torch.norm(root_positions, dim=1) > 10.0, ones, reset)
+    reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
 
     return reward, reset
