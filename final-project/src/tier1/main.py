@@ -46,6 +46,18 @@ class GymInterface:
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
+    
+    def calculate_3d_distance(A, B, C):
+        # A, B and C are expected to be
+        # PyTorch tensors representing points
+        # in the form [x, y, z]
+        AB = B - A
+        AC = C - A
+        cross_product = torch.cross(AB, AC)
+        numerator = torch.norm(cross_product)
+        denominator = torch.norm(AB)
+
+        return numerator / denominator
 
     def calculate_perpendicular_intersection(A, B, C):
         # A, B and C are expected to be
