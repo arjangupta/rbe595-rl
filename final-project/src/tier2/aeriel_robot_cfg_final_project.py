@@ -20,7 +20,6 @@ class AerialRobotCfgFinalProject(BaseConfig):
 
     def __init__(self, map):
         self.map = map
-        # self.asset_dict = asset_dict
 
     seed = 1
 

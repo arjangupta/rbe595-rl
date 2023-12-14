@@ -9,8 +9,6 @@ from aeriel_robot_final_project import AerialRobotFinalProject
 
 def main():
 
-    map = random.randint(0,9)
-
     cfg = AerialRobotCfgFinalProject(map)
 
     task_registry.register( "quad_for_final_project", AerialRobotFinalProject, cfg)
