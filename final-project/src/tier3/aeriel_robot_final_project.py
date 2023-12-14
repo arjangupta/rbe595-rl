@@ -56,7 +56,7 @@ class AerialRobotFinalProject(BaseTask):
 
         self.enable_onboard_cameras = self.cfg.env.enable_onboard_cameras
 
-        map = random.randint(1, 9)
+        map = random.randint(1, 2)
         # map = 1
 
         asset_dict = self.pick_random_dict_map(map)
@@ -223,6 +223,8 @@ class AerialRobotFinalProject(BaseTask):
 
         self.segmentation_counter = 0
 
+        self.evh = None
+
         for i in range(self.num_envs):
             # create environment
             env_handle = self.gym.create_env(self.sim, env_lower, env_upper, int(np.sqrt(self.num_envs)))
@@ -243,65 +245,7 @@ class AerialRobotFinalProject(BaseTask):
                 torch_cam_tensor = gymtorch.wrap_tensor(camera_tensor)
                 self.camera_tensors.append(torch_cam_tensor)
 
-            env_asset_list = self.env_asset_manager.prepare_assets_for_simulation(self.gym, self.sim)
-            asset_counter = 0
-
-            # have the segmentation counter be the max defined semantic id + 1. Use this to set the semantic mask of objects that are
-            # do not have a defined semantic id in the config file, but still requre one. Increment for every instance in the next snippet
-            # for i in range(NUM_OBJECTS):
-            #     dict_item = env_asset_list[i]
-            for dict_item in env_asset_list:
-                self.segmentation_counter = max(self.segmentation_counter, int(dict_item["semantic_id"]) + 1)
-
-            # for i in range(NUM_OBJECTS):
-            #     dict_item = env_asset_list[i]
-            for dict_item in env_asset_list:
-                folder_path = dict_item["asset_folder_path"]
-                filename = dict_item["asset_file_name"]
-                asset_options = dict_item["asset_options"]
-                whole_body_semantic = dict_item["body_semantic_label"]
-                per_link_semantic = dict_item["link_semantic_label"]
-                semantic_masked_links = dict_item["semantic_masked_links"]
-                semantic_id = dict_item["semantic_id"]
-                color = dict_item["color"]
-                collision_mask = dict_item["collision_mask"]
-
-                loaded_asset = self.gym.load_asset(self.sim, folder_path, filename, asset_options)
-
-                assert not (whole_body_semantic and per_link_semantic)
-                if semantic_id < 0:
-                    object_segmentation_id = self.segmentation_counter
-                    self.segmentation_counter += 1
-                else:
-                    object_segmentation_id = semantic_id
-
-                asset_counter += 1
-
-                env_asset_handle = self.gym.create_actor(env_handle, loaded_asset, start_pose,
-                                                         "env_asset_" + str(asset_counter), i, collision_mask,
-                                                         object_segmentation_id)
-                self.env_asset_handles.append(env_asset_handle)
-                if len(self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)) > 1:
-                    print("Env asset has rigid body with more than 1 link: ",
-                          len(self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)))
-                    sys.exit(0)
-
-                if per_link_semantic:
-                    rigid_body_names = None
-                    if len(semantic_masked_links) == 0:
-                        rigid_body_names = self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)
-                    else:
-                        rigid_body_names = semantic_masked_links
-                    for rb_index in range(len(rigid_body_names)):
-                        self.segmentation_counter += 1
-                        self.gym.set_rigid_body_segmentation_id(env_handle, env_asset_handle, rb_index,
-                                                                self.segmentation_counter)
-
-                if color is None:
-                    color = np.random.randint(low=50, high=200, size=3)
-
-                self.gym.set_rigid_body_color(env_handle, env_asset_handle, 0, gymapi.MESH_VISUAL,
-                                              gymapi.Vec3(color[0] / 255, color[1] / 255, color[2] / 255))
+            self.prepare_envs(env_handle, i)
 
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
@@ -313,6 +257,73 @@ class AerialRobotFinalProject(BaseTask):
         print("Total robot mass: ", self.robot_mass)
 
         print("\n\n\n\n\n ENVIRONMENT CREATED \n\n\n\n\n\n")
+
+    def prepare_envs(self, env_handle, i):
+
+        start_pose = gymapi.Transform()
+        # create env instance
+        pos = torch.tensor([0, 0, 0], device=self.device)
+        start_pose.p = gymapi.Vec3(*pos)
+
+        env_asset_list = self.env_asset_manager.prepare_assets_for_simulation(self.gym, self.sim)
+        asset_counter = 0
+
+        # have the segmentation counter be the max defined semantic id + 1. Use this to set the semantic mask of objects that are
+        # do not have a defined semantic id in the config file, but still requre one. Increment for every instance in the next snippet
+        # for i in range(NUM_OBJECTS):
+        #     dict_item = env_asset_list[i]
+        for dict_item in env_asset_list:
+            self.segmentation_counter = max(self.segmentation_counter, int(dict_item["semantic_id"]) + 1)
+
+        # for i in range(NUM_OBJECTS):
+        #     dict_item = env_asset_list[i]
+        for dict_item in env_asset_list:
+            folder_path = dict_item["asset_folder_path"]
+            filename = dict_item["asset_file_name"]
+            asset_options = dict_item["asset_options"]
+            whole_body_semantic = dict_item["body_semantic_label"]
+            per_link_semantic = dict_item["link_semantic_label"]
+            semantic_masked_links = dict_item["semantic_masked_links"]
+            semantic_id = dict_item["semantic_id"]
+            color = dict_item["color"]
+            collision_mask = dict_item["collision_mask"]
+
+            loaded_asset = self.gym.load_asset(self.sim, folder_path, filename, asset_options)
+
+            assert not (whole_body_semantic and per_link_semantic)
+            if semantic_id < 0:
+                object_segmentation_id = self.segmentation_counter
+                self.segmentation_counter += 1
+            else:
+                object_segmentation_id = semantic_id
+
+            asset_counter += 1
+
+            env_asset_handle = self.gym.create_actor(env_handle, loaded_asset, start_pose,
+                                                     "env_asset_" + str(asset_counter), i, collision_mask,
+                                                     object_segmentation_id)
+            self.env_asset_handles.append(env_asset_handle)
+            if len(self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)) > 1:
+                print("Env asset has rigid body with more than 1 link: ",
+                      len(self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)))
+                sys.exit(0)
+
+            if per_link_semantic:
+                rigid_body_names = None
+                if len(semantic_masked_links) == 0:
+                    rigid_body_names = self.gym.get_actor_rigid_body_names(env_handle, env_asset_handle)
+                else:
+                    rigid_body_names = semantic_masked_links
+                for rb_index in range(len(rigid_body_names)):
+                    self.segmentation_counter += 1
+                    self.gym.set_rigid_body_segmentation_id(env_handle, env_asset_handle, rb_index,
+                                                            self.segmentation_counter)
+
+            if color is None:
+                color = np.random.randint(low=50, high=200, size=3)
+
+            self.gym.set_rigid_body_color(env_handle, env_asset_handle, 0, gymapi.MESH_VISUAL,
+                                          gymapi.Vec3(color[0] / 255, color[1] / 255, color[2] / 255))
 
     def step(self, actions):
         # step physics and render each frame
@@ -367,18 +378,22 @@ class AerialRobotFinalProject(BaseTask):
         if 0 in env_ids:
             print("\n\n\n RESETTING ENV 0 \n\n\n")
 
-        map = random.randint(1, 9)
+        map = random.randint(1, 2)
         # map = 0
-
-        self.env_asset_manager.asset_type_to_dict_map = self.pick_random_dict_map(map)
-        self.env_asset_manager.cfg = self.cfg
-
-        # self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id, asset_dict)
 
         # self.env_asset_manager.asset_type_to_dict_map = self.pick_random_dict_map(map)
         # self.env_asset_manager.cfg = self.cfg
 
+        self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id, self.pick_random_dict_map(map))
+        # self.env_asset_manager.cfg = self.cfg
+
+        # for i in range(self.num_envs):
+        #     env_handle = self.envs[i]
+        #     self.prepare_envs(env_handle, i)
+
         # try:
+
+        # print(f"env ids: {env_ids}")
 
         if map != 0:
 
