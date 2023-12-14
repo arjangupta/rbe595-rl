@@ -48,7 +48,10 @@ class QuadrotorNeuralNetwork(nn.Module):
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, rel_x, rel_y, rel_z):
+    def forward(self, state):
+        rel_x = state[0]
+        rel_y = state[1]
+        rel_z = state[2]
         rel_x = rel_x.unsqueeze(0)
         rel_y = rel_y.unsqueeze(0)
         rel_z = rel_z.unsqueeze(0)
@@ -98,7 +101,7 @@ class DeepQLearningAgent:
         self.steps_done = 0
 
 
-    def select_action(self, rel_x, rel_y, rel_z):
+    def select_action(self, state):
         sample = random.random()
         eps_threshold = self.EPS_END + (self.EPS_START - self.EPS_END) * \
             math.exp(-1. * self.steps_done / self.EPS_DECAY)
@@ -108,7 +111,7 @@ class DeepQLearningAgent:
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
-                return self.policy_net(rel_x, rel_y, rel_z).max(0).indices.view(1, 1)
+                return self.policy_net(state).max(0).indices.view(1, 1)
         else:
             return torch.tensor([[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]], device=device, dtype=torch.long)
 
@@ -134,7 +137,7 @@ class DeepQLearningAgent:
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken. These are the actions which would've been taken
         # for each batch state according to policy_net
-        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
+        state_action_values = self.policy_net(state_batch).gather(1, action_batch.unsqueeze(1))
 
         # Compute V(s_{t+1}) for all next states.
         # Expected values of actions for non_final_next_states are computed based
@@ -166,16 +169,13 @@ class DeepQLearningAgent:
             num_time_steps = 500
 
         for ep in range(num_episodes):
-            if ep % 250 == 0:
-                print("Deep-QL Training episode: ", ep)
+            # if ep % 5 == 0:
+            print("Deep-QL Training episode: ", ep)
             state = self.gym_iface.get_current_position()
             # state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             print("initial state: ", state)
-            rel_pos_x = state[0]
-            rel_pos_y = state[1]
-            rel_pos_z = state[2]
             for t in range(num_time_steps):
-                action = self.select_action(rel_pos_x, rel_pos_y, rel_pos_z)
+                action = self.select_action(state)
                 # observation, reward, terminated, truncated, _ =
                 next_state, reward = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
