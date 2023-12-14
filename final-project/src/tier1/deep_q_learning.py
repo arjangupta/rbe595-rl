@@ -175,8 +175,6 @@ class DeepQLearningAgent:
             # if ep % 5 == 0:
             print("Deep-QL Training episode: ", ep)
             state = self.gym_iface.get_current_position()
-            # state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-            print("initial state: ", state)
             for t in range(num_time_steps):
                 action = self.select_action(state)
                 # observation, reward, terminated, truncated, _ =
