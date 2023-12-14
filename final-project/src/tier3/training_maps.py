@@ -7,7 +7,7 @@ class TrainMaps():
 
     @staticmethod
     def get_map(map_num, cfg):
-        map_num=6 #TODO: remove
+        # map_num=6 #toggle for testing
         print(f"picking map {map_num}")
 
         if map_num == 1:
