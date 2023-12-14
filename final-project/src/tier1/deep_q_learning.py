@@ -49,13 +49,16 @@ class QuadrotorNeuralNetwork(nn.Module):
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
     def forward(self, rel_x, rel_y, rel_z):
+        rel_x = rel_x.unsqueeze(0)
+        rel_y = rel_y.unsqueeze(0)
+        rel_z = rel_z.unsqueeze(0)
         x = F.relu(self.x_layer1(rel_x))
         x = F.relu(self.x_layer2(x))
         y = F.relu(self.y_layer1(rel_y))
         y = F.relu(self.y_layer2(y))
         z = F.relu(self.z_layer1(rel_z))
         z = F.relu(self.z_layer2(z))
-        joint = torch.cat((x, y, z), dim=1)
+        joint = torch.cat((x, y, z), dim=0)
         joint = F.relu(self.joint_layer1(joint))
         joint = F.relu(self.joint_layer2(joint))
         return self.output_layer(joint)
@@ -105,7 +108,7 @@ class DeepQLearningAgent:
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
-                return self.policy_net(rel_x, rel_y, rel_z).max(1).indices.view(1, 1)
+                return self.policy_net(rel_x, rel_y, rel_z).max(0).indices.view(1, 1)
         else:
             return torch.tensor([[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]], device=device, dtype=torch.long)
 
@@ -197,5 +200,5 @@ class DeepQLearningAgent:
                 target_net_state_dict = self.target_net.state_dict()
                 policy_net_state_dict = self.policy_net.state_dict()
                 for key in policy_net_state_dict:
-                    target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
+                    target_net_state_dict[key] = policy_net_state_dict[key]*self.TAU + target_net_state_dict[key]*(1-self.TAU)
                 self.target_net.load_state_dict(target_net_state_dict)

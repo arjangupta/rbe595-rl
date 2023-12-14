@@ -32,7 +32,7 @@ class QuadRewardSystem:
     
     def f_delta_t(self, dt):
         """This is the function that regulates the discount rate based on dmax"""
-        return 0.5 * ((torch.tanh * ((2*self.d_max - dt)/self.d_max)) + 1)
+        return 0.5 * ((torch.tanh((2*self.d_max - dt)/self.d_max)) + 1)
     
     def determine_reward(self, did_collide):
         """This function determines the reward for a given time step"""

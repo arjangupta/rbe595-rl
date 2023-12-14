@@ -39,9 +39,12 @@ class GymInterface:
             self.command_actions = torch.from_numpy(points[:,i_sample])
             for _ in range(0, 50):
                 # Step through the environment repeatedly
-                obs, priviliged_obs, rewards, resets, extras = self.env.step(self.command_actions)
+                self.env.step(self.command_actions)
         # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
+        # Check if near goal
+        if self.check_if_near_goal():
+            print("Reached goal!")
         return self.get_relative_postion(), self.reward_function.determine_reward(False)
 
     def get_current_position(self):
@@ -93,6 +96,10 @@ class GymInterface:
             self.env.goal_position,
             current_position)
         return moving_setpoint - current_position
+    
+    def check_if_near_goal(self):
+        """Returns true if the drone is within 1 meter of the goal"""
+        return torch.norm(self.env.goal_position - self.get_current_position()) < 1.0
 
 def main():
     gym_iface = GymInterface()
