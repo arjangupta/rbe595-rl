@@ -89,7 +89,7 @@ class DeepQLearningAgent:
         self.target_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
-        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=LR, amsgrad=True)
+        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.LR, amsgrad=True)
         self.memory = ReplayMemory(10000)
 
         self.steps_done = 0
@@ -156,17 +156,23 @@ class DeepQLearningAgent:
         self.optimizer.step()
 
     def train(self):
+        num_episodes = 1000
+        num_time_steps = 100
         if torch.cuda.is_available():
             num_episodes = 5000
-        else:
-            num_episodes = 1000
+            num_time_steps = 500
 
         for ep in range(num_episodes):
+            if ep % 250 == 0:
+                print("Deep-QL Training episode: ", ep)
             state = self.gym_iface.get_current_position()
             # state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
-            curr_pos_x = state[0], curr_pos_y = state[1], curr_pos_z = state[2]
-            for t in count():
-                action = self.select_action(curr_pos_x, curr_pos_y, curr_pos_z)
+            print("initial state: ", state)
+            rel_pos_x = state[0]
+            rel_pos_y = state[1]
+            rel_pos_z = state[2]
+            for t in range(num_time_steps):
+                action = self.select_action(rel_pos_x, rel_pos_y, rel_pos_z)
                 # observation, reward, terminated, truncated, _ =
                 next_state, reward = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)

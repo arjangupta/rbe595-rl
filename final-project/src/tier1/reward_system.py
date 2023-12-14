@@ -2,7 +2,7 @@
 This is the reward system for the quadcopter in the final project, as
 given in Camci et al. 2020.
 """
-import numpy as np
+import torch
 
 class QuadRewardSystem:
     def __init__(self):
@@ -21,8 +21,8 @@ class QuadRewardSystem:
         self.d_max = 5.0
 
         # Lower and upper limits on reward
-        self.Rl = 0.0
-        self.Ru = 1.0
+        self.R_l = 0.0
+        self.R_u = 1.0
 
         # Mild punishment for excessive deviation
         self.R_dp = -0.5
@@ -32,7 +32,7 @@ class QuadRewardSystem:
     
     def f_delta_t(self, dt):
         """This is the function that regulates the discount rate based on dmax"""
-        return 0.5 * ((np.tanh * ((2*self.d_max - dt)/self.d_max)) + 1)
+        return 0.5 * ((torch.tanh * ((2*self.d_max - dt)/self.d_max)) + 1)
     
     def determine_reward(self, did_collide):
         """This function determines the reward for a given time step"""
@@ -42,7 +42,7 @@ class QuadRewardSystem:
             return self.R_cp
         
         # If excessive deviation, mild punishment
-        if np.abs(self.dt_end) > self.d_max:
+        if torch.abs(self.dt_end) > self.d_max:
             return self.R_dp
         
         # Calculate delta_d

@@ -47,7 +47,7 @@ class GymInterface:
     def get_current_position(self):
         return self.env.get_current_position()[0]
     
-    def calculate_3d_distance(A, B, C):
+    def calculate_3d_distance(self, A, B, C):
         """Returns the euclidean distance of the point C
         from the line AB.
             A, B and C are expected to be
@@ -69,7 +69,7 @@ class GymInterface:
             self.env.goal_position,
             self.get_current_position())
 
-    def calculate_perpendicular_intersection(A, B, C):
+    def calculate_perpendicular_intersection(self, A, B, C):
         """Returns the point D which is the intersection of the
         perpendicular line from C to the line AB.
             A, B and C are PyTorch tensors
