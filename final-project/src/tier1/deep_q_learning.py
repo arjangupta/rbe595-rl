@@ -218,7 +218,7 @@ class DeepQLearningAgent:
 
         for ep in range(num_episodes):
             # if ep % 5 == 0:
-            print("Deep-QL Training episode: ", ep)
+            print(f"Deep-QL Training episode: {ep+1}\n")
             state = self.gym_iface.get_current_position()
             for _ in range(num_time_steps):
                 action = self.select_action(state)
@@ -234,7 +234,8 @@ class DeepQLearningAgent:
                     # next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                     next_state = observation
                 
-                if self.debug:
+                # if self.debug:
+                if not done:
                     print("reward: ", reward)
                     print("next_state: ", next_state)
 
@@ -256,5 +257,5 @@ class DeepQLearningAgent:
                 self.target_net.load_state_dict(target_net_state_dict)
 
                 if done:
-                    print("Episode ended due to termination or truncation")
+                    print("\nEpisode ended due to termination or truncation\n")
                     break
