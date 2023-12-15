@@ -244,9 +244,11 @@ class DeepQLearningAgent:
                     next_state = observation
                 
                 # if self.debug:
-                if not done:
-                    print("reward: ", reward)
-                    print("next_state: ", next_state)
+                # if not done:
+                #     print("reward: ", reward)
+                #     print("next_state: ", next_state)
+                # else:
+                #     print("reward: ", reward)
 
                 # Store the transition in memory
                 self.memory.push(state.unsqueeze(0), action, next_state, reward)
@@ -269,5 +271,5 @@ class DeepQLearningAgent:
                 torch.save(self.policy_net.state_dict(), self.MODEL_FILE_NAME)
 
                 if done:
-                    print("\nEpisode ended due to termination or truncation\n")
+                    print("\n\nEpisode ended due to termination or truncation\n\n")
                     break
