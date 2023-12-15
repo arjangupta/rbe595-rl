@@ -26,16 +26,30 @@ class GymInterface:
         self.reward_function = QuadRewardSystem()
         # Set device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # Set goal position
-        self.goal_position = torch.tensor([7.0, 7.0, 4.0], dtype=torch.float32, device=self.device)
-        if self.debug:
-            print("Goal position: ", self.goal_position)
+        # Set goal positions
+        self.goal_position_options = torch.tensor(
+            [[7.0, 6.5, 4.0],
+             [5.0, -10.3, 6.4],
+             [11.2, 2.2, 1.0],
+             [3.0, -3.0, 3.0],
+             [4.9, -10.0, 9.0],
+             [2.0, 12.0, 7.1]
+             ], dtype=torch.float32, device=self.device)
+        self.goal_position = self.goal_position_options[0]
         # Get initial drone position
         self.initial_position = self.get_current_position().clone()
         if self.debug:
             print("Initial position: ", self.initial_position)
         # Set flag for first step done
         self.first_step_done = False
+    
+    def choose_new_goal_position(self):
+        """Chooses a new goal position"""
+        # Choose a random index from the goal position options
+        self.goal_position = self.goal_position_options[
+            torch.randint(0, self.goal_position_options.shape[0], (1,)).item()]
+        if self.debug:
+            print("New goal position: ", self.goal_position)
 
     def step(self, action):
         # Capture starting relative position
