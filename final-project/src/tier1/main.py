@@ -43,12 +43,15 @@ class GymInterface:
         num_samples = 5
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
         # Step through all points
+        reset = False
         for i_sample in range(0, num_samples):
             # Set command actions
             self.command_actions = torch.from_numpy(points[:,i_sample])
-            for _ in range(0, 50):
+            for _ in range(0, 25):
                 # Step through the environment repeatedly
-                self.env.step(self.command_actions)
+                _, _, _, reset, _ = self.env.step(self.command_actions)
+                if reset:
+                    break
         # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
         # Check if near goal
@@ -57,7 +60,7 @@ class GymInterface:
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
-        return self.get_relative_postion(), self.reward_function.determine_reward(False)
+        return self.get_relative_postion(), self.reward_function.determine_reward(False), reset, False
 
     def get_current_position(self):
         return self.env.get_current_position()[0]

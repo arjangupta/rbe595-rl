@@ -178,19 +178,23 @@ class DeepQLearningAgent:
             # if ep % 5 == 0:
             print("Deep-QL Training episode: ", ep)
             state = self.gym_iface.get_current_position()
-            for t in range(num_time_steps):
+            for _ in range(num_time_steps):
                 action = self.select_action(state)
                 # observation, reward, terminated, truncated, _ =
-                next_state, reward = self.gym_iface.step(action.item())
+                observation, reward, truncated, terminated = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
-                print("next_state: ", next_state)
-                print("reward: ", reward)
-                # done = terminated or truncated
 
-                # if terminated:
-                #     next_state = None
-                # else:
-                #     next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+                done = terminated or truncated
+
+                if terminated:
+                    next_state = None
+                else:
+                    # next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+                    next_state = observation
+                
+                if self.debug:
+                    print("reward: ", reward)
+                    print("next_state: ", next_state)
 
                 # Store the transition in memory
                 self.memory.push(state, action, next_state, reward)
@@ -208,3 +212,6 @@ class DeepQLearningAgent:
                 for key in policy_net_state_dict:
                     target_net_state_dict[key] = policy_net_state_dict[key]*self.TAU + target_net_state_dict[key]*(1-self.TAU)
                 self.target_net.load_state_dict(target_net_state_dict)
+
+                if done:
+                    break
