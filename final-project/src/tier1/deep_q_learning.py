@@ -61,6 +61,15 @@ class QuadrotorNeuralNetwork(nn.Module):
         y = F.relu(self.y_layer2(y))
         z = F.relu(self.z_layer1(rel_z))
         z = F.relu(self.z_layer2(z))
+        # if x.dim() == 2:
+        #     x = x.squeeze(0)
+        #     print("x: ", x)
+        # if y.dim() == 2:
+        #     y = y.squeeze(0)
+        #     print("y: ", y)
+        # if z.dim() == 2:
+        #     z = z.squeeze(0)
+        #     print("z: ", z)
         joint = torch.cat((x, y, z), dim=0)
         joint = F.relu(self.joint_layer1(joint))
         joint = F.relu(self.joint_layer2(joint))
@@ -85,7 +94,7 @@ class DeepQLearningAgent:
         self.LR = 1e-4
 
         # Debug
-        self.debug = True
+        self.debug = False
 
         # Get number of actions from gym action space
         n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
@@ -116,7 +125,9 @@ class DeepQLearningAgent:
                 # found, so we pick action with the larger expected reward.
                 return self.policy_net(state).max(0).indices.view(1, 1)
         else:
-            return torch.tensor([[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]], device=device, dtype=torch.long)
+            return torch.tensor(
+                [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
+                device=device, dtype=torch.long)
 
     def optimize_model(self):
         if len(self.memory) < self.BATCH_SIZE:
@@ -126,6 +137,11 @@ class DeepQLearningAgent:
         # detailed explanation). This converts batch-array of Transitions
         # to Transition of batch-arrays.
         batch = Transition(*zip(*transitions))
+        if self.debug:
+            print("batch: ", batch)
+            print("batch.state: ", batch.state)
+            print("batch.action: ", batch.action)
+            print("batch.next_state: ", batch.next_state)
 
         # Compute a mask of non-final states and concatenate the batch elements
         # (a final state would've been the one after which simulation ended)
@@ -136,14 +152,15 @@ class DeepQLearningAgent:
         state_batch = torch.cat(batch.state)
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
-        print("state_batch: ", state_batch)
-        print("action_batch: ", action_batch)
-        print("reward_batch: ", reward_batch)
+        if True:
+            print("state_batch: ", state_batch)
+            print("action_batch: ", action_batch)
+            print("reward_batch: ", reward_batch)
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken. These are the actions which would've been taken
         # for each batch state according to policy_net
-        state_action_values = self.policy_net(state_batch).gather(1, action_batch.unsqueeze(1))
+        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
 
         # Compute V(s_{t+1}) for all next states.
         # Expected values of actions for non_final_next_states are computed based

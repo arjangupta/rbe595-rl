@@ -141,6 +141,11 @@ def optimize_model():
     # to Transition of batch-arrays.
     batch = Transition(*zip(*transitions))
 
+    # print("batch: ", batch)
+    # print("batch.state: ", batch.state)
+    # print("batch.action: ", batch.action)
+    # print("batch.next_state: ", batch.next_state)
+
     # Compute a mask of non-final states and concatenate the batch elements
     # (a final state would've been the one after which simulation ended)
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,

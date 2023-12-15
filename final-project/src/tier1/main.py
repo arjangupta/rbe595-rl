@@ -38,7 +38,8 @@ class GymInterface:
     def step(self, action):
         # Capture starting relative position
         self.reward_function.dt_start = self.get_perpendicular_distance()
-        print("dt_start: ", self.reward_function.dt_start)
+        if self.debug:
+            print("dt_start: ", self.reward_function.dt_start)
         # Get action bezier curve as sampled points
         num_samples = 5
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
@@ -47,7 +48,7 @@ class GymInterface:
         for i_sample in range(0, num_samples):
             # Set command actions
             self.command_actions = torch.from_numpy(points[:,i_sample])
-            for _ in range(0, 25):
+            for _ in range(0, 1):
                 # Step through the environment repeatedly
                 _, _, _, reset, _ = self.env.step(self.command_actions)
                 if reset:
