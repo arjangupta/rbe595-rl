@@ -9,7 +9,11 @@ from deep_q_learning import DeepQLearningAgent
 from reward_system import QuadRewardSystem
 
 class GymInterface:
-    def __init__(self):
+    def __init__(self, debug=False):
+        # Set debug
+        self.debug = debug
+        # Set trace
+        self.trace = False
         # Declare environment
         task_registry.register( "quad_for_final_project", AerialRobotFinalProjectTier1, AerialRobotCfgFinalProjectTier1())
         # Create environment
@@ -24,12 +28,17 @@ class GymInterface:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Set goal position
         self.env.goal_position = torch.tensor([7.0, 7.0, 2.0], dtype=torch.float32, device=self.device)
+        if self.debug:
+            print("Goal position: ", self.env.goal_position)
         # Get initial drone position
-        self.initial_position = self.get_current_position()
+        self.initial_position = self.get_current_position().clone()
+        if self.debug:
+            print("Initial position: ", self.initial_position)
 
     def step(self, action):
         # Capture starting relative position
         self.reward_function.dt_start = self.get_perpendicular_distance()
+        print("dt_start: ", self.reward_function.dt_start)
         # Get action bezier curve as sampled points
         num_samples = 5
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
@@ -45,6 +54,9 @@ class GymInterface:
         # Check if near goal
         if self.check_if_near_goal():
             print("Reached goal!")
+        if self.debug:
+            print("dt_end: ", self.reward_function.dt_end)
+            print("Current position: ", self.get_current_position())
         return self.get_relative_postion(), self.reward_function.determine_reward(False)
 
     def get_current_position(self):
@@ -61,6 +73,15 @@ class GymInterface:
         cross_product = torch.cross(AB, AC)
         parallelogram_area = torch.norm(cross_product)
         length_AB = torch.norm(AB) # which is the base of the parallelogram
+        if self.trace:
+            print("A: ", A)
+            print("B: ", B)
+            print("C: ", C)
+            print("AB: ", AB)
+            print("AC: ", AC)
+            print("cross_product: ", cross_product)
+            print("parallelogram_area: ", parallelogram_area)
+            print("length_AB: ", length_AB)
         return parallelogram_area / length_AB # which is the height of the parallelogram
 
     def get_perpendicular_distance(self):
@@ -102,7 +123,7 @@ class GymInterface:
         return torch.norm(self.env.goal_position - self.get_current_position()) < 1.0
 
 def main():
-    gym_iface = GymInterface()
+    gym_iface = GymInterface(debug=False)
     dql_agent = DeepQLearningAgent(gym_iface)
     dql_agent.train()
 

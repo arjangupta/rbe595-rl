@@ -84,6 +84,9 @@ class DeepQLearningAgent:
         self.TAU = 0.005
         self.LR = 1e-4
 
+        # Debug
+        self.debug = True
+
         # Get number of actions from gym action space
         n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
 
@@ -180,6 +183,8 @@ class DeepQLearningAgent:
                 # observation, reward, terminated, truncated, _ =
                 next_state, reward = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
+                print("next_state: ", next_state)
+                print("reward: ", reward)
                 # done = terminated or truncated
 
                 # if terminated:
