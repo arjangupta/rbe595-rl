@@ -69,6 +69,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         self.initial_root_states = self.root_states.clone()
         self.counter = 0
+        self.last_reset_counter = 0
 
         self.action_upper_limits = torch.tensor(
             [1, 1, 1, 1], device=self.device, dtype=torch.float32)
@@ -259,6 +260,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         print("\n\nResetting env\n\n")
 
+        self.last_reset_counter = self.counter
+
     def get_current_position(self):
         return self.root_positions
 
@@ -315,7 +318,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.root_linvels,
             self.root_angvels,
             self.reset_buf, self.progress_buf, self.max_episode_length,
-            self.counter
+            (self.counter - self.last_reset_counter)
         )
 
 
