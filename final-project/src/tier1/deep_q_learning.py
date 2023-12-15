@@ -114,11 +114,19 @@ class DeepQLearningAgent:
         # Get number of actions from gym action space
         n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
 
+        # Set the model file name
+        self.MODEL_FILE_NAME = "quad_dqn_model.pth"
+
         # Declare the policy and target networks
         n_rel_x = 1
         n_rel_y = 1
         n_rel_z = 1
         self.policy_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)
+        # If the model .pth file exists, load it
+        try:
+            self.policy_net.load_state_dict(torch.load(self.MODEL_FILE_NAME))
+        except:
+            print("No model file found, creating new model")
         self.target_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
@@ -255,6 +263,9 @@ class DeepQLearningAgent:
                 for key in policy_net_state_dict:
                     target_net_state_dict[key] = policy_net_state_dict[key]*self.TAU + target_net_state_dict[key]*(1-self.TAU)
                 self.target_net.load_state_dict(target_net_state_dict)
+
+                # Save the model
+                torch.save(self.policy_net.state_dict(), self.MODEL_FILE_NAME)
 
                 if done:
                     print("\nEpisode ended due to termination or truncation\n")
