@@ -248,7 +248,7 @@ class DeepQLearningAgent:
                 #     print("reward: ", reward)
                 #     print("next_state: ", next_state)
                 # else:
-                #     print("reward: ", reward)
+                print("reward: ", reward)
 
                 # Store the transition in memory
                 self.memory.push(state.unsqueeze(0), action, next_state, reward)
