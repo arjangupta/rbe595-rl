@@ -27,9 +27,9 @@ class GymInterface:
         # Set device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Set goal position
-        self.env.goal_position = torch.tensor([7.0, 7.0, 2.0], dtype=torch.float32, device=self.device)
+        self.goal_position = torch.tensor([7.0, 7.0, 4.0], dtype=torch.float32, device=self.device)
         if self.debug:
-            print("Goal position: ", self.env.goal_position)
+            print("Goal position: ", self.goal_position)
         # Get initial drone position
         self.initial_position = self.get_current_position().clone()
         if self.debug:
@@ -47,7 +47,7 @@ class GymInterface:
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
         # Step through all points
         reset = False
-        hit_ground = False
+        collision = False
         for i_sample in range(0, num_samples):
             # Set command actions
             self.command_actions = torch.from_numpy(points[:,i_sample])
@@ -56,9 +56,9 @@ class GymInterface:
                 _, _, _, reset_ret, _, hit_ground_ret = self.env.step(self.command_actions)
                 if reset_ret:
                     reset = True
-                    break
-                if hit_ground_ret:
-                    hit_ground = True
+                    if hit_ground_ret:
+                        print("Drone hit ground!")
+                        collision = True
                     break
         # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
@@ -70,7 +70,7 @@ class GymInterface:
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
-        return self.get_relative_postion(), self.reward_function.determine_reward(hit_ground), reset, near_goal
+        return self.get_relative_postion(), self.reward_function.determine_reward(collision), reset, near_goal
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
@@ -103,7 +103,7 @@ class GymInterface:
         and the goal position"""
         return self.calculate_3d_distance(
             self.initial_position,
-            self.env.goal_position,
+            self.goal_position,
             self.get_current_position())
 
     def calculate_perpendicular_intersection(self, A, B, C):
@@ -127,13 +127,13 @@ class GymInterface:
         current_position = self.get_current_position()
         moving_setpoint = self.calculate_perpendicular_intersection(
             self.initial_position,
-            self.env.goal_position,
+            self.goal_position,
             current_position)
         return moving_setpoint - current_position
     
     def check_if_near_goal(self):
         """Returns true if the drone is within 1 meter of the goal"""
-        return torch.norm(self.env.goal_position - self.get_current_position()) < 1.0
+        return torch.norm(self.goal_position - self.get_current_position()) < 1.0
 
 def main():
     gym_iface = GymInterface(debug=False)

@@ -103,7 +103,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
 
         # Set drone hit ground buffer
-        self.drone_hit_ground_buf = torch.zeros((self.num_envs, 1), device=self.device, dtype=torch.float32)
+        self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -314,7 +314,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.root_quats,
             self.root_linvels,
             self.root_angvels,
-            self.reset_buf, self.progress_buf, self.max_episode_length
+            self.reset_buf, self.progress_buf, self.max_episode_length,
+            self.counter
         )
 
 
@@ -342,8 +343,8 @@ def quat_axis(q, axis=0):
 
 
 @torch.jit.script
-def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float) -> Tuple[Tensor, Tensor, Tensor]
+def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length, counter):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, int) -> Tuple[Tensor, Tensor, Tensor]
 
     # distance to target
     target_dist = torch.sqrt(root_positions[..., 0] * root_positions[..., 0] +
@@ -375,12 +376,11 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
     reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
 
-    drone_hit_ground = torch.zeros_like(reset_buf)
     # If the self.counter is more than 2000, and the z coordinate is less than 0.2, then reset
-    reset = torch.where(root_positions[:, 2] < 0.2, ones, reset)
-    if torch.where(root_positions[:, 2] < 0.2, ones, reset):
-        # Set a flag to indicate that the drone hit the ground
-        drone_hit_ground = torch.ones_like(reset_buf)
-        print("Drone hit the ground!")
+    if counter > 2000:
+        reset = torch.where(root_positions[:, 2] <= 0.2, ones, reset)
+        drone_hit_ground = torch.where(root_positions[:, 2] <= 0.2, ones, die)
+    else:
+        drone_hit_ground = torch.zeros_like(reset_buf)
 
     return reward, reset, drone_hit_ground
