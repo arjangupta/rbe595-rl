@@ -48,10 +48,11 @@ class GymInterface:
         for i_sample in range(0, num_samples):
             # Set command actions
             self.command_actions = torch.from_numpy(points[:,i_sample])
-            for _ in range(0, 1):
+            for _ in range(0, 25):
                 # Step through the environment repeatedly
-                _, _, _, reset, _ = self.env.step(self.command_actions)
-                if reset:
+                _, _, _, reset_ret, _ = self.env.step(self.command_actions)
+                if reset_ret:
+                    reset = True
                     break
         # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()

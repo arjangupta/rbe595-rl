@@ -256,4 +256,5 @@ class DeepQLearningAgent:
                 self.target_net.load_state_dict(target_net_state_dict)
 
                 if done:
+                    print("Episode ended due to termination or truncation")
                     break
