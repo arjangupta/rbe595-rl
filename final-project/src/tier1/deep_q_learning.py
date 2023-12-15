@@ -45,6 +45,8 @@ class QuadrotorNeuralNetwork(nn.Module):
         self.joint_layer1 = nn.Linear((8 + 4 + 4), 8)
         self.joint_layer2 = nn.Linear(8, 32)
         self.output_layer = nn.Linear(32, n_actions)
+        # Debug
+        self.debug = True
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -57,27 +59,29 @@ class QuadrotorNeuralNetwork(nn.Module):
         rel_y = rel_y.unsqueeze(1)
         rel_z = state[:,2]
         rel_z = rel_z.unsqueeze(1)
-        print("rel_x: ", rel_x)
-        print("rel_y: ", rel_y)
-        print("rel_z: ", rel_z)
+        if self.debug:
+            print("rel_x: ", rel_x)
+            print("rel_y: ", rel_y)
+            print("rel_z: ", rel_z)
         x = F.relu(self.x_layer1(rel_x))
         x = F.relu(self.x_layer2(x))
         y = F.relu(self.y_layer1(rel_y))
         y = F.relu(self.y_layer2(y))
         z = F.relu(self.z_layer1(rel_z))
         z = F.relu(self.z_layer2(z))
-        # if x.dim() == 2:
-        #     x = x.squeeze(0)
-        print("x: ", x)
-        # if y.dim() == 2:
-        #     y = y.squeeze(0)
-        print("y: ", y)
-        # if z.dim() == 2:
-        #     z = z.squeeze(0)
-        print("z: ", z)
-        # print("x.shape: ", x.shape)
-        # print("y.shape: ", y.shape)
-        # print("z.shape: ", z.shape)
+        if self.debug:
+            print("x: ", x)
+            print("y: ", y)
+            print("z: ", z)
+            # print("x.shape: ", x.shape)
+            # print("y.shape: ", y.shape)
+            # print("z.shape: ", z.shape)
+        if x.dim() == 2:
+            x = x.squeeze(0)
+        if y.dim() == 2:
+            y = y.squeeze(0)
+        if z.dim() == 2:
+            z = z.squeeze(0)
         joint = torch.cat((x, y, z), dim=0)
         joint = F.relu(self.joint_layer1(joint))
         joint = F.relu(self.joint_layer2(joint))
