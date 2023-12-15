@@ -141,6 +141,11 @@ def optimize_model():
     # to Transition of batch-arrays.
     batch = Transition(*zip(*transitions))
 
+    # print("batch: ", batch)
+    # print("batch.state: ", batch.state)
+    # print("batch.action: ", batch.action)
+    # print("batch.next_state: ", batch.next_state)
+
     # Compute a mask of non-final states and concatenate the batch elements
     # (a final state would've been the one after which simulation ended)
     non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
@@ -154,6 +159,11 @@ def optimize_model():
     # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
     # columns of actions taken. These are the actions which would've been taken
     # for each batch state according to policy_net
+    print("------------------------------------")
+    print("policy_net(state_batch): ", policy_net(state_batch))
+    print("action_batch: ", action_batch)
+    print("policy_net(state_batch).gather(1, action_batch): ", policy_net(state_batch).gather(1, action_batch))
+    print("------------------------------------")
     state_action_values = policy_net(state_batch).gather(1, action_batch)
 
     # Compute V(s_{t+1}) for all next states.

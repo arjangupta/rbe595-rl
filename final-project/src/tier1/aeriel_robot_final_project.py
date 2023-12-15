@@ -17,22 +17,16 @@ from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
 from isaacgym import gymutil, gymtorch, gymapi
 from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
-from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject as AerialRobotCfg
+from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1 as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
 
 import matplotlib.pyplot as plt
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 import time
 
-class AerialRobotFinalProject(BaseTask):
+class AerialRobotFinalProjectTier1(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
-        print("Custom AerialRobotFinalProject constructor")
-        print("cfg:", cfg)
-        print("sim_params:", sim_params)
-        print("physics_engine:", physics_engine)
-        print("sim_device:", sim_device)
-        print("headless:", headless)
         self.cfg = cfg
 
         # Override num_envs to 1
@@ -94,7 +88,6 @@ class AerialRobotFinalProject(BaseTask):
         self.full_camera_array = torch.zeros((self.num_envs, 270, 480), device=self.device)
 
         if self.viewer:
-            print("Creating viewer")
             cam_pos_x, cam_pos_y, cam_pos_z = self.cfg.viewer.pos[0], self.cfg.viewer.pos[1], self.cfg.viewer.pos[2]
             cam_target_x, cam_target_y, cam_target_z = self.cfg.viewer.lookat[0], self.cfg.viewer.lookat[1], self.cfg.viewer.lookat[2]
             cam_pos = gymapi.Vec3(cam_pos_x, cam_pos_y, cam_pos_z)
@@ -103,8 +96,11 @@ class AerialRobotFinalProject(BaseTask):
             
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
         
-        # Image counter
-        self.image_counter = 0
+        # To save images
+        self.save_images = False
+
+        # Action display fixed coordinate
+        self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -121,17 +117,11 @@ class AerialRobotFinalProject(BaseTask):
         return
 
     def _create_envs(self):
-        print("\n\n\n\n\n CREATING ENVIRONMENT \n\n\n\n\n\n")
+        print("\nCREATING AerialRobot for RBE 595 Final Project - Tier 1\n")
         asset_path = self.cfg.robot_asset.file.format(
             AERIAL_GYM_ROOT_DIR=AERIAL_GYM_ROOT_DIR)
         asset_root = os.path.dirname(asset_path)
         asset_file = os.path.basename(asset_path)
-
-        print("asset_path:", asset_path)
-        print("asset_root:", asset_root)
-        print("asset_file:", asset_file)
-
-        print("num_envs:", self.num_envs)
 
         asset_options = asset_class_to_AssetOptions(self.cfg.robot_asset)
 
@@ -193,10 +183,7 @@ class AerialRobotFinalProject(BaseTask):
         self.robot_mass = 0
         for prop in self.robot_body_props:
             self.robot_mass += prop.mass
-        print("Total robot mass: ", self.robot_mass)
         
-        print("\n\n\n\n\n RBE 595 ENVIRONMENT CREATED \n\n\n\n\n\n")
-    
     def render_cameras(self):        
         self.gym.render_all_camera_sensors(self.sim)
         self.gym.start_access_image_tensors(self.sim)
@@ -208,15 +195,12 @@ class AerialRobotFinalProject(BaseTask):
         for env_id in range(self.num_envs):
             # the depth values are in -ve z axis, so we need to flip it to positive
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
-        # Save the image and increment the counter
-        # plt.imsave("images/image_" + str(self.image_counter) + ".png", self.full_camera_array[0].cpu().numpy(), cmap='gray')
-        # self.image_counter += 1
         return
 
-    def step(self, actions):
+    def step(self, position_increment):
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(actions)
+            self.pre_physics_step(position_increment)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
@@ -228,6 +212,23 @@ class AerialRobotFinalProject(BaseTask):
         self.progress_buf += 1
         self.compute_observations()
         self.compute_reward()
+
+        # Save depth image to file
+        if self.save_images:
+            if self.counter % 2000 == 0:
+                print("self.counter:", self.counter)
+                print("Saving depth image")
+                self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
+                print("Saving rgb image")
+                self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_COLOR, "rgb_image_"+str(self.counter)+".png")
+        
+        # FOR TRAINING THE NN (only where images are needed)
+        # Store depth image in a buffer
+        # self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
+        # if self.enable_onboard_cameras:
+        #     depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
+        #     self.depth_image_buf[0] = torch.from_numpy(depth_image)
+
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
             self.reset_idx(reset_env_ids)
@@ -253,28 +254,44 @@ class AerialRobotFinalProject(BaseTask):
         self.reset_buf[env_ids] = 1
         self.progress_buf[env_ids] = 0
 
-    def pre_physics_step(self, _actions):
+        print("\n\nResetting env\n\n")
+
+    def get_current_position(self):
+        return self.root_positions
+
+    def pre_physics_step(self, _position_increment):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
         self.counter += 1
 
-        
-        actions = _actions.to(self.device)
-        actions = tensor_clamp(
-            actions, self.action_lower_limits, self.action_upper_limits)
-        self.action_input[:] = actions
+        # Move the position_increment to the device
+        position_increment = _position_increment.to(self.device)
 
-        # clear actions for reset envs
+        # Clamp the position_increment by looking at the action limits
+        position_increment = tensor_clamp(
+            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+        
+        # Increment the position with current position
+        position_increment = position_increment + self.root_positions[0]
+
+        # Increment the position with fixed coordinate
+        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
+
+        self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
+
+        # clear position_increment for reset envs
         self.forces[:] = 0.0
         self.torques[:, :] = 0.0
 
-        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(self.root_states, self.action_input)
-        self.forces[:, 0, 2] = self.robot_mass * (-self.sim_params.gravity.z) * output_thrusts_mass_normalized
+        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(
+            self.root_states, self.action_input)
+        self.forces[:, 0, 2] = self.robot_mass * (
+            -self.sim_params.gravity.z) * output_thrusts_mass_normalized
         self.torques[:, 0] = output_torques_inertia_normalized
         self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
 
-        # apply actions
+        # apply position_increment
         self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(
             self.forces), gymtorch.unwrap_tensor(self.torques), gymapi.LOCAL_SPACE)
 
@@ -353,6 +370,6 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # resets due to episode length
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
-    reset = torch.where(torch.norm(root_positions, dim=1) > 10.0, ones, reset)
+    reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
 
     return reward, reset

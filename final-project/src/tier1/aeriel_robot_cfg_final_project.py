@@ -11,7 +11,7 @@ from aerial_gym.envs.base.base_config import BaseConfig
 import numpy as np
 from aerial_gym import AERIAL_GYM_ROOT_DIR
 
-class AerialRobotCfgFinalProject(BaseConfig):
+class AerialRobotCfgFinalProjectTier1(BaseConfig):
     seed = 1
     class env:
         num_envs = 65536
@@ -19,7 +19,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         get_privileged_obs = False # if True the states of all entitites in the environment will be returned as privileged observations, otherwise None will be returned
         num_actions = 4
         env_spacing = 1
-        episode_length_s = 8 # episode length in seconds
+        episode_length_s = 1.21e+6 # episode length in seconds (14 days)
         num_control_steps_per_env_step = 1 # number of physics steps per env step
 
     class control:
@@ -34,7 +34,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
         kR: gains for attitude
         kOmega: gains for angular velocity
         """
-        controller = "lee_attitude_control" # or "lee_velocity_control" or "lee_attitude_control"
+        controller = "lee_position_control" # or "lee_velocity_control" or "lee_attitude_control"
         kP = [0.8, 0.8, 1.0] # used for lee_position_control only
         kV = [0.5, 0.5, 0.4] # used for lee_position_control, lee_velocity_control only
         kR = [3.0, 3.0, 1.0] # used for lee_position_control, lee_velocity_control and lee_attitude_control
