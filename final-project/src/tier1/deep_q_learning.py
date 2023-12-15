@@ -49,12 +49,14 @@ class QuadrotorNeuralNetwork(nn.Module):
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
     def forward(self, state):
-        rel_x = state[0]
-        rel_y = state[1]
-        rel_z = state[2]
-        rel_x = rel_x.unsqueeze(0)
-        rel_y = rel_y.unsqueeze(0)
-        rel_z = rel_z.unsqueeze(0)
+        if state.dim() == 1:
+            state = state.unsqueeze(0)
+        rel_x = state[:,0]
+        rel_y = state[:,1]
+        rel_z = state[:,2]
+        print("rel_x: ", rel_x)
+        print("rel_y: ", rel_y)
+        print("rel_z: ", rel_z)
         x = F.relu(self.x_layer1(rel_x))
         x = F.relu(self.x_layer2(x))
         y = F.relu(self.y_layer1(rel_y))
@@ -94,7 +96,7 @@ class DeepQLearningAgent:
         self.LR = 1e-4
 
         # Debug
-        self.debug = False
+        self.debug = True
 
         # Get number of actions from gym action space
         n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
@@ -160,13 +162,12 @@ class DeepQLearningAgent:
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken. These are the actions which would've been taken
         # for each batch state according to policy_net
-        state_action_values = self.policy_net(state_batch)
-        state_action_values = state_action_values.unsqueeze(1)
-        if True:
-            print("action_batch: ", action_batch)
-            print("state_action_values: ", state_action_values)
-            print("state_action_values.gather(1, action_batch): ", state_action_values.gather(1, action_batch))
-        state_action_values.gather(1, action_batch)
+        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
+        # print("action_batch: ", action_batch)
+        # print("state_batch: ", state_batch)
+        # print("state_action_values: ", state_action_values)
+        # print("state_action_values.gather(1, action_batch): ", state_action_values.gather(1, action_batch))
+        # state_action_values.gather(1, action_batch)
 
         # Compute V(s_{t+1}) for all next states.
         # Expected values of actions for non_final_next_states are computed based
@@ -220,7 +221,7 @@ class DeepQLearningAgent:
                     print("next_state: ", next_state)
 
                 # Store the transition in memory
-                self.memory.push(state, action, next_state, reward)
+                self.memory.push(state.unsqueeze(0), action, next_state, reward)
 
                 # Move to the next state
                 state = next_state
