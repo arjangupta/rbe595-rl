@@ -271,5 +271,5 @@ class DeepQLearningAgent:
                 torch.save(self.policy_net.state_dict(), self.MODEL_FILE_NAME)
 
                 if done:
-                    print("\n\nEpisode ended due to termination or truncation\n\n")
+                    print("\nEpisode ended due to termination or truncation\n")
                     break

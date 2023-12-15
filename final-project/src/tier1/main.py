@@ -57,7 +57,7 @@ class GymInterface:
                 if reset_ret:
                     reset = True
                     if hit_ground_ret:
-                        print("Drone hit ground!")
+                        # print("Drone hit ground!")
                         collision = True
                     break
             if reset:
