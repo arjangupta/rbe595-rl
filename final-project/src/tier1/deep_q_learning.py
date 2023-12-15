@@ -138,6 +138,11 @@ class DeepQLearningAgent:
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
+                if self.debug:
+                    print("self.policy_net(state): ", self.policy_net(state))
+                    print("self.policy_net(state).max(0): ", self.policy_net(state).max(0))
+                    print("self.policy_net(state).max(0).indices: ", self.policy_net(state).max(0).indices)
+                    print("self.policy_net(state).max(0).indices.view(1, 1): ", self.policy_net(state).max(0).indices.view(1, 1))
                 return self.policy_net(state).max(0).indices.view(1, 1)
         else:
             return torch.tensor(
