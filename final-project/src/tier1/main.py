@@ -60,6 +60,8 @@ class GymInterface:
                         print("Drone hit ground!")
                         collision = True
                     break
+            if reset:
+                break
         # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
         # Check if near goal
