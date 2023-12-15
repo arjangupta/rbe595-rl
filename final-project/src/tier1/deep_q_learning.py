@@ -52,8 +52,11 @@ class QuadrotorNeuralNetwork(nn.Module):
         if state.dim() == 1:
             state = state.unsqueeze(0)
         rel_x = state[:,0]
+        rel_x = rel_x.unsqueeze(1)
         rel_y = state[:,1]
+        rel_y = rel_y.unsqueeze(1)
         rel_z = state[:,2]
+        rel_z = rel_z.unsqueeze(1)
         print("rel_x: ", rel_x)
         print("rel_y: ", rel_y)
         print("rel_z: ", rel_z)
@@ -65,13 +68,16 @@ class QuadrotorNeuralNetwork(nn.Module):
         z = F.relu(self.z_layer2(z))
         # if x.dim() == 2:
         #     x = x.squeeze(0)
-        #     print("x: ", x)
+        print("x: ", x)
         # if y.dim() == 2:
         #     y = y.squeeze(0)
-        #     print("y: ", y)
+        print("y: ", y)
         # if z.dim() == 2:
         #     z = z.squeeze(0)
-        #     print("z: ", z)
+        print("z: ", z)
+        # print("x.shape: ", x.shape)
+        # print("y.shape: ", y.shape)
+        # print("z.shape: ", z.shape)
         joint = torch.cat((x, y, z), dim=0)
         joint = F.relu(self.joint_layer1(joint))
         joint = F.relu(self.joint_layer2(joint))
