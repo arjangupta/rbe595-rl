@@ -102,6 +102,9 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # Action display fixed coordinate
         self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
 
+        # Set drone hit ground buffer
+        self.drone_hit_ground_buf = torch.zeros((self.num_envs, 1), device=self.device, dtype=torch.float32)
+
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
@@ -235,7 +238,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
@@ -306,7 +309,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         return self.obs_buf
 
     def compute_reward(self):
-        self.rew_buf[:], self.reset_buf[:] = compute_quadcopter_reward(
+        self.rew_buf[:], self.reset_buf[:], self.drone_hit_ground_buf[:] = compute_quadcopter_reward(
             self.root_positions,
             self.root_quats,
             self.root_linvels,
@@ -340,7 +343,7 @@ def quat_axis(q, axis=0):
 
 @torch.jit.script
 def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float) -> Tuple[Tensor, Tensor]
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float) -> Tuple[Tensor, Tensor, Tensor]
 
     # distance to target
     target_dist = torch.sqrt(root_positions[..., 0] * root_positions[..., 0] +
@@ -372,4 +375,12 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
     reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
 
-    return reward, reset
+    drone_hit_ground = torch.zeros_like(reset_buf)
+    # If the self.counter is more than 2000, and the z coordinate is less than 0.2, then reset
+    reset = torch.where(root_positions[:, 2] < 0.2, ones, reset)
+    if torch.where(root_positions[:, 2] < 0.2, ones, reset):
+        # Set a flag to indicate that the drone hit the ground
+        drone_hit_ground = torch.ones_like(reset_buf)
+        print("Drone hit the ground!")
+
+    return reward, reset, drone_hit_ground

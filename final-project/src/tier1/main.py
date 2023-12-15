@@ -34,6 +34,8 @@ class GymInterface:
         self.initial_position = self.get_current_position().clone()
         if self.debug:
             print("Initial position: ", self.initial_position)
+        # Set flag for first step done
+        self.first_step_done = False
 
     def step(self, action):
         # Capture starting relative position
@@ -45,24 +47,30 @@ class GymInterface:
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
         # Step through all points
         reset = False
+        hit_ground = False
         for i_sample in range(0, num_samples):
             # Set command actions
             self.command_actions = torch.from_numpy(points[:,i_sample])
             for _ in range(0, 15):
                 # Step through the environment repeatedly
-                _, _, _, reset_ret, _ = self.env.step(self.command_actions)
+                _, _, _, reset_ret, _, hit_ground_ret = self.env.step(self.command_actions)
                 if reset_ret:
                     reset = True
+                    break
+                if hit_ground_ret:
+                    hit_ground = True
                     break
         # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
         # Check if near goal
+        near_goal = False
         if self.check_if_near_goal():
+            near_goal = True
             print("Reached goal!")
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
-        return self.get_relative_postion(), self.reward_function.determine_reward(False), reset, False
+        return self.get_relative_postion(), self.reward_function.determine_reward(hit_ground), reset, near_goal
 
     def get_current_position(self):
         return self.env.get_current_position()[0]

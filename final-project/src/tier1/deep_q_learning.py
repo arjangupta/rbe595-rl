@@ -125,6 +125,7 @@ class DeepQLearningAgent:
         # If the model .pth file exists, load it
         try:
             self.policy_net.load_state_dict(torch.load(self.MODEL_FILE_NAME))
+            print(f"Model file {self.MODEL_FILE_NAME} found, loading model")
         except:
             print("No model file found, creating new model")
         self.target_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)

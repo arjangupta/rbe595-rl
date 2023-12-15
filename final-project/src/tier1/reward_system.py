@@ -39,6 +39,7 @@ class QuadRewardSystem:
 
         # If collision, return drastic punishment
         if did_collide:
+            print("Harshest punishment - collision")
             return self.R_cp
         
         # If excessive deviation, mild punishment
