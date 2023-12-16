@@ -96,7 +96,7 @@ class AerialRobotFinalProjectTier3(BaseTask):
         self.contact_forces = gymtorch.wrap_tensor(self.contact_force_tensor).view(self.num_envs, bodies_per_env, 3)[:,
                               0]
 
-        self.collisions = torch.zeros(self.num_envs, device=self.device)
+        self.collisions = torch.zeros(self.num_envs, device=self.device) #FIXME: not in tier1
 
         self.initial_root_states = self.root_states.clone()
         self.counter = 0
@@ -342,7 +342,7 @@ class AerialRobotFinalProjectTier3(BaseTask):
 
         self.progress_buf += 1
 
-        self.check_collisions() #FIXME: this not in tier1
+        # self.check_collisions() #FIXME: this not in tier1
         self.compute_observations()
         self.compute_reward()
 
@@ -385,9 +385,9 @@ class AerialRobotFinalProjectTier3(BaseTask):
             self.depth_image = depth_im.flatten()
             # print("self.depth_image:", self.depth_image)
 
-        if self.cfg.env.reset_on_collision: #FIXME: not in tier1
-            ones = torch.ones_like(self.reset_buf)
-            self.reset_buf = torch.where(self.collisions > 0, ones, self.reset_buf)
+        # if self.cfg.env.reset_on_collision: #FIXME: not in tier1
+        #     ones = torch.ones_like(self.reset_buf)
+        #     self.reset_buf = torch.where(self.collisions > 0, ones, self.reset_buf)
 
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
@@ -395,7 +395,7 @@ class AerialRobotFinalProjectTier3(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf #FIXME: tier1 added drone_hit_ground_buf
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions #FIXME: tier1 added drone_hit_ground_buf
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
@@ -538,11 +538,11 @@ class AerialRobotFinalProjectTier3(BaseTask):
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_net_contact_force_tensor(self.sim) #FIXME: not in tier1
 
-    def check_collisions(self):
-        ones = torch.ones((self.num_envs), device=self.device)
-        zeros = torch.zeros((self.num_envs), device=self.device)
-        self.collisions[:] = 0
-        self.collisions = torch.where(torch.norm(self.contact_forces, dim=1) > 0.1, ones, zeros)
+    # def check_collisions(self):
+    #     ones = torch.ones((self.num_envs), device=self.device)
+    #     zeros = torch.zeros((self.num_envs), device=self.device)
+    #     self.collisions[:] = 0
+    #     self.collisions = torch.where(torch.norm(self.contact_forces, dim=1) > 0.1, ones, zeros)
 
     def dump_images(self):
         for env_id in range(self.num_envs):
@@ -559,13 +559,14 @@ class AerialRobotFinalProjectTier3(BaseTask):
 
     def compute_reward(self):
         # self.rew_buf[:], self.reset_buf[:] = compute_quadcopter_reward( #FIXME: tier1 added drone_hit_ground_buf
-        self.rew_buf[:], self.reset_buf[:], self.drone_hit_ground_buf[:] = compute_quadcopter_reward(
+        self.rew_buf[:], self.reset_buf[:], self.drone_hit_ground_buf[:], self.collisions[:] = compute_quadcopter_reward(
             self.root_positions,
             self.root_quats,
             self.root_linvels,
             self.root_angvels,
             self.reset_buf, self.progress_buf, self.max_episode_length,
-            (self.counter - self.last_reset_counter) #FIXME: added from tier1
+            (self.counter - self.last_reset_counter), #FIXME: added from tier1
+            self.contact_forces
         )
 
 
@@ -594,10 +595,8 @@ def quat_axis(q, axis=0):
 
 
 @torch.jit.script
-def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length, counter):
-# def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf,
-#                               max_episode_length):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, int) -> Tuple[Tensor, Tensor, Tensor] #FIXME: tier1 added extra Tensor output
+def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length, counter, contact_forces):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, int, Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor] #FIXME: tier1 added extra Tensor output
 
     # distance to target
     target_dist = torch.sqrt(root_positions[..., 0] * root_positions[..., 0] +
@@ -639,4 +638,9 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
     else:
         drone_hit_ground = torch.zeros_like(reset_buf)
 
-    return reward, reset, drone_hit_ground
+    # ones = torch.ones((1)) #, device=self.device)
+    # zeros = torch.zeros((1)) #, device=self.device)
+    reset = torch.where(torch.norm(contact_forces, dim=1) > 0.1, ones, reset)
+    collisions = torch.where(torch.norm(contact_forces, dim=1) > 0.1, ones, die) #zeros
+
+    return reward, reset, drone_hit_ground, collisions

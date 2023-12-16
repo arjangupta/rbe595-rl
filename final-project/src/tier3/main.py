@@ -100,11 +100,13 @@ class GymInterface:
             self.command_actions = torch.from_numpy(points[:, i_sample])
             for _ in range(0, 15):
                 # Step through the environment repeatedly
-                _, _, _, reset_ret, _, hit_ground_ret = self.env.step(self.command_actions)
+                _, _, _, reset_ret, _, hit_ground_ret, collision_ret = self.env.step(self.command_actions)
                 if reset_ret:
                     reset = True
                     if hit_ground_ret:
                         # print("Drone hit ground!")
+                        collision = True
+                    if collision_ret:
                         collision = True
                     break
             # If one of the last 3 samples, save image
