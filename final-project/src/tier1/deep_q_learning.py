@@ -66,7 +66,7 @@ class QuadrotorNeuralNetwork(nn.Module):
         self.output_layer = nn.Linear(32, n_actions)
 
         # Debug
-        self.debug = False
+        self.debug = True
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -167,7 +167,7 @@ class DeepQLearningAgent:
         self.LR = 1e-4
 
         # Debug
-        self.debug = False
+        self.debug = True
 
         # Get number of actions from gym action space
         n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
