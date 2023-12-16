@@ -201,6 +201,7 @@ class DeepQLearningAgent:
             math.exp(-1. * self.steps_done / self.EPS_DECAY)
         self.steps_done += 1
         if sample > eps_threshold:
+            print("NN action")
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
@@ -212,6 +213,7 @@ class DeepQLearningAgent:
                 #     print("self.policy_net(state).max(0).indices.view(1, 1): ", self.policy_net(state).max(0).indices.view(1, 1))
                 return self.policy_net(state).argmax().view(1, 1)
         else:
+            print("Random action")
             return torch.tensor(
                 [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
                 device=device, dtype=torch.long)
