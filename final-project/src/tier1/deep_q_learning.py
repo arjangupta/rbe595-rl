@@ -296,6 +296,7 @@ class DeepQLearningAgent:
             )
             for _ in range(num_time_steps):
                 action = self.select_action(state)
+                print("Selected action: ", action)
                 # observation, reward, terminated, truncated, _ =
                 observation, reward, truncated, terminated = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
