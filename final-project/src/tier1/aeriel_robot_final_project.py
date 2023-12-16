@@ -32,6 +32,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # Override num_envs to 1
         self.cfg.env.num_envs = 1
 
+        self.enable_onboard_cameras = self.cfg.env.enable_onboard_cameras
+
         self.max_episode_length = int(self.cfg.env.episode_length_s / self.cfg.sim.dt)
         self.debug_viz = False
         num_actors = 1
@@ -228,10 +230,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
         
         # FOR TRAINING THE NN (only where images are needed)
         # Store depth image in a buffer
-        # self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
-        # if self.enable_onboard_cameras:
-        #     depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
-        #     self.depth_image_buf[0] = torch.from_numpy(depth_image)
+        self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
+        if self.enable_onboard_cameras:
+            depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
+            self.depth_image_buf[0] = torch.from_numpy(depth_image)
 
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:

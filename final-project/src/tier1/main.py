@@ -76,7 +76,7 @@ class GymInterface:
                     break
             if reset:
                 break
-        # Capture ending relative position
+    # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
         # Check if near goal
         near_goal = False
@@ -86,7 +86,7 @@ class GymInterface:
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
-        return self.get_relative_postion(), self.reward_function.determine_reward(collision), reset, near_goal
+        return self.get_relative_postion(), self.reward_function.determine_reward(collision, self.get_current_position()), reset, near_goal
 
     def get_current_position(self):
         return self.env.get_current_position()[0]

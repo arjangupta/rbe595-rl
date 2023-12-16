@@ -29,7 +29,7 @@ class ReplayMemory(object):
 
     def __len__(self):
         return len(self.memory)
-    
+
 class QuadrotorNeuralNetwork(nn.Module):
 
     def __init__(self, n_rel_x, n_rel_y, n_rel_z, n_actions):
@@ -41,10 +41,27 @@ class QuadrotorNeuralNetwork(nn.Module):
         self.y_layer2 = nn.Linear(8, 4)
         self.z_layer1 = nn.Linear(n_rel_z, 8)
         self.z_layer2 = nn.Linear(8, 4)
-        # Join the layers
+
+        # Seperated layers for each camera image
+        self.camera_1_layer1 = nn.Linear(1024, 128)
+        self.camera_1_layer2 = nn.Linear(128, 16)
+        self.camera_1_layer3 = nn.Linear(16, 8)
+        self.camera_2_layer1 = nn.Linear(1024, 128)
+        self.camera_2_layer2 = nn.Linear(128, 16)
+        self.camera_2_layer3 = nn.Linear(16, 8)
+        self.camera_3_layer1 = nn.Linear(1024, 128)
+        self.camera_3_layer2 = nn.Linear(128, 16)
+        self.camera_3_layer3 = nn.Linear(16, 16)
+
+        # Join the position layers
         self.joint_layer1 = nn.Linear((8 + 4 + 4), 8)
-        self.joint_layer2 = nn.Linear(8, 32)
+
+        # Join the camera layers
+        self.camera_joint_layer1 = nn.Linear((8 + 8 + 16), 16)
+
+        self.joint_layer2 = nn.Linear((8 + 16), 32)
         self.output_layer = nn.Linear(32, n_actions)
+
         # Debug
         self.debug = False
 
@@ -53,11 +70,41 @@ class QuadrotorNeuralNetwork(nn.Module):
     def forward(self, state):
         if state.dim() == 1:
             state = state.unsqueeze(0)
-        rel_x = state[:,0]
+
+        cam_1 = state[:,0]
+        cam_1 = cam_1.unsqueeze(1)
+        cam_2 = state[:,1]
+        cam_2 = cam_2.unsqueeze(1)
+        cam_3 = state[:,2]
+        cam_3 = cam_3.unsqueeze(1)
+
+        if self.debug:
+            print("cam_1: ", cam_1)
+            print("cam_2: ", cam_2)
+            print("cam_3: ", cam_3)
+        cam1 = F.relu(self.camera_1_layer1(cam_1))
+        cam1 = F.relu(self.camera_1_layer2(cam1))
+        cam1 = F.relu(self.camera_1_layer3(cam1))
+        cam2 = F.relu(self.camera_2_layer1(cam_2))
+        cam2 = F.relu(self.camera_2_layer2(cam2))
+        cam2 = F.relu(self.camera_2_layer3(cam2))
+        cam3 = F.relu(self.camera_2_layer1(cam_3))
+        cam3 = F.relu(self.camera_2_layer2(cam3))
+        cam3 = F.relu(self.camera_2_layer3(cam3))
+
+        if self.debug:
+            print("cam1: ", cam1)
+            print("cam2: ", cam2)
+            print("cam3: ", cam3)
+            print("cam1.dim(): ", cam1.dim())
+            print("cam2.dim(): ", cam2.dim())
+            print("cam3.dim(): ", cam3.dim())
+
+        rel_x = state[:,3]
         rel_x = rel_x.unsqueeze(1)
-        rel_y = state[:,1]
+        rel_y = state[:,4]
         rel_y = rel_y.unsqueeze(1)
-        rel_z = state[:,2]
+        rel_z = state[:,5]
         rel_z = rel_z.unsqueeze(1)
         if self.debug:
             print("rel_x: ", rel_x)
@@ -85,10 +132,19 @@ class QuadrotorNeuralNetwork(nn.Module):
         #     y = y.squeeze(0)
         # if z.dim() == 2:
         #     z = z.squeeze(0)
-        joint = torch.cat((x, y, z), dim=1)
-        joint = F.relu(self.joint_layer1(joint))
-        joint = F.relu(self.joint_layer2(joint))
-        return self.output_layer(joint)
+
+        # joint = torch.cat((x, y, z), dim=1)
+        # joint = F.relu(self.joint_layer1(joint))
+        # joint = F.relu(self.joint_layer2(joint))
+        # return self.output_layer(joint)
+
+        joint_pos = torch.cat((x, y, z), dim=1)
+        joint_cam = torch.cat((cam1, cam2, cam3), dim=1)
+        joint_pos = F.relu(self.joint_layer1(joint_pos))
+        joint_cam = F.relu(self.camera_joint_layer1(joint_cam))
+        joint_all = torch.cat((joint_pos, joint_cam), dim=1)
+        joint_all = F.relu(self.joint_layer2(joint_all))
+        return self.output_layer(joint_all)
 
 class DeepQLearningAgent:
     def __init__(self, gym_iface):

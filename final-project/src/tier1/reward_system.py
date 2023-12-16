@@ -29,19 +29,29 @@ class QuadRewardSystem:
 
         # Drastic punishment for collision
         self.R_cp = -1.0
+
+        # The drone's position the last time the rewards were evaluated
+        self.last_position = None
     
     def f_delta_t(self, dt):
         """This is the function that regulates the discount rate based on dmax"""
         return 0.5 * ((torch.tanh((2*self.d_max - dt)/self.d_max)) + 1)
     
-    def determine_reward(self, did_collide):
+    def determine_reward(self, did_collide, position):
         """This function determines the reward for a given time step"""
 
         # If collision, return drastic punishment
         if did_collide:
             # print("Harshest punishment - collision")
             return self.R_cp
-        
+
+        # If stays at same point, mild punishment
+        stay_reward = 0
+        if self.last_position is not None:
+            if torch.all(self.last_position.eq(position)):
+                stay_reward = self.R_dp
+        self.last_position = position
+
         # If excessive deviation, mild punishment
         if torch.abs(self.dt_end) > self.d_max:
             return self.R_dp
@@ -50,12 +60,12 @@ class QuadRewardSystem:
         self.delta_d = self.dt_end - self.dt_start
         # Calculate reward as given in paper
         if self.delta_d > self.delta_d_u:
-            return self.R_l * self.f_delta_t(self.dt_end)
+            return self.R_l * self.f_delta_t(self.dt_end) + stay_reward
         elif self.delta_d < self.delta_d_l:
-            return self.R_u * self.f_delta_t(self.dt_end)
+            return self.R_u * self.f_delta_t(self.dt_end) + stay_reward
         else:
             return (self.R_l +
                 (self.R_u - self.R_l)*
                 ((self.delta_d_u - self.delta_d)/(self.delta_d_u - self.delta_d_l))
-            )*self.f_delta_t(self.dt_end)
+            )*self.f_delta_t(self.dt_end) + stay_reward
 
