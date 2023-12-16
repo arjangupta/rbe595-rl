@@ -118,6 +118,8 @@ class QuadrotorNeuralNetwork(nn.Module):
         rel_pos = state.relative_position
         if rel_pos.dim() == 1:
             rel_pos = rel_pos.unsqueeze(0)
+        if rel_pos.dim() == 3:
+            rel_pos = rel_pos.squeeze(1)
         rel_x = rel_pos[:,0]
         rel_x = rel_x.unsqueeze(1)
         rel_y = rel_pos[:,1]
