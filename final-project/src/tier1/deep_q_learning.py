@@ -305,7 +305,7 @@ class DeepQLearningAgent:
             num_time_steps = 500
 
         for ep in range(num_episodes):
-            if ep % 5 == 0:
+            if ep % 2 == 0:
                 self.gym_iface.choose_new_goal_position()
             print(f"\n\n\nDeep-QL Training episode: {ep+1}\n")
             print(f"Goal position: {self.gym_iface.goal_position}\n")
