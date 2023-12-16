@@ -22,7 +22,7 @@ class QuadRewardSystem:
 
         # Lower and upper limits on reward
         self.R_l = 0.0
-        self.R_u = 1.0
+        self.R_u = 2.0
 
         # Mild punishment for excessive deviation
         self.R_dp = -0.5
