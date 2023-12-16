@@ -97,7 +97,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
         
         # To save images
-        self.save_images = True
+        self.save_images = False
 
         # Action display fixed coordinate
         self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
