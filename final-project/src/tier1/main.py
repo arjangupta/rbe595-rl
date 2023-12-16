@@ -5,7 +5,7 @@ import torch
 from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1
 from aeriel_robot_final_project import AerialRobotFinalProjectTier1
 from action_primitives import QuadActionPrimitives
-from deep_q_learning import DeepQLearningAgent
+from deep_q_learning import DeepQLearningAgent, State
 from reward_system import QuadRewardSystem
 
 class GymInterface:
@@ -42,6 +42,8 @@ class GymInterface:
             print("Initial position: ", self.initial_position)
         # Set flag for first step done
         self.first_step_done = False
+        # Current image array
+        self.image_set = torch.zeros((3, 1024), dtype=torch.float32, device=self.device)
     
     def choose_new_goal_position(self):
         """Chooses a new goal position"""
@@ -74,9 +76,12 @@ class GymInterface:
                         # print("Drone hit ground!")
                         collision = True
                     break
+            # If one of the last 3 samples, save image
+            if i_sample >= num_samples - 3:
+                self.image_set[i_sample - num_samples + 3] = self.get_image()
             if reset:
                 break
-    # Capture ending relative position
+        # Capture ending relative position
         self.reward_function.dt_end = self.get_perpendicular_distance()
         # Check if near goal
         near_goal = False
@@ -89,7 +94,7 @@ class GymInterface:
         return self.get_observation(), self.reward_function.determine_reward(collision, self.get_current_position()), reset, near_goal
 
     def get_observation(self):
-        return torch.cat(self.get_relative_postion(), self.get_image())
+        return State(self.image_set, self.get_relative_postion())
 
     def get_image(self):
         return self.env.get_depth_image()

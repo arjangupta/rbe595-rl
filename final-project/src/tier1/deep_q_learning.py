@@ -13,6 +13,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Define the transition tuple
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
+# Define the state tuple
+State = namedtuple('State',
+                   ('depth_image', 'relative_position'))
 
 class ReplayMemory(object):
     """Experience Replay memory"""
@@ -67,30 +70,34 @@ class QuadrotorNeuralNetwork(nn.Module):
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, state):
-        if state.dim() == 1:
-            state = state.unsqueeze(0)
-
-        cam_1 = state[:,0]
-        cam_1 = cam_1.unsqueeze(1)
-        cam_2 = state[:,1]
-        cam_2 = cam_2.unsqueeze(1)
-        cam_3 = state[:,2]
-        cam_3 = cam_3.unsqueeze(1)
+    def forward(self, state: State):
+        # Feed into camera layers
+        depth_im = state.depth_image
+        if depth_im.dim() == 1:
+            depth_im = depth_im.unsqueeze(0)
+        depth_im_1 = depth_im[:,0]
+        depth_im_1 = depth_im_1.unsqueeze(1)
+        depth_im_2 = depth_im[:,1]
+        depth_im_2 = depth_im_2.unsqueeze(1)
+        depth_im_3 = depth_im[:,2]
+        depth_im_3 = depth_im_3.unsqueeze(1)
 
         if self.debug:
-            print("cam_1: ", cam_1)
-            print("cam_2: ", cam_2)
-            print("cam_3: ", cam_3)
-        cam1 = F.relu(self.camera_1_layer1(cam_1))
+            print("depth_im_1: ", depth_im_1)
+            print("depth_im_2: ", depth_im_2)
+            print("depth_im_3: ", depth_im_3)
+            print("depth_im_1.dim(): ", depth_im_1.dim())
+            print("depth_im_2.dim(): ", depth_im_2.dim())
+            print("depth_im_3.dim(): ", depth_im_3.dim())
+        cam1 = F.relu(self.camera_1_layer1(depth_im_1))
         cam1 = F.relu(self.camera_1_layer2(cam1))
         cam1 = F.relu(self.camera_1_layer3(cam1))
-        cam2 = F.relu(self.camera_2_layer1(cam_2))
+        cam2 = F.relu(self.camera_2_layer1(depth_im_2))
         cam2 = F.relu(self.camera_2_layer2(cam2))
         cam2 = F.relu(self.camera_2_layer3(cam2))
-        cam3 = F.relu(self.camera_2_layer1(cam_3))
-        cam3 = F.relu(self.camera_2_layer2(cam3))
-        cam3 = F.relu(self.camera_2_layer3(cam3))
+        cam3 = F.relu(self.camera_3_layer1(depth_im_3))
+        cam3 = F.relu(self.camera_3_layer2(cam3))
+        cam3 = F.relu(self.camera_3_layer3(cam3))
 
         if self.debug:
             print("cam1: ", cam1)
@@ -100,11 +107,15 @@ class QuadrotorNeuralNetwork(nn.Module):
             print("cam2.dim(): ", cam2.dim())
             print("cam3.dim(): ", cam3.dim())
 
-        rel_x = state[:,3]
+        # Feed into position layers
+        rel_pos = state.relative_position
+        if rel_pos.dim() == 1:
+            rel_pos = rel_pos.unsqueeze(0)
+        rel_x = rel_pos[:,0]
         rel_x = rel_x.unsqueeze(1)
-        rel_y = state[:,4]
+        rel_y = rel_pos[:,1]
         rel_y = rel_y.unsqueeze(1)
-        rel_z = state[:,5]
+        rel_z = rel_pos[:,2]
         rel_z = rel_z.unsqueeze(1)
         if self.debug:
             print("rel_x: ", rel_x)
