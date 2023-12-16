@@ -13,3 +13,8 @@ Install the bezier library
 ```
 pip install bezier
 ```
+
+Install opencv
+```
+pip install opencv-python
+```
