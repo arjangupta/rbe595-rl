@@ -87,6 +87,10 @@ class QuadrotorNeuralNetwork(nn.Module):
             print("depth_im_1.dim(): ", depth_im_1.dim())
             print("depth_im_2.dim(): ", depth_im_2.dim())
             print("depth_im_3.dim(): ", depth_im_3.dim())
+            print("depth_im_1.shape: ", depth_im_1.shape)
+            print("depth_im_2.shape: ", depth_im_2.shape)
+            print("depth_im_3.shape: ", depth_im_3.shape)
+
         cam1 = F.relu(self.camera_1_layer1(depth_im_1))
         cam1 = F.relu(self.camera_1_layer2(cam1))
         cam1 = F.relu(self.camera_1_layer3(cam1))
@@ -132,20 +136,9 @@ class QuadrotorNeuralNetwork(nn.Module):
             print("x.dim(): ", x.dim())
             print("y.dim(): ", y.dim())
             print("z.dim(): ", z.dim())
-            # print("x.shape: ", x.shape)
-            # print("y.shape: ", y.shape)
-            # print("z.shape: ", z.shape)
-        # if x.dim() == 2:
-        #     x = x.squeeze(0)
-        # if y.dim() == 2:
-        #     y = y.squeeze(0)
-        # if z.dim() == 2:
-        #     z = z.squeeze(0)
-
-        # joint = torch.cat((x, y, z), dim=1)
-        # joint = F.relu(self.joint_layer1(joint))
-        # joint = F.relu(self.joint_layer2(joint))
-        # return self.output_layer(joint)
+            print("x.shape: ", x.shape)
+            print("y.shape: ", y.shape)
+            print("z.shape: ", z.shape)
 
         joint_pos = torch.cat((x, y, z), dim=1)
         joint_cam = torch.cat((cam1, cam2, cam3), dim=1)
