@@ -97,7 +97,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
         
         # To save images
-        self.save_images = False
+        self.save_images = True
 
         # Action display fixed coordinate
         self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
@@ -219,8 +219,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.compute_reward()
 
         # Save depth image to file
-        if self.save_images:
-            if self.counter % 2000 == 0:
+        if self.save_images and self.counter % 2000 == 0:
                 print("self.counter:", self.counter)
                 print("Saving depth image")
                 self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
@@ -231,14 +230,15 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # Store depth image in a buffer
         if self.enable_onboard_cameras:
             depth_im = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
-            # print("depth_image_np.shape:", depth_image_np.shape)
+            # print("depth_im.shape:", depth_im.shape)
             # Convert to tensor from numpy
             self.depth_image = torch.from_numpy(depth_im).to(self.device)
+            # print("self.depth_image:", self.depth_image)
             # The given depth image has shape (270, 480), but we need (1, 1024)
             # So, first we need to scale it to 32x32
-            self.depth_image = torchvision.transforms.Resize((32, 32))(self.depth_image)
+            self.depth_image = torch.nn.functional.interpolate(self.depth_image.unsqueeze(0).unsqueeze(0), size=(32, 32), mode='nearest')
             # Save the 32x32 depth image to a file every 2000 steps
-            if self.counter % 2000 == 0:
+            if self.save_images and self.counter % 2000 == 0:
                 torchvision.utils.save_image(self.depth_image, "depth_image_tensor_"+str(self.counter)+".png")
             # Now, we can flatten it to (1, 1024)
             self.depth_image = self.depth_image.flatten().unsqueeze(0)

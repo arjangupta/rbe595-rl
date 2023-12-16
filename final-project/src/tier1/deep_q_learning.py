@@ -66,7 +66,7 @@ class QuadrotorNeuralNetwork(nn.Module):
         self.output_layer = nn.Linear(32, n_actions)
 
         # Debug
-        self.debug = False
+        self.debug = True
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -297,7 +297,10 @@ class DeepQLearningAgent:
                 self.gym_iface.choose_new_goal_position()
             print(f"Deep-QL Training episode: {ep+1}\n")
             print(f"Goal position: {self.gym_iface.goal_position}\n")
-            state = self.gym_iface.get_current_position()
+            state = State(
+                depth_image=self.gym_iface.get_image_set(),
+                relative_position=self.gym_iface.get_current_position().unsqueeze(0)
+            )
             for _ in range(num_time_steps):
                 action = self.select_action(state)
                 # observation, reward, terminated, truncated, _ =
@@ -320,7 +323,8 @@ class DeepQLearningAgent:
                 print("reward: ", reward)
 
                 # Store the transition in memory
-                self.memory.push(state.unsqueeze(0), action, next_state, reward)
+                # state.relative_position = state.relative_position.unsqueeze(0)
+                self.memory.push(state, action, next_state, reward)
 
                 # Move to the next state
                 state = next_state

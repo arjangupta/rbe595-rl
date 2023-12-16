@@ -78,7 +78,7 @@ class GymInterface:
                     break
             # If one of the last 3 samples, save image
             if i_sample >= num_samples - 3:
-                self.image_set[i_sample - num_samples + 3] = self.get_image()
+                self.image_set[i_sample - num_samples + 3] = self.env.get_depth_image()
             if reset:
                 break
         # Capture ending relative position
@@ -94,16 +94,13 @@ class GymInterface:
         return self.get_observation(), self.reward_function.determine_reward(collision, self.get_current_position()), reset, near_goal
 
     def get_observation(self):
-        return State(self.image_set, self.get_relative_postion())
+        return State(self.image_set, self.get_relative_postion().unsqueeze(0))
 
-    def get_image(self):
-        return self.env.get_depth_image()
+    def get_image_set(self):
+        return self.image_set
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
-
-    def get_images(self):
-        return self.env.get
     
     def calculate_3d_distance(self, A, B, C):
         """Returns the euclidean distance of the point C
