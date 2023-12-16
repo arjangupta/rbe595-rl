@@ -218,8 +218,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.compute_observations()
         self.compute_reward()
 
+        save_images_every = 5000
+
         # Save depth image to file
-        if self.save_images and self.counter % 500 == 0:
+        if self.save_images and self.counter % save_images_every == 0:
                 print("self.counter:", self.counter)
                 print("Saving depth image")
                 self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
@@ -237,7 +239,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
             # So, first we need to scale it to 32x32
             depth_im = torch.nn.functional.interpolate(depth_im.unsqueeze(0).unsqueeze(0), size=(32, 32), mode='nearest')
             # Save the 32x32 depth image to a file every 2000 steps
-            if self.save_images and self.counter % 500 == 0:
+            if self.save_images and self.counter % save_images_every == 0:
                 torchvision.utils.save_image(depth_im, "depth_image_tensor_"+str(self.counter)+".png")
             # Now, we can flatten it to (1, 1024)
             self.depth_image = depth_im.flatten().unsqueeze(0)
