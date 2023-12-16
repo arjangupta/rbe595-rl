@@ -16,7 +16,7 @@ TREE_SEMANTIC_ID = 2
 OBJECT_SEMANTIC_ID = 3
 WALL_SEMANTIC_ID = 8
 
-class AerialRobotCfgFinalProject(BaseConfig):
+class AerialRobotCfgFinalProjectTier3(BaseConfig):
 
     seed = 1
 
@@ -25,10 +25,10 @@ class AerialRobotCfgFinalProject(BaseConfig):
         num_observations = 13
         get_privileged_obs = True  # if True the states of all entitites in the environment will be returned as privileged observations, otherwise None will be returned
         num_actions = 4
-        env_spacing = 5.0  # not used with heightfields/trimeshes
-        episode_length_s = 10  # episode length in seconds
-        num_control_steps_per_env_step = 10  # number of control & physics steps between camera renders
-        enable_onboard_cameras = False  # enable onboard cameras
+        env_spacing = 1
+        episode_length_s = 1.21e+6 # episode length in seconds (14 days)
+        num_control_steps_per_env_step = 1 # number of physics steps per env step
+        enable_onboard_cameras = True  # enable onboard cameras
         reset_on_collision = True  # reset environment when contact force on quadrotor is above a threshold
         create_ground_plane = True  # create a ground plane
 
@@ -58,7 +58,7 @@ class AerialRobotCfgFinalProject(BaseConfig):
             max_depenetration_velocity = 1.0
             max_gpu_contact_pairs = 2 ** 23  # 2**24 -> needed for 8000 envs and more
             default_buffer_size_multiplier = 5
-            contact_collection = 1  # 0: never, 1: last sub-step, 2: all sub-steps (default=2)
+            contact_collection = 1  # 0: never, 1: last sub-step, 2: all sub-steps (default=2) # FIXME: this is 0 in tier1
 
     class control:
         """
@@ -72,21 +72,24 @@ class AerialRobotCfgFinalProject(BaseConfig):
         kR: gains for attitude
         kOmega: gains for angular velocity
         """
-        controller = "lee_velocity_control"  # or "lee_velocity_control" or "lee_attitude_control"
+        controller = "lee_position_control"  # or "lee_velocity_control" or "lee_attitude_control"
         kP = [0.8, 0.8, 1.0]  # used for lee_position_control only
         kV = [0.5, 0.5, 0.4]  # used for lee_position_control, lee_velocity_control only
         kR = [3.0, 3.0, 1.0]  # used for lee_position_control, lee_velocity_control and lee_attitude_control
         kOmega = [0.5, 0.5, 1.20]  # used for lee_position_control, lee_velocity_control and lee_attitude_control
-        scale_input = [2.0, 1.0, 1.0, np.pi / 4.0]  # scale the input to the controller from -1 to 1 for each dimension
+        scale_input = [1.0, 1.0, 1.0, 1.0]  # scale the input to the controller from -1 to 1 for each dimension, scale from -np.pi to np.pi for yaw in the case of position control
 
     class robot_asset:
         file = "{AERIAL_GYM_ROOT_DIR}/resources/robots/quad/model.urdf"
         name = "aerial_robot"  # actor name
         base_link_name = "base_link"
+        foot_name = "None" # name of the feet bodies, used to index body state and contact force tensors
+        penalize_contacts_on = []
+        terminate_after_contacts_on = []
         disable_gravity = False
         collapse_fixed_joints = True  # merge bodies connected by fixed joints.
         fix_base_link = False  # fix the base of the robot
-        collision_mask = 0  # 1 to disable, 0 to enable...bitwise filter
+        collision_mask = 0  # 1 to disable, 0 to enable...bitwise filter #FIXME: in tier1 this is 1
         replace_cylinder_with_capsule = False  # replace collision cylinders with capsules, leads to faster/more stable simulation
         flip_visual_attachments = True  # Some .obj meshes must be flipped from y-up to z-up
         density = 0.001

@@ -19,6 +19,7 @@ import sys
 import numpy as np
 import os
 import torch
+import torchvision
 import xml.etree.ElementTree as ET
 
 from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
@@ -26,7 +27,7 @@ from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
 from isaacgym import gymutil, gymtorch, gymapi
 from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
-from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject as AerialRobotCfg
+from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier3 as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
 from aeriel_asset_manager_final_project import AssetManager
 
@@ -35,7 +36,7 @@ from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 import time
 from training_maps import TrainMaps
 
-class AerialRobotFinalProject(BaseTask):
+class AerialRobotFinalProjectTier3(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
         self.cfg = cfg
@@ -47,7 +48,7 @@ class AerialRobotFinalProject(BaseTask):
         self.cfg.env.enable_onboard_cameras = True
 
         self.max_episode_length = int(self.cfg.env.episode_length_s / self.cfg.sim.dt)
-        self.debug_viz = True
+        self.debug_viz = True #FIXME: False in tier1
 
         self.sim_params = sim_params
         self.physics_engine = physics_engine
@@ -56,7 +57,7 @@ class AerialRobotFinalProject(BaseTask):
 
         self.enable_onboard_cameras = self.cfg.env.enable_onboard_cameras
 
-        map = random.randint(1, 2)
+        map = random.randint(1, 6)
         # map = 1
 
         asset_dict = self.pick_random_dict_map(map)
@@ -99,6 +100,7 @@ class AerialRobotFinalProject(BaseTask):
 
         self.initial_root_states = self.root_states.clone()
         self.counter = 0
+        self.last_reset_counter = 0
 
         self.action_upper_limits = torch.tensor(
             [1, 1, 1, 1], device=self.device, dtype=torch.float32)
@@ -121,7 +123,7 @@ class AerialRobotFinalProject(BaseTask):
         self.env_upper_bound = torch.zeros(
             (self.num_envs, 3), dtype=torch.float32, device=self.device)
 
-        if self.cfg.env.enable_onboard_cameras:
+        if self.cfg.env.enable_onboard_cameras: #FIXME: this check isn't in tier1
             self.full_camera_array = torch.zeros((self.num_envs, 270, 480), device=self.device)
 
         if self.viewer:
@@ -134,6 +136,17 @@ class AerialRobotFinalProject(BaseTask):
 
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
 
+        # To save images
+        self.save_images = False
+
+        # Action display fixed coordinate
+        self.action_display_fixed_coordinate = torch.tensor([[5, 5, 5]], device=self.device, dtype=torch.float32)
+
+        # Set drone hit ground buffer #FIXME: in tier1, but here should be solved by environment bounds
+        self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
+
+        self.depth_image = torch.zeros((1, 1024), device=self.device)
+
 
     def pick_random_dict_map(self, map_num):
 
@@ -143,30 +156,10 @@ class AerialRobotFinalProject(BaseTask):
 
         return asset_type_to_dict_map
 
-        # asset_type_to_dict_map = {
-        #     "thin": self.cfg.thin_asset_params,
-        #     "trees": self.cfg.tree_asset_params,
-        #     "objects": self.cfg.object_asset_params,
-        #     "long_left_wall": self.cfg.left_wall,
-        #     "long_right_wall": self.cfg.right_wall,
-        #     "back_wall": self.cfg.back_wall,
-        #     "front_wall": self.cfg.front_wall,
-        #     "bottom_wall": self.cfg.bottom_wall,
-        #     "top_wall": self.cfg.top_wall}
-        # self.cfg.asset_config.include_env_bound_type = {
-        #     "front_wall": False,
-        #     "long_left_wall": True,
-        #     "top_wall": False,
-        #     "back_wall": False,
-        #     "long_right_wall": True,
-        #     "bottom_wall": False}
-        # return asset_type_to_dict_map
-
-
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
-        if self.cfg.env.create_ground_plane:
+        if self.cfg.env.create_ground_plane: #FIXME: this check not in tier1
             self._create_ground_plane()
         self._create_envs()
         self.progress_buf = torch.zeros(
@@ -194,8 +187,8 @@ class AerialRobotFinalProject(BaseTask):
 
         start_pose = gymapi.Transform()
         # create env instance
-        pos = torch.tensor([0, 0, 0], device=self.device)
-        start_pose.p = gymapi.Vec3(*pos)
+        pos = torch.tensor([0, 0, 0], device=self.device) #FIXME: not here in tier1 - in for loop instead
+        start_pose.p = gymapi.Vec3(*pos) #FIXME: not here in tier1 - in for loop instead
         self.env_spacing = self.cfg.env.env_spacing
         env_lower = gymapi.Vec3(-self.env_spacing, -
         self.env_spacing, -self.env_spacing)
@@ -221,7 +214,7 @@ class AerialRobotFinalProject(BaseTask):
         # orientation of the camera relative to the body
         local_transform.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
-        self.segmentation_counter = 0
+        self.segmentation_counter = 0 #FIXME: not in tier1
 
         self.evh = None
 
@@ -231,11 +224,18 @@ class AerialRobotFinalProject(BaseTask):
             # insert robot asset
             actor_handle = self.gym.create_actor(env_handle, robot_asset, start_pose, "robot", i,
                                                  self.cfg.robot_asset.collision_mask, 0)
+
+            # pos = torch.tensor([2, 0, 0], device=self.device)
+            # wall_pose = gymapi.Transform()
+            # wall_pose.p = gymapi.Vec3(*pos)
+            # self.robot_body_props = self.gym.get_actor_rigid_body_properties(
+            #     env_handle, actor_handle) #FIXME: this here in tier1
+
             # append to lists
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
-            if self.enable_onboard_cameras:
+            if self.enable_onboard_cameras: # FIXME: no check in tier1
                 cam_handle = self.gym.create_camera_sensor(env_handle, camera_props)
                 self.gym.attach_camera_to_body(cam_handle, env_handle, actor_handle, local_transform,
                                                gymapi.FOLLOW_TRANSFORM)
@@ -250,6 +250,8 @@ class AerialRobotFinalProject(BaseTask):
             self.envs.append(env_handle)
             self.actor_handles.append(actor_handle)
 
+        #             self.robot_body_props = self.gym.get_actor_rigid_body_properties(
+        #                 env_handle, actor_handle) #FIXME this is tier1
         self.robot_body_props = self.gym.get_actor_rigid_body_properties(self.envs[0], self.actor_handles[0])
         self.robot_mass = 0
         for prop in self.robot_body_props:
@@ -325,43 +327,65 @@ class AerialRobotFinalProject(BaseTask):
             self.gym.set_rigid_body_color(env_handle, env_asset_handle, 0, gymapi.MESH_VISUAL,
                                           gymapi.Vec3(color[0] / 255, color[1] / 255, color[2] / 255))
 
-    def step(self, actions):
+    def step(self, position_increment):
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(actions)
+            self.pre_physics_step(position_increment)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
             self.post_physics_step()
 
         self.render(sync_frame_time=False)
-        if self.enable_onboard_cameras:
+        if self.enable_onboard_cameras: #FIXME: check not in tier1
             self.render_cameras()
 
         self.progress_buf += 1
 
-        self.check_collisions()
+        self.check_collisions() #FIXME: this not in tier1
         self.compute_observations()
         self.compute_reward()
 
+        save_images_every = 500
+
         # Save depth image to file
-        # if self.debug_viz:
-        #     if self.counter % 250 == 0:
-        #         print("self.counter:", self.counter)
-        #         print("Saving depth image")
-        #         self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
-        #         print("Saving segmentation image")
-        #         self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_SEGMENTATION, "segmentation_image_"+str(self.counter)+".png")
-        #         print("Saving rgb image")
-        #         self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_COLOR, "rgb_image_"+str(self.counter)+".png")
+        if self.save_images and self.counter % save_images_every == 0:
+            # print("self.counter:", self.counter)
+            self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH,
+                                                "depth_image_" + str(self.counter) + ".png")
+            self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_COLOR,
+                                                "rgb_image_" + str(self.counter) + ".png")
 
+        # FOR TRAINING THE NN (only where images are needed)
         # Store depth image in a buffer
-        # self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
-        # if self.enable_onboard_cameras:
-        #     depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
-        #     self.depth_image_buf[0] = torch.from_numpy(depth_image)
+        if self.enable_onboard_cameras:
+            # Get the depth image from the camera array
+            depth_im = self.full_camera_array[0]
 
-        if self.cfg.env.reset_on_collision:
+            # The given depth image has shape (270, 480), but we need (1, 1024)
+            # So, first we need to scale it to 32x32 on the GPU
+            depth_im = depth_im.unsqueeze(0).unsqueeze(0)
+            depth_im = torch.nn.functional.interpolate(depth_im, size=(32, 32), mode='bilinear', align_corners=False)
+
+            # Now, the issue is that the depth image has many nan values
+            # So, we need to replace them with 0.0
+            depth_im = torch.where(torch.isnan(depth_im), torch.zeros_like(depth_im), depth_im)
+
+            # Also, the 0-1 range is flipped, so we need to flip it back
+            depth_im = 1.0 - depth_im
+
+            # print("depth_im:", depth_im)
+
+            # Save the 32x32 depth image to a file after certain number of iterations
+            if self.save_images and self.counter % save_images_every == 0:
+                torchvision.utils.save_image(depth_im, "depth_image_tensor_" + str(self.counter) + ".png")
+
+            # Convert to tensor from numpy
+            # Now, we can flatten it to (1, 1024)
+            self.depth_image = depth_im.flatten()
+            # print("self.depth_image:", self.depth_image)
+
+        if self.cfg.env.reset_on_collision: #FIXME: not in tier1
             ones = torch.ones_like(self.reset_buf)
             self.reset_buf = torch.where(self.collisions > 0, ones, self.reset_buf)
 
@@ -371,95 +395,137 @@ class AerialRobotFinalProject(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf #FIXME: tier1 added drone_hit_ground_buf
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
         if 0 in env_ids:
             print("\n\n\n RESETTING ENV 0 \n\n\n")
 
-        map = random.randint(1, 2)
-        # map = 0
-
-        # self.env_asset_manager.asset_type_to_dict_map = self.pick_random_dict_map(map)
-        # self.env_asset_manager.cfg = self.cfg
+        map = random.randint(1, 6)
 
         self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id, self.pick_random_dict_map(map))
-        # self.env_asset_manager.cfg = self.cfg
 
-        # for i in range(self.num_envs):
-        #     env_handle = self.envs[i]
-        #     self.prepare_envs(env_handle, i)
+        self.env_asset_manager.randomize_pose()
 
-        # try:
+        #FIXME: this env asset stuff different than tier1
 
-        # print(f"env ids: {env_ids}")
+        self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
 
-        if map != 0:
+        euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
+        self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1],
+                                                                          euler_angles[..., 2])
+        self.env_asset_root_states[env_ids, :, 7:13] = 0.0
 
-            self.env_asset_manager.randomize_pose()
+        # get environment lower and upper bounds
+        self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)
+        self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
 
-            self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
-
-            euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
-            self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1],
-                                                                              euler_angles[..., 2])
-            self.env_asset_root_states[env_ids, :, 7:13] = 0.0
-
-            # get environment lower and upper bounds
-            self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)
-            self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
-            # except:
-        #     print("what")
-        drone_pos_rand_sample = torch.rand((num_resets, 3), device=self.device)
-
-        drone_positions = (self.env_upper_bound[env_ids] - self.env_lower_bound[env_ids] -
-                           0.50) * drone_pos_rand_sample + (self.env_lower_bound[env_ids] + 0.25)
+        # FIXME: not in tier1
+        # drone_pos_rand_sample = torch.rand((num_resets, 3), device=self.device)
+        #
+        # drone_positions = (self.env_upper_bound[env_ids] - self.env_lower_bound[env_ids] -
+        #                    0.50) * drone_pos_rand_sample + (self.env_lower_bound[env_ids] + 0.25)
 
         # set drone positions that are sampled within environment bounds
 
+        # self.root_states[env_ids,
+        # 0:3] = drone_positions
+        # self.root_states[env_ids,
+        # 7:10] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        # self.root_states[env_ids,
+        # 10:13] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+
+        self.root_states[env_ids] = self.initial_root_states[env_ids]
         self.root_states[env_ids,
-        0:3] = drone_positions
+        0:3] = 2.0 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
         self.root_states[env_ids,
         7:10] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
         self.root_states[env_ids,
         10:13] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
 
-        self.root_states[env_ids, 3:6] = 0  # standard orientation, can be randomized
+        self.root_states[env_ids, 3:7] = 0  # standard orientation, can be randomized #FIXME: changed from 3:6
         self.root_states[env_ids, 6] = 1
 
         self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
         self.progress_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
 
-    def pre_physics_step(self, _actions):
+        print("\n\nResetting env\n\n")
+
+        self.last_reset_counter = self.counter
+
+    def get_current_position(self):
+        return self.root_positions
+
+    def get_depth_image(self):
+        return self.depth_image
+
+    def pre_physics_step(self, _position_increment):
+
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
         self.counter += 1
 
-        actions = _actions.to(self.device)
-        actions = tensor_clamp(
-            actions, self.action_lower_limits, self.action_upper_limits)
-        self.action_input[:] = actions
+        # Move the position_increment to the device
+        position_increment = _position_increment.to(self.device)
 
-        # clear actions for reset envs
+        # Clamp the position_increment by looking at the action limits
+        position_increment = tensor_clamp(
+            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+
+        # Increment the position with current position
+        position_increment = position_increment + self.root_positions[0]
+
+        # Increment the position with fixed coordinate
+        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
+
+        self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
+
+        # clear position_increment for reset envs
         self.forces[:] = 0.0
         self.torques[:, :] = 0.0
 
-        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(self.root_states,
-                                                                                            self.action_input)
-        self.forces[:, 0, 2] = self.robot_mass * (-self.sim_params.gravity.z) * output_thrusts_mass_normalized
+        output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(
+            self.root_states, self.action_input)
+        self.forces[:, 0, 2] = self.robot_mass * (
+            -self.sim_params.gravity.z) * output_thrusts_mass_normalized
         self.torques[:, 0] = output_torques_inertia_normalized
         self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
 
-        # Add random forces to robot body
-        self.forces[:, 0, 0] += torch.rand((self.num_envs,), device=self.device) * 10
-        self.forces[:, 0, 1] += torch.rand((self.num_envs,), device=self.device) * 10
-
-        # apply actions
+        # apply position_increment
         self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(
             self.forces), gymtorch.unwrap_tensor(self.torques), gymapi.LOCAL_SPACE)
+
+        #FIXME: below tier3 implementation
+        # # resets
+        # if self.counter % 250 == 0:
+        #     print("self.counter:", self.counter)
+        # self.counter += 1
+        #
+        # actions = _actions.to(self.device)
+        # actions = tensor_clamp(
+        #     actions, self.action_lower_limits, self.action_upper_limits)
+        # self.action_input[:] = actions
+        #
+        # # clear actions for reset envs
+        # self.forces[:] = 0.0
+        # self.torques[:, :] = 0.0
+        #
+        # output_thrusts_mass_normalized, output_torques_inertia_normalized = self.controller(self.root_states,
+        #                                                                                     self.action_input)
+        # self.forces[:, 0, 2] = self.robot_mass * (-self.sim_params.gravity.z) * output_thrusts_mass_normalized
+        # self.torques[:, 0] = output_torques_inertia_normalized
+        # self.forces = torch.where(self.forces < 0, torch.zeros_like(self.forces), self.forces)
+        #
+        # # Add random forces to robot body
+        # self.forces[:, 0, 0] += torch.rand((self.num_envs,), device=self.device) * 10
+        # self.forces[:, 0, 1] += torch.rand((self.num_envs,), device=self.device) * 10
+        #
+        # # apply actions
+        # self.gym.apply_rigid_body_force_tensors(self.sim, gymtorch.unwrap_tensor(
+        #     self.forces), gymtorch.unwrap_tensor(self.torques), gymapi.LOCAL_SPACE)
 
     def render_cameras(self):
         self.gym.render_all_camera_sensors(self.sim)
@@ -470,7 +536,7 @@ class AerialRobotFinalProject(BaseTask):
 
     def post_physics_step(self):
         self.gym.refresh_actor_root_state_tensor(self.sim)
-        self.gym.refresh_net_contact_force_tensor(self.sim)
+        self.gym.refresh_net_contact_force_tensor(self.sim) #FIXME: not in tier1
 
     def check_collisions(self):
         ones = torch.ones((self.num_envs), device=self.device)
@@ -482,6 +548,7 @@ class AerialRobotFinalProject(BaseTask):
         for env_id in range(self.num_envs):
             # the depth values are in -ve z axis, so we need to flip it to positive
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
+        return
 
     def compute_observations(self):
         self.obs_buf[..., :3] = self.root_positions
@@ -491,12 +558,14 @@ class AerialRobotFinalProject(BaseTask):
         return self.obs_buf
 
     def compute_reward(self):
-        self.rew_buf[:], self.reset_buf[:] = compute_quadcopter_reward(
+        # self.rew_buf[:], self.reset_buf[:] = compute_quadcopter_reward( #FIXME: tier1 added drone_hit_ground_buf
+        self.rew_buf[:], self.reset_buf[:], self.drone_hit_ground_buf[:] = compute_quadcopter_reward(
             self.root_positions,
             self.root_quats,
             self.root_linvels,
             self.root_angvels,
-            self.reset_buf, self.progress_buf, self.max_episode_length
+            self.reset_buf, self.progress_buf, self.max_episode_length,
+            (self.counter - self.last_reset_counter) #FIXME: added from tier1
         )
 
 
@@ -525,17 +594,18 @@ def quat_axis(q, axis=0):
 
 
 @torch.jit.script
-def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf,
-                              max_episode_length):
-    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float) -> Tuple[Tensor, Tensor]
-
-    ## The reward function set here is arbitrary and the user is encouraged to modify this as per their need to achieve collision avoidance.
+def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf, max_episode_length, counter):
+# def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_angvels, reset_buf, progress_buf,
+#                               max_episode_length):
+    # type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, float, int) -> Tuple[Tensor, Tensor, Tensor] #FIXME: tier1 added extra Tensor output
 
     # distance to target
     target_dist = torch.sqrt(root_positions[..., 0] * root_positions[..., 0] +
                              root_positions[..., 1] * root_positions[..., 1] +
                              (root_positions[..., 2]) * (root_positions[..., 2]))
     pos_reward = 2.0 / (1.0 + target_dist * target_dist)
+
+    dist_reward = (20.0 - target_dist) / 40.0
 
     # uprightness
     ups = quat_axis(root_quats, 2)
@@ -548,7 +618,7 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # combined reward
     # uprigness and spinning only matter when close to the target
-    reward = pos_reward + pos_reward * (up_reward + spinnage_reward)
+    reward = pos_reward + pos_reward * (up_reward + spinnage_reward) + dist_reward
 
     # resets due to misbehavior
     ones = torch.ones_like(reset_buf)
@@ -559,4 +629,14 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
     reset = torch.where(torch.norm(root_positions, dim=1) > 20, ones, reset)
 
-    return reward, reset
+    #FIXME: if else added from tier1, drone_hit_ground added from tier1
+
+    # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
+    if counter > 500:
+        ground_threshold = 0.25
+        reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
+        drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
+    else:
+        drone_hit_ground = torch.zeros_like(reset_buf)
+
+    return reward, reset, drone_hit_ground
