@@ -45,16 +45,16 @@ class QuadRewardSystem:
             # print("Harshest punishment - collision")
             return self.R_cp
 
+        # If excessive deviation, mild punishment
+        if torch.abs(self.dt_end) > self.d_max:
+            return self.R_dp
+
         # If stays at (roughly) same point, return minimal reward
         stay_reward = 0
         if self.last_position is not None:
             if torch.allclose(position, self.last_position, atol=0.25):
                 return stay_reward
         self.last_position = position.clone()
-
-        # If excessive deviation, mild punishment
-        if torch.abs(self.dt_end) > self.d_max:
-            return self.R_dp
         
         # Calculate delta_d
         self.delta_d = self.dt_end - self.dt_start
