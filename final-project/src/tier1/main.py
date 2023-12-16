@@ -86,10 +86,19 @@ class GymInterface:
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
-        return self.get_relative_postion(), self.reward_function.determine_reward(collision, self.get_current_position()), reset, near_goal
+        return self.get_observation(), self.reward_function.determine_reward(collision, self.get_current_position()), reset, near_goal
+
+    def get_observation(self):
+        return torch.cat(self.get_relative_postion(), self.get_camera())
+
+    def get_camera(self):
+        return self.env.get_camera_images()
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
+
+    def get_images(self):
+        return self.env.get
     
     def calculate_3d_distance(self, A, B, C):
         """Returns the euclidean distance of the point C

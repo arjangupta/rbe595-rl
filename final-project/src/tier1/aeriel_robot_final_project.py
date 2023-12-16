@@ -108,6 +108,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # Set drone hit ground buffer
         self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
+        self.depth_images = torch.zeros((3, 270, 480), device=self.device)
+
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
@@ -234,6 +236,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         if self.enable_onboard_cameras:
             depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
             self.depth_image_buf[0] = torch.from_numpy(depth_image)
+            self.depth_images[0] = torch.from_numpy(depth_image)
 
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
@@ -266,6 +269,9 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
     def get_current_position(self):
         return self.root_positions
+
+    def get_camera_images(self):
+        return self.depth_images
 
     def pre_physics_step(self, _position_increment):
         # resets
