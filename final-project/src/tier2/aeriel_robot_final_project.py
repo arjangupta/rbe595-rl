@@ -141,15 +141,6 @@ class AerialRobotFinalProjectTier2(BaseTask):
 
         self.depth_image = torch.zeros((1, 1024), device=self.device)
 
-
-    def pick_random_dict_map(self, map_num):
-
-        asset_type_to_dict_map, include_env_bound_type, include_asset_type = TrainMaps.get_map(map_num, self.cfg)
-        self.cfg.asset_config.include_env_bound_type = include_env_bound_type
-        self.cfg.asset_config.include_asset_type = include_asset_type
-
-        return asset_type_to_dict_map
-
     def create_sim(self):
         self.sim = self.gym.create_sim(
             self.sim_device_id, self.graphics_device_id, self.physics_engine, self.sim_params)
