@@ -10,7 +10,6 @@ import numpy as np
 import os
 import torch
 import torchvision
-import cv2
 import xml.etree.ElementTree as ET
 
 from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
@@ -223,7 +222,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         # Save depth image to file
         if self.save_images and self.counter % save_images_every == 0:
-                print("self.counter:", self.counter)
+                # print("self.counter:", self.counter)
                 print("Saving depth image")
                 self.gym.write_camera_image_to_file(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH, "depth_image_"+str(self.counter)+".png")
                 print("Saving rgb image")
@@ -232,18 +231,25 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # FOR TRAINING THE NN (only where images are needed)
         # Store depth image in a buffer
         if self.enable_onboard_cameras:
-            depth_im = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_COLOR)
+            # depth_im = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
+            
+            # Get the depth image from the camera array
+            depth_im = self.full_camera_array[0]
             # print("depth_im.shape:", depth_im.shape)
+            
             # The given depth image has shape (270, 480), but we need (1, 1024)
-            # So, first we need to scale it to 32x32
-            depth_im = cv2.resize(depth_im, (32, 32))
+            # So, first we need to scale it to 32x32 on the GPU
+            depth_im = depth_im.unsqueeze(0).unsqueeze(0)
+            depth_im = torch.nn.functional.interpolate(depth_im, size=(32, 32), mode='bilinear', align_corners=False)
+            # print("depth_im:", depth_im)
             # Save the 32x32 depth image to a file every 2000 steps
             if self.save_images and self.counter % save_images_every == 0:
-                cv2.imwrite("depth_image_small_"+str(self.counter)+".png", depth_im)
+                torchvision.utils.save_image(depth_im, "depth_image_tensor_"+str(self.counter)+".png")
             # Convert to tensor from numpy
-            depth_im = torch.from_numpy(depth_im).to(self.device)
+            # depth_im = torch.from_numpy(depth_im).to(self.device)
             # Now, we can flatten it to (1, 1024)
-            self.depth_image = depth_im.flatten().unsqueeze(0)
+            self.depth_image = depth_im.flatten()#.unsqueeze(0)
+            # print("self.depth_image:", self.depth_image)
 
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
