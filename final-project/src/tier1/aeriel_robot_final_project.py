@@ -108,7 +108,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         # Set drone hit ground buffer
         self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
-        self.depth_images = torch.zeros((3, 270, 480), device=self.device)
+        self.depth_image = torch.zeros((1, 1024), device=self.device)
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -232,11 +232,14 @@ class AerialRobotFinalProjectTier1(BaseTask):
         
         # FOR TRAINING THE NN (only where images are needed)
         # Store depth image in a buffer
-        self.depth_image_buf = torch.zeros((self.num_envs, 270, 480), device=self.device)
         if self.enable_onboard_cameras:
-            depth_image = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
-            self.depth_image_buf[0] = torch.from_numpy(depth_image)
-            self.depth_images[0] = torch.from_numpy(depth_image)
+            depth_image_np = self.gym.get_camera_image(self.sim, self.envs[0], self.camera_handles[0], gymapi.IMAGE_DEPTH)
+            print("depth_image_np.shape:", depth_image_np.shape)
+            # Convert to tensor
+            self.depth_image = torch.from_numpy(depth_image_np).to(self.device)
+            # Reshape to 1x1024
+            self.depth_image = self.depth_image.reshape(1, 1024)
+
 
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         if len(reset_env_ids) > 0:
@@ -270,8 +273,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
     def get_current_position(self):
         return self.root_positions
 
-    def get_camera_images(self):
-        return self.depth_images
+    def get_depth_image(self):
+        return self.depth_image
 
     def pre_physics_step(self, _position_increment):
         # resets

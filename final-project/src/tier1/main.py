@@ -57,7 +57,7 @@ class GymInterface:
         if self.debug:
             print("dt_start: ", self.reward_function.dt_start)
         # Get action bezier curve as sampled points
-        num_samples = 5
+        num_samples = 5 # THIS MUST NEVER BE LESS THAN 3 OR THE NN WILL FAIL
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
         # Step through all points
         reset = False
@@ -89,10 +89,10 @@ class GymInterface:
         return self.get_observation(), self.reward_function.determine_reward(collision, self.get_current_position()), reset, near_goal
 
     def get_observation(self):
-        return torch.cat(self.get_relative_postion(), self.get_camera())
+        return torch.cat(self.get_relative_postion(), self.get_image())
 
-    def get_camera(self):
-        return self.env.get_camera_images()
+    def get_image(self):
+        return self.env.get_depth_image()
 
     def get_current_position(self):
         return self.env.get_current_position()[0]
