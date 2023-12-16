@@ -22,7 +22,7 @@ class QuadRewardSystem:
 
         # Lower and upper limits on reward
         self.R_l = 0.0
-        self.R_u = 2.0
+        self.R_u = 1.0
 
         # Mild punishment for excessive deviation
         self.R_dp = -0.5
@@ -50,7 +50,7 @@ class QuadRewardSystem:
             return self.R_dp
 
         # If stays at (roughly) same point, return minimal reward
-        stay_reward = 0
+        stay_reward = -0.25
         if self.last_position is not None:
             if torch.allclose(position, self.last_position, atol=0.25):
                 return stay_reward

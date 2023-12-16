@@ -6,215 +6,66 @@
 class TrainMaps():
 
     @staticmethod
-    def get_map(map_num, cfg):
-        # map_num=6 #toggle for testing
-        print(f"picking map {map_num}")
+    def get_map(cfg):
 
-        if map_num == 1:
-            cfg.wall1_map1.specified_position = [2.5, -5, 10]
-            cfg.wall2_map1.specified_position = [7.5, -5, 10]
-            cfg.wall3_map1.specified_position = [12.5, -5, 10]
-            cfg.wall4_map1.specified_position = [17.5, -5, 10]
-            cfg.wall5_map1.specified_position = [22.5, -5, 10]
-            cfg.wall6_map1.specified_position = [27.5, -5, 10]
+        cfg.longwall1.specified_position = [5, -10, 10]
+        cfg.longwall2.specified_position = [15, -10, 10]
+        cfg.longwall3.specified_position = [25, -10, 10]
+        cfg.longwall4.specified_position = [35, -10, 10]
+        cfg.longwall5.specified_position = [5, 0, 5]
+        cfg.longwall6.specified_position = [20, 0, 5]
 
-            cfg.wall7_map1.specified_position = [2.5, 5, 10]
-            cfg.wall8_map1.specified_position = [7.5, 5, 10]
-            cfg.wall9_map1.specified_position = [12.5, 5, 10]
-            cfg.wall10_map1.specified_position = [17.5, 5, 10]
-            cfg.wall11_map1.specified_position = [22.5, 5, 10]
-            cfg.wall12_map1.specified_position = [27.5, 5, 10]
+        cfg.longwall7.specified_position = [5, 10, 10]
+        cfg.longwall8.specified_position = [15, 10, 10]
+        cfg.longwall9.specified_position = [25, 10, 10]
+        cfg.longwall10.specified_position = [35, 10, 10]
+        cfg.longwall11.specified_position = [10, 0, 15]
+        cfg.longwall12.specified_position = [25, 0, 15]
 
-            cfg.wall1_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall2_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall3_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall4_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall5_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall6_map1.specified_euler_angle = [0, 0, 0]
+        cfg.longwall1.specified_euler_angle = [0, 0, 0]
+        cfg.longwall2.specified_euler_angle = [0, 0, 0]
+        cfg.longwall3.specified_euler_angle = [0, 0, 0]
+        cfg.longwall4.specified_euler_angle = [0, 0, 0]
+        cfg.longwall5.specified_euler_angle = [1.57, 1.57, 0]
+        cfg.longwall6.specified_euler_angle = [1.57, 1.57, 0]
 
-            cfg.wall7_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall8_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall9_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall10_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall11_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall12_map1.specified_euler_angle = [0, 0, 0]
-
-        if map_num == 2:
-            cfg.wall1_map1.specified_position = [2.5, -10, 10]
-            cfg.wall2_map1.specified_position = [7.5, -10, 10]
-            cfg.wall3_map1.specified_position = [11.78, -8.24, 10]
-            cfg.wall4_map1.specified_position = [15.295, -4.71, 10]
-            cfg.wall5_map1.specified_position = [19.56, -2.95, 10]
-            cfg.wall6_map1.specified_position = [24.56, -2.95, 10]
-
-            cfg.wall7_map1.specified_position = [2.5, 10, 10]
-            cfg.wall8_map1.specified_position = [7.5, 10, 10]
-            cfg.wall9_map1.specified_position = [11.78, 8.24, 10]
-            cfg.wall10_map1.specified_position = [15.295, 4.71, 10]
-            cfg.wall11_map1.specified_position = [19.56, 2.95, 10]
-            cfg.wall12_map1.specified_position = [24.56, 2.95, 10]
-
-            cfg.wall1_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall2_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall3_map1.specified_euler_angle = [0, 0, 0.785]
-            cfg.wall4_map1.specified_euler_angle = [0, 0, 0.785]
-            cfg.wall5_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall6_map1.specified_euler_angle = [0, 0, 0]
-
-            cfg.wall7_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall8_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall9_map1.specified_euler_angle = [0, 0, -0.785]
-            cfg.wall10_map1.specified_euler_angle = [0, 0, -0.785]
-            cfg.wall11_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall12_map1.specified_euler_angle = [0, 0, 0]
-
-        if map_num == 3:
-            cfg.wall1_map1.specified_position = [2.5, -5, 10]
-            cfg.wall2_map1.specified_position = [7.5, -5, 10]
-            cfg.wall3_map1.specified_position = [12.5, -5, 10]
-            cfg.wall4_map1.specified_position = [17.5, -5, 10]
-            cfg.wall5_map1.specified_position = [5, -2.5, 10]
-            cfg.wall6_map1.specified_position = [15, -2.5, 10]
-
-            cfg.wall7_map1.specified_position = [2.5, 5, 10]
-            cfg.wall8_map1.specified_position = [7.5, 5, 10]
-            cfg.wall9_map1.specified_position = [12.5, 5, 10]
-            cfg.wall10_map1.specified_position = [17.5, 5, 10]
-            cfg.wall11_map1.specified_position = [22.5, 5, 10]
-            cfg.wall12_map1.specified_position = [10, 2.5, 10]
-
-            cfg.wall1_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall2_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall3_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall4_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall5_map1.specified_euler_angle = [0, 0, 1.57]
-            cfg.wall6_map1.specified_euler_angle = [0, 0, 1.57]
-
-            cfg.wall7_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall8_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall9_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall10_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall11_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall12_map1.specified_euler_angle = [0, 0, 1.57]
-
-        if map_num == 4:
-            cfg.wall1_map1.specified_position = [2.5, -5, 10]
-            cfg.wall2_map1.specified_position = [7.5, -5, 10]
-            cfg.wall3_map1.specified_position = [12.5, -5, 10]
-            cfg.wall4_map1.specified_position = [17.5, -5, 10]
-            cfg.wall5_map1.specified_position = [5, -5, 10]
-            cfg.wall6_map1.specified_position = [5, 0, 10]
-
-            cfg.wall7_map1.specified_position = [2.5, 5, 10]
-            cfg.wall8_map1.specified_position = [7.5, 5, 10]
-            cfg.wall9_map1.specified_position = [12.5, 5, 10]
-            cfg.wall10_map1.specified_position = [17.5, 5, 10]
-            cfg.wall11_map1.specified_position = [10, 5, 10]
-            cfg.wall12_map1.specified_position = [10, 0, 10]
-
-            cfg.wall1_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall2_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall3_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall4_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall5_map1.specified_euler_angle = [0, 0, 1.57]
-            cfg.wall6_map1.specified_euler_angle = [0, 0, 1.57]
-
-            cfg.wall7_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall8_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall9_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall10_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall11_map1.specified_euler_angle = [0, 0, 1.57]
-            cfg.wall12_map1.specified_euler_angle = [0, 0, 1.57]
-
-        if map_num == 5:
-            cfg.wall1_map1.specified_position = [5, 0, 2.5]
-            cfg.wall2_map1.specified_position = [5, 0, 2.5]
-            cfg.wall3_map1.specified_position = [5, 0, 2.5]
-            cfg.wall4_map1.specified_position = [5, 0, 2.5]
-            cfg.wall5_map1.specified_position = [5, 0, 2.5]
-            cfg.wall6_map1.specified_position = [5, 0, 2.5]
-
-            cfg.wall7_map1.specified_position = [5, 0, 2.5]
-            cfg.wall8_map1.specified_position = [5, 0, 2.5]
-            cfg.wall9_map1.specified_position = [15, 5, 10]
-            cfg.wall10_map1.specified_position = [15, -5, 10]
-            cfg.wall11_map1.specified_position = [15, 0, 12.5]
-            cfg.wall12_map1.specified_position = [15, 0, 17.5]
-
-            cfg.wall1_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall2_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall3_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall4_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall5_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall6_map1.specified_euler_angle = [1.57, 1.57, 0]
-
-            cfg.wall7_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall8_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall9_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall10_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall11_map1.specified_euler_angle = [1.57, 1.57, 0]
-            cfg.wall12_map1.specified_euler_angle = [1.57, 1.57, 0]
-
-        if map_num == 6:
-            cfg.wall1_map1.specified_position = [2.5, -5, 10]
-            cfg.wall2_map1.specified_position = [7.5, -5, 10]
-            cfg.wall3_map1.specified_position = [12.5, -5, 10]
-            cfg.wall4_map1.specified_position = [17.5, -5, 10]
-            cfg.wall5_map1.specified_position = [22.5, -5, 10]
-            cfg.wall6_map1.specified_position = [10, 0, 10]
-
-            cfg.wall7_map1.specified_position = [2.5, 5, 10]
-            cfg.wall8_map1.specified_position = [7.5, 5, 10]
-            cfg.wall9_map1.specified_position = [12.5, 5, 10]
-            cfg.wall10_map1.specified_position = [17.5, 5, 10]
-            cfg.wall11_map1.specified_position = [22.5, 5, 10]
-            cfg.wall12_map1.specified_position = [20, 0, 2.5]
-
-            cfg.wall1_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall2_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall3_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall4_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall5_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall6_map1.specified_euler_angle = [1.57, 1.57, 0]
-
-            cfg.wall7_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall8_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall9_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall10_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall11_map1.specified_euler_angle = [0, 0, 0]
-            cfg.wall12_map1.specified_euler_angle = [1.57, 1.57, 0]
-
+        cfg.longwall7.specified_euler_angle = [0, 0, 0]
+        cfg.longwall8.specified_euler_angle = [0, 0, 0]
+        cfg.longwall9.specified_euler_angle = [0, 0, 0]
+        cfg.longwall10.specified_euler_angle = [0, 0, 0]
+        cfg.longwall11.specified_euler_angle = [1.57, 1.57, 0]
+        cfg.longwall12.specified_euler_angle = [1.57, 1.57, 0]
 
         asset_type_to_dict_map = {
             "thin": cfg.thin_asset_params,
             "trees": cfg.tree_asset_params,
             "objects": cfg.object_asset_params,
-            "wall1_map1": cfg.wall1_map1,
-            "wall2_map1": cfg.wall2_map1,
-            "wall3_map1": cfg.wall3_map1,
-            "wall4_map1": cfg.wall4_map1,
-            "wall5_map1": cfg.wall5_map1,
-            "wall6_map1": cfg.wall6_map1,
-            "wall7_map1": cfg.wall7_map1,
-            "wall8_map1": cfg.wall8_map1,
-            "wall9_map1": cfg.wall9_map1,
-            "wall10_map1": cfg.wall10_map1,
-            "wall11_map1": cfg.wall11_map1,
-            "wall12_map1": cfg.wall12_map1,
+            "longwall1": cfg.longwall1,
+            "longwall2": cfg.longwall2,
+            "longwall3": cfg.longwall3,
+            "longwall4": cfg.longwall4,
+            "longwall5": cfg.longwall5,
+            "longwall6": cfg.longwall6,
+            "longwall7": cfg.longwall7,
+            "longwall8": cfg.longwall8,
+            "longwall9": cfg.longwall9,
+            "longwall10": cfg.longwall10,
+            "longwall11": cfg.longwall11,
+            "longwall12": cfg.longwall12,
         }
         include_env_bound_type = {
-            "wall1_map1": True,
-            "wall2_map1": True,
-            "wall3_map1": True,
-            "wall4_map1": True,
-            "wall5_map1": True,
-            "wall6_map1": True,
-            "wall7_map1": True,
-            "wall8_map1": True,
-            "wall9_map1": True,
-            "wall10_map1": True,
-            "wall11_map1": True,
-            "wall12_map1": True,
+            "longwall1": True,
+            "longwall2": True,
+            "longwall3": True,
+            "longwall4": True,
+            "longwall5": True,
+            "longwall6": True,
+            "longwall7": True,
+            "longwall8": True,
+            "longwall9": True,
+            "longwall10": True,
+            "longwall11": True,
+            "longwall12": True,
         }
         include_asset_type = {
             "thin": False,

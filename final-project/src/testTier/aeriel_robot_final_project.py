@@ -57,12 +57,7 @@ class AerialRobotFinalProjectTierTest(BaseTask):
 
         self.enable_onboard_cameras = self.cfg.env.enable_onboard_cameras
 
-        map = random.randint(1, 6)
-        # map = 1
-
-        asset_dict = self.pick_random_dict_map(map)
-
-        self.env_asset_manager = AssetManager(self.cfg, sim_device, asset_dict)
+        self.env_asset_manager = AssetManager(self.cfg, sim_device, self.get_test_map())
         self.cam_resolution = (480, 270)
 
         super().__init__(self.cfg, sim_params, physics_engine, sim_device, headless)
@@ -148,9 +143,9 @@ class AerialRobotFinalProjectTierTest(BaseTask):
         self.depth_image = torch.zeros((1, 1024), device=self.device)
 
 
-    def pick_random_dict_map(self, map_num):
+    def get_test_map(self):
 
-        asset_type_to_dict_map, include_env_bound_type, include_asset_type = TrainMaps.get_map(map_num, self.cfg)
+        asset_type_to_dict_map, include_env_bound_type, include_asset_type = TrainMaps.get_map(self.cfg)
         self.cfg.asset_config.include_env_bound_type = include_env_bound_type
         self.cfg.asset_config.include_asset_type = include_asset_type
 
@@ -402,9 +397,7 @@ class AerialRobotFinalProjectTierTest(BaseTask):
         if 0 in env_ids:
             print("\n\n\n RESETTING ENV 0 \n\n\n")
 
-        map = random.randint(1, 6)
-
-        self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id, self.pick_random_dict_map(map))
+        self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id, self.get_test_map())
 
         self.env_asset_manager.randomize_pose()
 

@@ -184,7 +184,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
 
         # color = [80,255,100]
 
-    class wall1_map1(asset_state_params):
+    class longwall1(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -205,7 +205,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall2_map1(asset_state_params):
+    class longwall2(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -226,7 +226,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall3_map1(asset_state_params):
+    class longwall3(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -247,7 +247,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall4_map1(asset_state_params):
+    class longwall4(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -268,7 +268,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall5_map1(asset_state_params):
+    class longwall5(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -289,7 +289,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall6_map1(asset_state_params):
+    class longwall6(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -310,7 +310,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall7_map1(asset_state_params):
+    class longwall7(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -331,7 +331,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall8_map1(asset_state_params):
+    class longwall8(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -352,7 +352,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall9_map1(asset_state_params):
+    class longwall9(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -374,7 +374,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         color = [100, 200, 210]
 
 
-    class wall10_map1(asset_state_params):
+    class longwall10(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -395,7 +395,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall11_map1(asset_state_params):
+    class longwall11(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -416,7 +416,7 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         semantic_id = WALL_SEMANTIC_ID
         color = [100, 200, 210]
 
-    class wall12_map1(asset_state_params):
+    class longwall12(asset_state_params):
         num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
@@ -449,77 +449,18 @@ class AerialRobotCfgFinalProjectTierTest(BaseConfig):
         }
 
         include_env_bound_type = {
-            "wall1_map1": False,
-            "wall2_map1": False,
-            "wall3_map1": False,
-            "wall4_map1": False,
-            "wall5_map1": False,
-            "wall6_map1": False,
-            "wall7_map1": False,
-            "wall8_map1": False,
-            "wall9_map1": False,
-            "wall10_map1": False,
-            "wall11_map1": False,
-            "wall12_map1": False,
-            # "wall7_map2": False,
-            # "wall8_map2": False,
-            #
-            # "wall1_map1": False,
-            # "wall1_map2": False,
-            # "wall1_map3": False,
-            # "wall1_map4": False,
-            # "wall1_map5": False,
-            # "wall1_map6": False,
-            # "wall1_map7": False,
-            # "wall2_map1": False,
-            # "wall2_map2": False,
-            # "wall2_map3": False,
-            # "wall2_map4": False,
-            # "wall2_map5": False,
-            # "wall2_map6": False,
-            # "wall2_map7": False,
-            # "wall3_map1": False,
-            # "wall3_map2": False,
-            # "wall3_map3": False,
-            # "wall3_map4": False,
-            # "wall3_map5": False,
-            # "wall3_map6": False,
-            # "wall3_map7": False,
-            # "wall4_map1": False,
-            # "wall4_map2": False,
-            # "wall4_map3": False,
-            # "wall4_map4": False,
-            # "wall4_map5": False,
-            # "wall4_map6": False,
-            # "wall4_map7": False,
-            # "wall5_map1": False,
-            # "wall5_map2": False,
-            # "wall5_map3": False,
-            # "wall5_map4": False,
-            # "wall5_map5": False,
-            # "wall5_map6": False,
-            # "wall5_map7": False,
-            # "wall6_map1": False,
-            # "wall6_map2": False,
-            # "wall6_map3": False,
-            # "wall6_map4": False,
-            # "wall6_map5": False,
-            # "wall6_map6": False,
-            # "wall6_map7": False,
-            # "wall7_map1": False,
-            # "wall7_map2": False,
-            # "wall7_map3": False,
-            # "wall7_map4": False,
-            # "wall7_map5": False,
-            # "wall7_map6": False,
-            # "wall7_map7": False,
-            # "wall8_map1": False,
-            # "wall8_map2": False,
-            # "wall8_map3": False,
-            # "wall8_map4": False,
-            # "wall8_map5": False,
-            # "wall8_map6": False,
-            # "wall8_map7": False,
+            "longwall1": False,
+            "longwall2": False,
+            "longwall3": False,
+            "longwall4": False,
+            "longwall5": False,
+            "longwall6": False,
+            "longwall7": False,
+            "longwall8": False,
+            "longwall9": False,
+            "longwall10": False,
+            "longwall11": False,
+            "longwall12": False,
         }
 
         env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space

@@ -306,7 +306,7 @@ class DeepQLearningAgent:
             relative_position=self.gym_iface.get_current_position().unsqueeze(0)
         )
         done_count = 0
-        while not done_count >= 2:
+        while done_count < 2:
             action = self.select_action(state)
             if self.debug:
                 print("Selected action: ", action)
