@@ -73,12 +73,17 @@ class QuadrotorNeuralNetwork(nn.Module):
     def forward(self, state: State):
         # Feed into camera layers
         depth_im = state.depth_image
-        depth_im_1 = depth_im[0]
-        depth_im_1 = depth_im_1.unsqueeze(0)
-        depth_im_2 = depth_im[1]
-        depth_im_2 = depth_im_2.unsqueeze(0)
-        depth_im_3 = depth_im[2]
-        depth_im_3 = depth_im_3.unsqueeze(0)
+        if depth_im.dim() == 2:
+            depth_im_1 = depth_im[0]
+            depth_im_1 = depth_im_1.unsqueeze(0)
+            depth_im_2 = depth_im[1]
+            depth_im_2 = depth_im_2.unsqueeze(0)
+            depth_im_3 = depth_im[2]
+            depth_im_3 = depth_im_3.unsqueeze(0)
+        elif depth_im.dim() == 3:
+            depth_im_1 = depth_im[:,0]
+            depth_im_2 = depth_im[:,1]
+            depth_im_3 = depth_im[:,2]
 
         if self.debug:
             print("depth_im_1: ", depth_im_1)
@@ -247,9 +252,15 @@ class DeepQLearningAgent:
         # (a final state would've been the one after which simulation ended)
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
                                             batch.next_state)), device=device, dtype=torch.bool)
-        non_final_next_states = torch.cat([s for s in batch.next_state
-                                                    if s is not None])
-        state_batch = torch.cat(batch.state)
+        non_final_next_states_prune = [s for s in batch.next_state if s is not None]
+        non_final_next_states = State(
+            depth_image=torch.stack([s.depth_image for s in non_final_next_states_prune]),
+            relative_position=torch.stack([s.relative_position for s in non_final_next_states_prune])
+        )
+        state_batch = State(
+            depth_image=torch.stack([s.depth_image for s in batch.state]),
+            relative_position=torch.stack([s.relative_position for s in batch.state])
+        )
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
         if self.debug:
