@@ -194,6 +194,17 @@ class DeepQLearningAgent:
 
         self.steps_done = 0
 
+        self.num_nn_actions = 0
+        self.num_random_actions = 0
+
+    def show_action_stats(self):
+        """Shows percentage of actions taken by the neural network and random actions"""
+        total_actions = self.num_nn_actions + self.num_random_actions
+        print(f"Total actions: {total_actions}")
+        print(f"NN actions: {self.num_nn_actions} ({self.num_nn_actions/total_actions*100}%)")
+        print(f"Random actions: {self.num_random_actions} ({self.num_random_actions/total_actions*100}%)")
+        self.num_nn_actions = 0
+        self.num_random_actions = 0
 
     def select_action(self, state):
         sample = random.random()
@@ -201,7 +212,7 @@ class DeepQLearningAgent:
             math.exp(-1. * self.steps_done / self.EPS_DECAY)
         self.steps_done += 1
         if sample > eps_threshold:
-            print("NN action")
+            self.num_nn_actions += 1
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
@@ -213,7 +224,7 @@ class DeepQLearningAgent:
                 #     print("self.policy_net(state).max(0).indices.view(1, 1): ", self.policy_net(state).max(0).indices.view(1, 1))
                 return self.policy_net(state).argmax().view(1, 1)
         else:
-            print("Random action")
+            self.num_random_actions += 1
             return torch.tensor(
                 [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
                 device=device, dtype=torch.long)
@@ -288,7 +299,7 @@ class DeepQLearningAgent:
         for ep in range(num_episodes):
             if ep % 5 == 0:
                 self.gym_iface.choose_new_goal_position()
-            print(f"Deep-QL Training episode: {ep+1}\n")
+            print(f"\n\n\nDeep-QL Training episode: {ep+1}\n")
             print(f"Goal position: {self.gym_iface.goal_position}\n")
             state = State(
                 depth_image=self.gym_iface.get_image_set(),
@@ -296,7 +307,8 @@ class DeepQLearningAgent:
             )
             for _ in range(num_time_steps):
                 action = self.select_action(state)
-                print("Selected action: ", action)
+                if self.debug:
+                    print("Selected action: ", action)
                 # observation, reward, terminated, truncated, _ =
                 observation, reward, truncated, terminated = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
@@ -340,3 +352,4 @@ class DeepQLearningAgent:
                 if done:
                     print("\nEpisode ended due to termination or truncation\n")
                     break
+            self.show_action_stats()
