@@ -47,10 +47,9 @@ class QuadRewardSystem:
 
         # If stays at same point, mild punishment
         stay_reward = 0
-        if self.last_position is not None:
-            if torch.all(self.last_position.eq(position)):
-                stay_reward = self.R_dp
-        self.last_position = position
+        if position == self.last_position:
+            self.last_position = position
+            return stay_reward
 
         # If excessive deviation, mild punishment
         if torch.abs(self.dt_end) > self.d_max:
@@ -60,12 +59,12 @@ class QuadRewardSystem:
         self.delta_d = self.dt_end - self.dt_start
         # Calculate reward as given in paper
         if self.delta_d > self.delta_d_u:
-            return self.R_l * self.f_delta_t(self.dt_end) + stay_reward
+            return self.R_l * self.f_delta_t(self.dt_end)# + stay_reward
         elif self.delta_d < self.delta_d_l:
-            return self.R_u * self.f_delta_t(self.dt_end) + stay_reward
+            return self.R_u * self.f_delta_t(self.dt_end)# + stay_reward
         else:
             return (self.R_l +
                 (self.R_u - self.R_l)*
                 ((self.delta_d_u - self.delta_d)/(self.delta_d_u - self.delta_d_l))
-            )*self.f_delta_t(self.dt_end) + stay_reward
+            )*self.f_delta_t(self.dt_end)# + stay_reward
 
