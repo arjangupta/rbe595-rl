@@ -152,7 +152,7 @@ class QuadrotorNeuralNetwork(nn.Module):
         joint_pos = F.relu(self.joint_layer1(joint_pos))
         joint_cam = F.relu(self.camera_joint_layer1(joint_cam))
         joint_all = torch.cat((joint_pos, joint_cam), dim=1)
-        joint_all = F.relu(self.joint_layer2(joint_all))
+        joint_all = F.softmax(self.joint_layer2(joint_all))
         return self.output_layer(joint_all)
 
 class DeepQLearningAgent:

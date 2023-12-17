@@ -50,7 +50,7 @@ class QuadRewardSystem:
             return self.R_dp
 
         # If stays at (roughly) same point, return minimal reward
-        stay_reward = -0.25
+        stay_reward = 0
         if self.last_position is not None:
             if torch.allclose(position, self.last_position, atol=0.25):
                 return stay_reward
