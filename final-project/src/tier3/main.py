@@ -47,7 +47,8 @@ class GymInterface:
         # Current image array
         self.image_set = torch.zeros((3, 1024), dtype=torch.float32, device=self.device)
         # Moving setpoint time counter
-        self.moving_setpoint_time_counter = 0
+        self.moving_setpoint_time_counter = 0.0
+        self.moving_setpoint_time_counter_increment = 0.25
 
     def choose_new_goal_position(self):
         """Chooses a new goal position"""
@@ -86,12 +87,12 @@ class GymInterface:
                     if collision_ret:
                         collision = True
                     break
-                self.moving_setpoint_time_counter += 1
             # If one of the last 3 samples, save image
             if i_sample >= num_samples - 3:
                 self.image_set[i_sample - num_samples + 3] = self.env.get_depth_image()
             if reset:
                 break
+        self.moving_setpoint_time_counter += self.moving_setpoint_time_counter_increment
         # Capture ending relative position
         self.reward_function.dt_end = self.get_distance_from_moving_setpoint()
         # Check if near goal
@@ -146,9 +147,11 @@ class GymInterface:
             self.get_current_position())
         # This is the ghost setpoint that moves along the straight line path. Its distance
         # is something that we incrementally increase as time goes on.
-        distance_along_x_axis = self.moving_setpoint_time_counter - self.initial_position[0]
+        distance_along_x_axis = self.moving_setpoint_time_counter - self.get_current_position()[0]
         # Now we use the Pythagorean theorem to calculate the relative distance
         relative_distance = torch.sqrt(perpendicular_distance**2 + distance_along_x_axis**2)
+        if self.debug:
+            print("relative_distance: ", relative_distance)
         return relative_distance
 
     def calculate_perpendicular_intersection(self, A, B, C):
@@ -174,8 +177,12 @@ class GymInterface:
             self.initial_position,
             self.goal_position,
             current_position)
-        moving_setpoint[0] = moving_setpoint[0] + self.moving_setpoint_time_counter # every "second" the setpoint moves 1 meter along the x-axis
-        return moving_setpoint  - current_position
+        # Every "second" the setpoint moves a certain distance along the x-axis
+        moving_setpoint[0] = moving_setpoint[0] + self.moving_setpoint_time_counter
+        relative_pos = moving_setpoint  - current_position
+        if self.debug:
+            print("relative_pos: ", relative_pos)
+        return relative_pos
 
     def check_if_near_goal(self):
         """Returns true if the drone is within 1 meter of the goal"""
