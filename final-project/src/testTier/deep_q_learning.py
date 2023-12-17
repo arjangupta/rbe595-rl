@@ -214,27 +214,18 @@ class DeepQLearningAgent:
         self.num_random_actions = 0
 
     def select_action(self, state):
-        sample = random.random()
-        eps_threshold = self.EPS_END + (self.EPS_START - self.EPS_END) * \
-            math.exp(-1. * self.steps_done / self.EPS_DECAY)
         self.steps_done += 1
-        if sample > eps_threshold:
-            self.num_nn_actions += 1
-            with torch.no_grad():
-                # t.max(1) will return the largest column value of each row.
-                # second column on max result is index of where max element was
-                # found, so we pick action with the larger expected reward.
-                # if self.debug:
-                #     print("self.policy_net(state): ", self.policy_net(state))
-                #     print("self.policy_net(state).max(0): ", self.policy_net(state).max(0))
-                #     print("self.policy_net(state).max(0).indices: ", self.policy_net(state).max(0).indices)
-                #     print("self.policy_net(state).max(0).indices.view(1, 1): ", self.policy_net(state).max(0).indices.view(1, 1))
-                return self.policy_net(state).argmax().view(1, 1)
-        else:
-            self.num_random_actions += 1
-            return torch.tensor(
-                [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
-                device=device, dtype=torch.long)
+        with torch.no_grad():
+            # t.max(1) will return the largest column value of each row.
+            # second column on max result is index of where max element was
+            # found, so we pick action with the larger expected reward.
+            # if self.debug:
+            #     print("self.policy_net(state): ", self.policy_net(state))
+            #     print("self.policy_net(state).max(0): ", self.policy_net(state).max(0))
+            #     print("self.policy_net(state).max(0).indices: ", self.policy_net(state).max(0).indices)
+            #     print("self.policy_net(state).max(0).indices.view(1, 1): ", self.policy_net(state).max(0).indices.view(1, 1))
+            return self.policy_net(state).argmax().view(1, 1)
+
 
     def optimize_model(self):
         if len(self.memory) < self.BATCH_SIZE:
