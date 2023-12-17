@@ -65,7 +65,7 @@ class QuadRewardSystem:
         #     if torch.allclose(position, self.last_position, atol=0.25):
         #         return self.sp
         # self.last_position = position.clone()
-        
+
         # Calculate delta_d
         self.delta_d = self.dt_end - self.dt_start
         # Calculate reward as given in paper
