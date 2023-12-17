@@ -22,13 +22,13 @@ class QuadRewardSystem:
 
         # Lower and upper limits on reward
         self.R_l = 0.0
-        self.R_u = 10.0
+        self.R_u = 1.0
 
         # Mild punishment for excessive deviation
         self.R_dp = -0.5
 
         # Drastic punishment for collision
-        self.R_cp = -5.0
+        self.R_cp = -1
 
         # The drone's position the last time the rewards were evaluated
         self.last_position = None
@@ -51,20 +51,20 @@ class QuadRewardSystem:
             # print("Harshest punishment - collision")
             return self.R_cp
         
-        # If too close to ground, return mid-level punishment
-        if position[2] < 1.0:
-            # print("Mid-level punishment - too close to ground")
-            return self.R_gp
+        # # If too close to ground, return mid-level punishment
+        # if position[2] < 1.0:
+        #     # print("Mid-level punishment - too close to ground")
+        #     return self.R_gp
 
         # If excessive deviation, mild punishment
         if torch.abs(self.dt_end) > self.d_max:
             return self.R_dp
 
-        # If stays at (roughly) same point, return minimal reward
-        if self.last_position is not None:
-            if torch.allclose(position, self.last_position, atol=0.25):
-                return self.sp
-        self.last_position = position.clone()
+        # # If stays at (roughly) same point, return punishment
+        # if self.last_position is not None:
+        #     if torch.allclose(position, self.last_position, atol=0.25):
+        #         return self.sp
+        # self.last_position = position.clone()
         
         # Calculate delta_d
         self.delta_d = self.dt_end - self.dt_start
