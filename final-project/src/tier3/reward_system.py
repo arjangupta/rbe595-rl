@@ -32,6 +32,9 @@ class QuadRewardSystem:
 
         # The drone's position the last time the rewards were evaluated
         self.last_position = None
+
+        # Too close to ground punishment
+        self.R_gp = -2.0
     
     def f_delta_t(self, dt):
         """This is the function that regulates the discount rate based on dmax"""
@@ -44,6 +47,11 @@ class QuadRewardSystem:
         if did_collide:
             # print("Harshest punishment - collision")
             return self.R_cp
+        
+        # If too close to ground, return mid-level punishment
+        if position[2] < 0.5:
+            # print("Mid-level punishment - too close to ground")
+            return self.R_gp
 
         # If excessive deviation, mild punishment
         if torch.abs(self.dt_end) > self.d_max:
