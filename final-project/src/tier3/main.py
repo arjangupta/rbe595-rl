@@ -46,6 +46,8 @@ class GymInterface:
         self.first_step_done = False
         # Current image array
         self.image_set = torch.zeros((3, 1024), dtype=torch.float32, device=self.device)
+        # Moving setpoint time counter
+        self.moving_setpoint_time_counter = 0
 
     def choose_new_goal_position(self):
         """Chooses a new goal position"""
@@ -77,12 +79,14 @@ class GymInterface:
                 _, _, _, reset_ret, _, hit_ground_ret, collision_ret = self.env.step(self.command_actions)
                 if reset_ret:
                     reset = True
+                    self.moving_setpoint_time_counter = 0
                     if hit_ground_ret:
                         # print("Drone hit ground!")
                         collision = True
                     if collision_ret:
                         collision = True
                     break
+                self.moving_setpoint_time_counter += 1
             # If one of the last 3 samples, save image
             if i_sample >= num_samples - 3:
                 self.image_set[i_sample - num_samples + 3] = self.env.get_depth_image()
@@ -164,7 +168,8 @@ class GymInterface:
             self.initial_position,
             self.goal_position,
             current_position)
-        return moving_setpoint - current_position
+        moving_setpoint[0] = moving_setpoint[0] + self.moving_setpoint_time_counter # every "second" the setpoint moves 1 meter along the x-axis
+        return moving_setpoint  - current_position
 
     def check_if_near_goal(self):
         """Returns true if the drone is within 1 meter of the goal"""
