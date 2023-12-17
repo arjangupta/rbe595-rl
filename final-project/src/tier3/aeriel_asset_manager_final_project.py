@@ -108,7 +108,7 @@ class AssetManager:
         for env_bound_key, include_asset in self.asset_config.include_env_bound_type.items():
             if not include_asset:
                 continue
-            print("Adding environment bound type: {}".format(env_bound_key))
+            # print("Adding environment bound type: {}".format(env_bound_key))
             env_bound_class = self.asset_type_to_dict_map[env_bound_key]
             self._add_asset_2_tensor(env_bound_class)
 

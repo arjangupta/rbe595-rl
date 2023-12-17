@@ -204,6 +204,8 @@ class DeepQLearningAgent:
         self.num_nn_actions = 0
         self.num_random_actions = 0
 
+        self.no_random_actions = False
+
     def show_action_stats(self):
         """Shows percentage of actions taken by the neural network and random actions"""
         total_actions = self.num_nn_actions + self.num_random_actions
@@ -218,7 +220,7 @@ class DeepQLearningAgent:
         eps_threshold = self.EPS_END + (self.EPS_START - self.EPS_END) * \
             math.exp(-1. * self.steps_done / self.EPS_DECAY)
         self.steps_done += 1
-        if sample > eps_threshold:
+        if sample > eps_threshold or self.no_random_actions:
             self.num_nn_actions += 1
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.
@@ -232,8 +234,13 @@ class DeepQLearningAgent:
                 return self.policy_net(state).argmax().view(1, 1)
         else:
             self.num_random_actions += 1
+            # return torch.tensor(
+            #     [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
+            #     device=device, dtype=torch.long)
+            # Choose an action at random from the following set
+            # [1, 2, 3, 7, 8, 9, 10, 11, 12, 16, 17]
             return torch.tensor(
-                [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
+                [[random.choice([1, 2, 3, 7, 8, 9, 10, 11, 12, 16, 17])]],
                 device=device, dtype=torch.long)
 
     def optimize_model(self):

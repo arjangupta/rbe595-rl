@@ -28,7 +28,7 @@ class QuadRewardSystem:
         self.R_dp = -0.5
 
         # Drastic punishment for collision
-        self.R_cp = -1.0
+        self.R_cp = -5.0
 
         # The drone's position the last time the rewards were evaluated
         self.last_position = None
