@@ -48,7 +48,7 @@ class GymInterface:
         self.image_set = torch.zeros((3, 1024), dtype=torch.float32, device=self.device)
         # Moving setpoint time counter
         self.moving_setpoint_time_counter = 0.0
-        self.moving_setpoint_time_counter_increment = 0.25
+        self.moving_setpoint_time_counter_increment = 0.5
 
     def choose_new_goal_position(self):
         """Chooses a new goal position"""
