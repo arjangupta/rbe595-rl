@@ -234,8 +234,13 @@ class DeepQLearningAgent:
                 return self.policy_net(state).argmax().view(1, 1)
         else:
             self.num_random_actions += 1
+            # return torch.tensor(
+            #     [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
+            #     device=device, dtype=torch.long)
+            # Choose an action at random from the following set
+            # [1, 2, 3, 7, 8, 9, 10, 11, 12, 16, 17]
             return torch.tensor(
-                [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
+                [[random.choice([1, 2, 3, 7, 8, 9, 10, 11, 12, 16, 17])]],
                 device=device, dtype=torch.long)
 
     def optimize_model(self):
