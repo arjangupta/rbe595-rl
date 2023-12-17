@@ -62,7 +62,7 @@ class GymInterface:
 
     def step(self, action):
         # Capture starting relative position
-        self.reward_function.dt_start = self.get_perpendicular_distance()
+        self.reward_function.dt_start = self.get_distance_from_moving_setpoint()
         if self.debug:
             print("dt_start: ", self.reward_function.dt_start)
         # Get action bezier curve as sampled points
@@ -93,7 +93,7 @@ class GymInterface:
             if reset:
                 break
         # Capture ending relative position
-        self.reward_function.dt_end = self.get_perpendicular_distance()
+        self.reward_function.dt_end = self.get_distance_from_moving_setpoint()
         # Check if near goal
         near_goal = False
         if self.check_if_near_goal():
@@ -136,14 +136,20 @@ class GymInterface:
             print("length_AB: ", length_AB)
         return parallelogram_area / length_AB  # which is the height of the parallelogram
 
-    def get_perpendicular_distance(self):
-        """The relative distance is the perpendicular deviation
-        from the straight line path between the initial position
-        and the goal position"""
-        return self.calculate_3d_distance(
+    def get_distance_from_moving_setpoint(self):
+        """The relative distance is the hypotenuse deviation of the drone
+        from the moving setpoint which moves along the straight line path
+        between the initial position and the goal position"""
+        perpendicular_distance = self.calculate_3d_distance(
             self.initial_position,
             self.goal_position,
             self.get_current_position())
+        # This is the ghost setpoint that moves along the straight line path. Its distance
+        # is something that we incrementally increase as time goes on.
+        distance_along_x_axis = self.moving_setpoint_time_counter - self.initial_position[0]
+        # Now we use the Pythagorean theorem to calculate the relative distance
+        relative_distance = torch.sqrt(perpendicular_distance**2 + distance_along_x_axis**2)
+        return relative_distance
 
     def calculate_perpendicular_intersection(self, A, B, C):
         """Returns the point D which is the intersection of the
