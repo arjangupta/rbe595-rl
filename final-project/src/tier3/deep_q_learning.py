@@ -17,6 +17,8 @@ Transition = namedtuple('Transition',
 State = namedtuple('State',
                    ('depth_image', 'relative_position'))
 
+rewards_csv = "rewards.csv"
+
 class ReplayMemory(object):
     """Experience Replay memory"""
 
@@ -320,6 +322,7 @@ class DeepQLearningAgent:
                 depth_image=self.gym_iface.get_image_set(),
                 relative_position=self.gym_iface.get_current_position().unsqueeze(0)
             )
+            total_rewards_step = 0
             for _ in range(num_time_steps):
                 action = self.select_action(state)
                 if self.debug:
@@ -327,6 +330,8 @@ class DeepQLearningAgent:
                 # observation, reward, terminated, truncated, _ =
                 observation, reward, truncated, terminated = self.gym_iface.step(action.item())
                 reward = torch.tensor([reward], device=device)
+
+                total_rewards_step += reward.item()
 
                 done = terminated or truncated
 
@@ -341,7 +346,7 @@ class DeepQLearningAgent:
                 #     print("reward: ", reward)
                 #     print("next_state: ", next_state)
                 # else:
-                print("reward: ", reward)
+                print("reward: ", reward.item())
 
                 # Store the transition in memory
                 # state.relative_position = state.relative_position.unsqueeze(0)
@@ -366,5 +371,7 @@ class DeepQLearningAgent:
 
                 if done:
                     print("\nEpisode ended due to termination or truncation\n")
+                    with open(rewards_csv, 'a') as fd:
+                        fd.write(str(total_rewards_step/num_time_steps))
                     break
             self.show_action_stats()
