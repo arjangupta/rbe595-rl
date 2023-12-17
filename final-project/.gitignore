@@ -3,3 +3,4 @@ depth_image_*.png
 rgb_image_*.png
 segmentation_image_*.png
 *.pth
+*.csv
