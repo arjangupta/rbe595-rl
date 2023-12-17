@@ -384,7 +384,6 @@ class AerialRobotFinalProjectTier2(BaseTask):
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
-        if 0 in env_ids:
 
         self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id)
 

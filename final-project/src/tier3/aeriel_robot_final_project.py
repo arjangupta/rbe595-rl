@@ -399,7 +399,6 @@ class AerialRobotFinalProjectTier3(BaseTask):
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
-        if 0 in env_ids:
 
         map = random.randint(1, 6)
 
