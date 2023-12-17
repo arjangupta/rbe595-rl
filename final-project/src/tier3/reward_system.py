@@ -49,7 +49,7 @@ class QuadRewardSystem:
             return self.R_cp
         
         # If too close to ground, return mid-level punishment
-        if position[2] < 0.5:
+        if position[2] < 1.0:
             # print("Mid-level punishment - too close to ground")
             return self.R_gp
 
