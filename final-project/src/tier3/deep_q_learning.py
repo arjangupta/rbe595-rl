@@ -1,5 +1,6 @@
 import math
 import random
+import time
 from collections import namedtuple, deque
 from itertools import count
 import torch
@@ -178,6 +179,9 @@ class DeepQLearningAgent:
         # Debug
         self.debug = False
 
+        #Info
+        self.info = True
+
         # Get number of actions from gym action space
         n_actions = self.gym_iface.action_primitives.NUM_ACTIONS
 
@@ -223,6 +227,8 @@ class DeepQLearningAgent:
             math.exp(-1. * self.steps_done / self.EPS_DECAY)
         self.steps_done += 1
         if sample > eps_threshold or self.no_random_actions:
+            if self.info or self.debug:
+                print("nn action")
             self.num_nn_actions += 1
             with torch.no_grad():
                 # t.max(1) will return the largest column value of each row.
@@ -235,6 +241,8 @@ class DeepQLearningAgent:
                 #     print("self.policy_net(state).max(0).indices.view(1, 1): ", self.policy_net(state).max(0).indices.view(1, 1))
                 return self.policy_net(state).argmax().view(1, 1)
         else:
+            if self.info or self.debug:
+                print("random action")
             self.num_random_actions += 1
             # return torch.tensor(
             #     [[random.randrange(self.gym_iface.action_primitives.NUM_ACTIONS)]],
@@ -323,9 +331,9 @@ class DeepQLearningAgent:
                 relative_position=self.gym_iface.get_current_position().unsqueeze(0)
             )
             total_rewards_step = 0
-            for _ in range(num_time_steps):
+            for step in range(num_time_steps):
                 action = self.select_action(state)
-                if self.debug:
+                if self.info or self.debug:
                     print("Selected action: ", action)
                 # observation, reward, terminated, truncated, _ =
                 observation, reward, truncated, terminated = self.gym_iface.step(action.item())
@@ -334,6 +342,10 @@ class DeepQLearningAgent:
                 total_rewards_step += reward.item()
 
                 done = terminated or truncated
+
+                if done and step == 0:
+                    print("Episode reset since physics was too slow upon restart and collisions detected")
+                    break
 
                 if terminated:
                     next_state = None
@@ -371,7 +383,11 @@ class DeepQLearningAgent:
 
                 if done:
                     print("\nEpisode ended due to termination or truncation\n")
+                    #need check for restting map
+                    # if reward != -0.002:
                     with open(rewards_csv, 'a') as fd:
-                        fd.write(str(total_rewards_step/num_time_steps))
+                        fd.write(str(total_rewards_step/(step+1)) + '\n')
                     break
             self.show_action_stats()
+
+            time.sleep(5)

@@ -30,13 +30,7 @@ class GymInterface:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # Set goal positions
         self.goal_position_options = torch.tensor(
-            [[7.0, 6.5, 4.0],
-             [5.0, -10.3, 6.4],
-             [11.2, 2.2, 1.0],
-             [3.0, -3.0, 3.0],
-             [15.9, -10.0, 9.0],
-             [2.0, 12.0, 7.1]
-             ], dtype=torch.float32, device=self.device)
+            [[25, 0, 5]], dtype=torch.float32, device=self.device)
         self.goal_position = self.goal_position_options[0]
         # Get initial drone position
         self.initial_position = self.get_current_position().clone()
