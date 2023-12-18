@@ -1,32 +1,3 @@
-#
-# import isaacgym
-# from aerial_gym.envs import *
-# from aerial_gym.utils import get_args, task_registry
-# import torch
-# from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProject
-# from aeriel_robot_final_project import AerialRobotFinalProject
-#
-# def main():
-#
-#     task_registry.register( "quad_for_final_project", AerialRobotFinalProject, AerialRobotCfgFinalProject())
-#     env, env_cfg = task_registry.make_env("quad_for_final_project")
-#     # env, env_cfg = task_registry.make_env("quad_with_obstacles")
-#
-#     print("Number of environments", env_cfg.env.num_envs)
-#     command_actions = torch.zeros((env_cfg.env.num_envs, env_cfg.env.num_actions))
-#     command_actions[:, 0] = 0.0
-#     command_actions[:, 1] = 0.0
-#     command_actions[:, 2] = 0.0
-#     command_actions[:, 3] = 0.8
-#
-#     env.enable_onboard_cameras = True
-#
-#     for i in range(0, 5000):
-#         obs, priviliged_obs, rewards, resets, extras = env.step(command_actions)
-#
-# if __name__ == "__main__":
-#     main()
-
 import isaacgym
 from aerial_gym.envs import *
 from aerial_gym.utils import get_args, task_registry
@@ -75,18 +46,24 @@ class GymInterface:
         self.first_step_done = False
         # Current image array
         self.image_set = torch.zeros((3, 1024), dtype=torch.float32, device=self.device)
+        # Moving setpoint time counter
+        self.moving_setpoint_time_counter = 0.0
+        self.moving_setpoint_time_counter_increment = 0.5
 
     def choose_new_goal_position(self):
         """Chooses a new goal position"""
         # Choose a random index from the goal position options
-        self.goal_position = self.goal_position_options[
-            torch.randint(0, self.goal_position_options.shape[0], (1,)).item()]
+        # self.goal_position = self.goal_position_options[
+        #     torch.randint(0, self.goal_position_options.shape[0], (1,)).item()]
+        # Just choose a coordinate along the x-axis
+        self.goal_position = torch.tensor([19.0, 0.0, 7.5],
+                                          dtype=torch.float32, device=self.device)
         if self.debug:
             print("New goal position: ", self.goal_position)
 
     def step(self, action):
         # Capture starting relative position
-        self.reward_function.dt_start = self.get_perpendicular_distance()
+        self.reward_function.dt_start = self.get_distance_from_moving_setpoint()
         if self.debug:
             print("dt_start: ", self.reward_function.dt_start)
         # Get action bezier curve as sampled points
@@ -100,11 +77,14 @@ class GymInterface:
             self.command_actions = torch.from_numpy(points[:, i_sample])
             for _ in range(0, 15):
                 # Step through the environment repeatedly
-                _, _, _, reset_ret, _, hit_ground_ret = self.env.step(self.command_actions)
+                _, _, _, reset_ret, _, hit_ground_ret, collision_ret = self.env.step(self.command_actions)
                 if reset_ret:
                     reset = True
+                    self.moving_setpoint_time_counter = 0
                     if hit_ground_ret:
                         # print("Drone hit ground!")
+                        collision = True
+                    if collision_ret:
                         collision = True
                     break
             # If one of the last 3 samples, save image
@@ -112,8 +92,9 @@ class GymInterface:
                 self.image_set[i_sample - num_samples + 3] = self.env.get_depth_image()
             if reset:
                 break
+        self.moving_setpoint_time_counter += self.moving_setpoint_time_counter_increment
         # Capture ending relative position
-        self.reward_function.dt_end = self.get_perpendicular_distance()
+        self.reward_function.dt_end = self.get_distance_from_moving_setpoint()
         # Check if near goal
         near_goal = False
         if self.check_if_near_goal():
@@ -156,14 +137,22 @@ class GymInterface:
             print("length_AB: ", length_AB)
         return parallelogram_area / length_AB  # which is the height of the parallelogram
 
-    def get_perpendicular_distance(self):
-        """The relative distance is the perpendicular deviation
-        from the straight line path between the initial position
-        and the goal position"""
-        return self.calculate_3d_distance(
+    def get_distance_from_moving_setpoint(self):
+        """The relative distance is the hypotenuse deviation of the drone
+        from the moving setpoint which moves along the straight line path
+        between the initial position and the goal position"""
+        perpendicular_distance = self.calculate_3d_distance(
             self.initial_position,
             self.goal_position,
             self.get_current_position())
+        # This is the ghost setpoint that moves along the straight line path. Its distance
+        # is something that we incrementally increase as time goes on.
+        distance_along_x_axis = self.moving_setpoint_time_counter - self.get_current_position()[0]
+        # Now we use the Pythagorean theorem to calculate the relative distance
+        relative_distance = torch.sqrt(perpendicular_distance**2 + distance_along_x_axis**2)
+        if self.debug:
+            print("relative_distance: ", relative_distance)
+        return relative_distance
 
     def calculate_perpendicular_intersection(self, A, B, C):
         """Returns the point D which is the intersection of the
@@ -188,7 +177,12 @@ class GymInterface:
             self.initial_position,
             self.goal_position,
             current_position)
-        return moving_setpoint - current_position
+        # Every "second" the setpoint moves a certain distance along the x-axis
+        moving_setpoint[0] = moving_setpoint[0] + self.moving_setpoint_time_counter
+        relative_pos = moving_setpoint  - current_position
+        if self.debug:
+            print("relative_pos: ", relative_pos)
+        return relative_pos
 
     def check_if_near_goal(self):
         """Returns true if the drone is within 1 meter of the goal"""
