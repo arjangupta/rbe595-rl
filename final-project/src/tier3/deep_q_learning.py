@@ -338,18 +338,11 @@ class DeepQLearningAgent:
                 if terminated:
                     next_state = None
                 else:
-                    # next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
                     next_state = observation
-                
-                # if self.debug:
-                # if not done:
-                #     print("reward: ", reward)
-                #     print("next_state: ", next_state)
-                # else:
+
                 print("reward: ", reward.item())
 
                 # Store the transition in memory
-                # state.relative_position = state.relative_position.unsqueeze(0)
                 self.memory.push(state, action, next_state, reward)
 
                 # Move to the next state
