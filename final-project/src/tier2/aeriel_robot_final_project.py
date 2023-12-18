@@ -380,7 +380,7 @@ class AerialRobotFinalProjectTier2(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf #FIXME: tier1 added drone_hit_ground_buf
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions #FIXME: tier1 added drone_hit_ground_buf
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
