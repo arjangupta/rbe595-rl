@@ -13,3 +13,8 @@ Install the bezier library
 ```
 pip install bezier
 ```
+
+Use the aerial gym fork
+```
+git clone git@github.com:arjangupta/aerial_gym_simulator.git
+```
