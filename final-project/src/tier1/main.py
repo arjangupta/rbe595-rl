@@ -15,8 +15,7 @@ class GymInterface:
         # Set trace
         self.trace = False
         # Declare environment
-        task_registry.register("quad_for_final_project", AerialRobotFinalProjectTier3,
-                               AerialRobotCfgFinalProjectTier3())
+        task_registry.register( "quad_for_final_project", AerialRobotFinalProjectTier1, AerialRobotCfgFinalProjectTier1())
         # Create environment
         self.env, self.env_cfg = task_registry.make_env("quad_for_final_project")
         # Declare command actions
