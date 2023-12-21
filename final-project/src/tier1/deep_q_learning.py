@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
+
 
 # Check for GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -16,6 +18,8 @@ Transition = namedtuple('Transition',
 # Define the state tuple
 State = namedtuple('State',
                    ('depth_image', 'relative_position'))
+
+writer = SummaryWriter()
 
 class ReplayMemory(object):
     """Experience Replay memory"""
@@ -47,12 +51,17 @@ class QuadrotorNeuralNetwork(nn.Module):
 
         # Seperated layers for each camera image
         self.camera_1_layer1 = nn.Linear(1024, 128)
+        torch.nn.init.xavier_uniform_(self.camera_1_layer1.weight)
+        print(self.camera_1_layer1.weight)
+
         self.camera_1_layer2 = nn.Linear(128, 16)
         self.camera_1_layer3 = nn.Linear(16, 8)
         self.camera_2_layer1 = nn.Linear(1024, 128)
+        torch.nn.init.xavier_uniform_(self.camera_2_layer1.weight)
         self.camera_2_layer2 = nn.Linear(128, 16)
         self.camera_2_layer3 = nn.Linear(16, 8)
         self.camera_3_layer1 = nn.Linear(1024, 128)
+        torch.nn.init.xavier_uniform_(self.camera_3_layer1.weight)
         self.camera_3_layer2 = nn.Linear(128, 16)
         self.camera_3_layer3 = nn.Linear(16, 16)
 
@@ -64,13 +73,16 @@ class QuadrotorNeuralNetwork(nn.Module):
 
         self.joint_layer2 = nn.Linear((8 + 16), 32)
         self.output_layer = nn.Linear(32, n_actions)
-
+        self.optimizer = optim.Adam(self.parameters(), lr=.003)
+        self.loss = nn.SmoothL1Loss()
         # Debug
         self.debug = False
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.to(self.device)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
-    def forward(self, state: State):
+    def forward(self, state):
         # Feed into camera layers
         depth_im = state.depth_image
         if depth_im.dim() == 2:
@@ -196,7 +208,7 @@ class DeepQLearningAgent:
         self.target_net = QuadrotorNeuralNetwork(n_rel_x, n_rel_y, n_rel_z, n_actions).to(device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
-        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.LR, amsgrad=True)
+        #self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.LR, amsgrad=True)
         self.memory = ReplayMemory(10000)
 
         self.steps_done = 0
@@ -243,9 +255,10 @@ class DeepQLearningAgent:
                 [[random.choice([1, 2, 3, 7, 8, 9, 10, 11, 12, 16, 17])]],
                 device=device, dtype=torch.long)
 
-    def optimize_model(self):
+    def optimize_model(self,epoch):
         if len(self.memory) < self.BATCH_SIZE:
             return
+        self.policy_net.optimizer.zero_grad()
         transitions = self.memory.sample(self.BATCH_SIZE)
         # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
         # detailed explanation). This converts batch-array of Transitions
@@ -280,37 +293,41 @@ class DeepQLearningAgent:
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken. These are the actions which would've been taken
         # for each batch state according to policy_net
-        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
-
+        q_eval = self.policy_net(state_batch).gather(1, action_batch)
+        
         # Compute V(s_{t+1}) for all next states.
         # Expected values of actions for non_final_next_states are computed based
         # on the "older" target_net; selecting their best reward with max(1).values
         # This is merged based on the mask, such that we'll have either the expected
         # state value or 0 in case the state was final.
         next_state_values = torch.zeros(self.BATCH_SIZE, device=device)
-        with torch.no_grad():
-            next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1).values
+        # with torch.no_grad():
+        next_state_values[non_final_mask] = self.policy_net(non_final_next_states).max(1).values
+        
         # Compute the expected Q values
-        expected_state_action_values = (next_state_values * self.GAMMA) + reward_batch
+        q_target = (next_state_values * self.GAMMA) + reward_batch
 
-        # Compute Huber loss
-        criterion = nn.SmoothL1Loss()
-        loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
-
+        
+        
+        #loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
+        loss = self.policy_net.loss(q_target.unsqueeze(1),q_eval).to(self.policy_net.device)
+        writer.add_scalar("Loss/train", loss, epoch)
         # Optimize the model
-        self.optimizer.zero_grad()
         loss.backward()
+        print(self.policy_net.camera_1_layer1.weight)
+        print(self.policy_net.camera_1_layer1.weight.grad)
+        self.policy_net.optimizer.step()
         # In-place gradient clipping
-        torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
-        self.optimizer.step()
+        #torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
+        
 
     def train(self):
         num_episodes = 1000
         num_time_steps = 100
         if torch.cuda.is_available():
-            num_episodes = 5000
-            num_time_steps = 500
-
+            num_episodes = 100
+            num_time_steps = 10000
+        epoch = 0
         for ep in range(num_episodes):
             if ep % 2 == 0:
                 self.gym_iface.choose_new_goal_position()
@@ -321,6 +338,7 @@ class DeepQLearningAgent:
                 relative_position=self.gym_iface.get_current_position().unsqueeze(0)
             )
             for _ in range(num_time_steps):
+                epoch+=1
                 action = self.select_action(state)
                 if self.debug:
                     print("Selected action: ", action)
@@ -351,15 +369,15 @@ class DeepQLearningAgent:
                 state = next_state
 
                 # Perform one step of the optimization (on the policy network)
-                self.optimize_model()
+                self.optimize_model(epoch)
 
                 # Soft update of the target network's weights
                 # θ′ ← τ θ + (1 −τ )θ′
-                target_net_state_dict = self.target_net.state_dict()
-                policy_net_state_dict = self.policy_net.state_dict()
-                for key in policy_net_state_dict:
-                    target_net_state_dict[key] = policy_net_state_dict[key]*self.TAU + target_net_state_dict[key]*(1-self.TAU)
-                self.target_net.load_state_dict(target_net_state_dict)
+                # target_net_state_dict = self.target_net.state_dict()
+                # policy_net_state_dict = self.policy_net.state_dict()
+                # for key in policy_net_state_dict:
+                #     target_net_state_dict[key] = policy_net_state_dict[key]*self.TAU + target_net_state_dict[key]*(1-self.TAU)
+                # self.target_net.load_state_dict(target_net_state_dict)
 
                 # Save the model
                 torch.save(self.policy_net.state_dict(), self.MODEL_FILE_NAME)
@@ -368,3 +386,4 @@ class DeepQLearningAgent:
                     print("\nEpisode ended due to termination or truncation\n")
                     break
             self.show_action_stats()
+        writer.close()
