@@ -2,22 +2,26 @@ import isaacgym
 from aerial_gym.envs import *
 from aerial_gym.utils import get_args, task_registry
 import torch
-from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1
-from aeriel_robot_final_project import AerialRobotFinalProjectTier1
+# from aeriel_robot_cfg_final_project_tier1 import AerialRobotCfgFinalProjectTier1
+# from aerial_robot_finalproject_tier1_task import AerialRobotFinalProjectTier1
 from action_primitives import QuadActionPrimitives
 from deep_q_learning import DeepQLearningAgent, State
 from reward_system import QuadRewardSystem
+from envs import *
 
 class GymInterface:
-    def __init__(self, debug=False):
+    def __init__(self, env, env_cfg, debug=False):
         # Set debug
         self.debug = debug
         # Set trace
         self.trace = False
         # Declare environment
-        task_registry.register( "quad_for_final_project", AerialRobotFinalProjectTier1, AerialRobotCfgFinalProjectTier1())
+        # task_registry.register( "quad_for_final_project", AerialRobotFinalProjectTier1, AerialRobotCfgFinalProjectTier1())
         # Create environment
-        self.env, self.env_cfg = task_registry.make_env("quad_for_final_project")
+        # self.env, self.env_cfg = task_registry.make_env("quad_for_final_project")
+        self.env=env
+        self.env_cfg=env_cfg
+
         # Declare command actions
         self.command_actions = torch.zeros((self.env_cfg.env.num_envs, 3))
         # Declare action primitives
@@ -54,33 +58,39 @@ class GymInterface:
         # self.goal_position = self.goal_position_options[
         #     torch.randint(0, self.goal_position_options.shape[0], (1,)).item()]
         # Just choose a coordinate along the x-axis
-        self.goal_position = torch.tensor([19.0, 0.0, 7.5],
+        self.goal_position = torch.tensor([13.0, 0.0, 3.0],
                                           dtype=torch.float32, device=self.device)
         if self.debug:
             print("New goal position: ", self.goal_position)
 
     def step(self, action):
+        
         # Capture starting relative position
         self.reward_function.dt_start = self.get_distance_from_moving_setpoint()
         if self.debug:
             print("dt_start: ", self.reward_function.dt_start)
+        
+        print("Start Position: ", self.get_current_position())
+        print("action: ", action)
+        
         # Get action bezier curve as sampled points
         num_samples = 5  # THIS MUST NEVER BE LESS THAN 3 OR THE NN WILL FAIL
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
         # Step through all points
         reset = False
         collision = False
-        for i_sample in range(0, num_samples):
+        for i_sample in range(4, num_samples):
             # Set command actions
             self.command_actions = torch.from_numpy(points[:, i_sample])
-            for _ in range(0, 15):
+            for _ in range(0, 1):
                 # Step through the environment repeatedly
                 _, _, _, reset_ret, _, hit_ground_ret = self.env.step(self.command_actions)
-                if reset_ret:
+                if self.moving_setpoint_time_counter!=0.0 and reset_ret:
+                    print("reset_ret:",reset_ret)
                     reset = True
                     self.moving_setpoint_time_counter = 0
                     if hit_ground_ret:
-                        # print("Drone hit ground!")
+                        print("Drone hit ground!")
                         collision = True
                     break
             # If one of the last 3 samples, save image
@@ -88,6 +98,7 @@ class GymInterface:
                 self.image_set[i_sample - num_samples + 3] = self.env.get_depth_image()
             if reset:
                 break
+        print("End Position: ", self.get_current_position())
         self.moving_setpoint_time_counter += self.moving_setpoint_time_counter_increment
         # Capture ending relative position
         self.reward_function.dt_end = self.get_distance_from_moving_setpoint()
@@ -96,6 +107,7 @@ class GymInterface:
         if self.check_if_near_goal():
             near_goal = True
             print("Reached goal!")
+            print("Final position: ", self.get_current_position())
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
@@ -181,15 +193,29 @@ class GymInterface:
         return relative_pos
 
     def check_if_near_goal(self):
-        """Returns true if the drone is within 1 meter of the goal"""
-        return torch.norm(self.goal_position - self.get_current_position()) < 1.0
+        """Returns true if the drone is within 1.5 meters of the goal"""
+        distance_to_goal = torch.norm(self.goal_position - self.get_current_position())
+        print("distance_to_goal:",distance_to_goal)
+        return distance_to_goal < 1.5
 
 
-def main():
-    gym_iface = GymInterface(debug=False)
+def main(args):
+    env, env_cfg = task_registry.make_env(name=args.task, args=args)
+    gym_iface = GymInterface(env,env_cfg,debug=False)
     dql_agent = DeepQLearningAgent(gym_iface)
-    dql_agent.train()
+    if args.train:
+        dql_agent.train()
+    else:
+        dql_agent.run() 
 
 
 if __name__ == "__main__":
-    main()
+    args = get_args()
+    main(args)
+    
+    
+
+    # parser = argparse.ArgumentParser()
+    # #parser.add_argument("--train", help="Run simulation without updating network",action="store_true")
+    # args = parser.parse_args()
+    # main(args.train)

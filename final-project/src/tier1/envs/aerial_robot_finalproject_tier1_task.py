@@ -18,7 +18,7 @@ from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
-from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1 as AerialRobotCfg
+from .aerial_robot_finalproject_tier1_cfg import AerialRobotCfgFinalProjectTier1 as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 from PIL import Image as im
@@ -99,7 +99,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
         
         # To save images
-        self.save_images = True
+        self.save_images = False
 
         # Action display fixed coordinate
         self.action_display_fixed_coordinate = torch.tensor([[5,5,5]], device=self.device, dtype=torch.float32)
@@ -204,10 +204,23 @@ class AerialRobotFinalProjectTier1(BaseTask):
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
         return
 
-    def step(self, position_increment):
+    def step(self, _position_increment):
+        position_increment = _position_increment.to(self.device)
+
+        # Clamp the position_increment by looking at the action limits
+        position_increment = tensor_clamp(
+            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+        
+        # Increment the position with current position
+        new_position = position_increment + self.root_positions[0]
+        new_position.to(self.device)
+        print("new_position",new_position)
+        # Increment the position with fixed coordinate
+        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
+        
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(position_increment)
+            self.pre_physics_step(new_position)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
@@ -308,26 +321,16 @@ class AerialRobotFinalProjectTier1(BaseTask):
     def get_depth_image(self):
         return self.depth_image
 
-    def pre_physics_step(self, _position_increment):
+    def pre_physics_step(self, position):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
         self.counter += 1
 
         # Move the position_increment to the device
-        position_increment = _position_increment.to(self.device)
-
-        # Clamp the position_increment by looking at the action limits
-        position_increment = tensor_clamp(
-            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
         
-        # Increment the position with current position
-        position_increment = position_increment + self.root_positions[0]
 
-        # Increment the position with fixed coordinate
-        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
-
-        self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
+        self.action_input[:] = torch.cat([position, torch.tensor([0], device=self.device)])
 
         # clear position_increment for reset envs
         self.forces[:] = 0.0
@@ -423,8 +426,8 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
     reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
 
     # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
-    if counter > 500:
-        ground_threshold = 0.25
+    if counter > -1:
+        ground_threshold = 0.15
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:
