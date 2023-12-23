@@ -20,6 +20,7 @@ import numpy as np
 import os
 import torch
 import torchvision
+from torchvision.transforms import transforms
 import xml.etree.ElementTree as ET
 
 from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
@@ -34,6 +35,7 @@ from aerial_gym.utils.asset_manager import AssetManager
 import matplotlib.pyplot as plt
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
 import time
+from PIL import Image as im
 
 class AerialRobotFinalProjectTier2(BaseTask):
 
@@ -312,19 +314,31 @@ class AerialRobotFinalProjectTier2(BaseTask):
             self.gym.set_rigid_body_color(env_handle, env_asset_handle, 0, gymapi.MESH_VISUAL,
                                           gymapi.Vec3(color[0] / 255, color[1] / 255, color[2] / 255))
 
-    def step(self, position_increment):
+    def step(self, _position_increment):
+        position_increment = _position_increment.to(self.device)
+
+        # Clamp the position_increment by looking at the action limits
+        position_increment = tensor_clamp(
+            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+        
+        # Increment the position with current position
+        new_position = position_increment + self.root_positions[0]
+        new_position.to(self.device)
+        print("new_position",new_position)
+        # Increment the position with fixed coordinate
+        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
+        
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(position_increment)
+            self.pre_physics_step(new_position)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
             self.post_physics_step()
 
         self.render(sync_frame_time=False)
-        if self.enable_onboard_cameras: #FIXME: check not in tier1
-            self.render_cameras()
-
+        self.render_cameras()
+        
         self.progress_buf += 1
 
         self.check_collisions() #FIXME: this not in tier1
@@ -344,30 +358,46 @@ class AerialRobotFinalProjectTier2(BaseTask):
         # FOR TRAINING THE NN (only where images are needed)
         # Store depth image in a buffer
         if self.enable_onboard_cameras:
-            # Get the depth image from the camera array
+             # Get the depth image from the camera array
             depth_im = self.full_camera_array[0]
 
             # The given depth image has shape (270, 480), but we need (1, 1024)
             # So, first we need to scale it to 32x32 on the GPU
-            depth_im = depth_im.unsqueeze(0).unsqueeze(0)
-            depth_im = torch.nn.functional.interpolate(depth_im, size=(32, 32), mode='bilinear', align_corners=False)
+            depth_im_pytorch = depth_im.unsqueeze(0).unsqueeze(0)
+            depth_im_pytorch = torch.nn.functional.interpolate(depth_im_pytorch, size=(32, 32), mode='bilinear', align_corners=False)
 
             # Now, the issue is that the depth image has many nan values
             # So, we need to replace them with 0.0
-            depth_im = torch.where(torch.isnan(depth_im), torch.zeros_like(depth_im), depth_im)
+            depth_im_pytorch = torch.where(torch.isnan(depth_im_pytorch), torch.zeros_like(depth_im_pytorch), depth_im_pytorch)
 
             # Also, the 0-1 range is flipped, so we need to flip it back
-            depth_im = 1.0 - depth_im
+            depth_im_pytorch = 1.0 - depth_im_pytorch
 
             # print("depth_im:", depth_im)
+            depth_im=depth_im.detach().cpu().numpy()
+            depth_im[depth_im == -np.inf] = 0
+            depth_im[depth_im < -10] = -10
+            normalized_depth = -255.0*(depth_im/np.min(depth_im + 1e-4))
+            normalized_depth_image = im.fromarray(normalized_depth.astype(np.uint8), mode="L")
+            
+            normalized_depth_image_resized = normalized_depth_image.resize((32,32))
+            depth_im=normalized_depth_image_resized
 
             # Save the 32x32 depth image to a file after certain number of iterations
             if self.save_images and self.counter % save_images_every == 0:
-                torchvision.utils.save_image(depth_im, "depth_image_tensor_" + str(self.counter) + ".png")
+                torchvision.utils.save_image(depth_im_pytorch, "depth_image_tensor_"+str(self.counter)+".png")
+                depth_im.save("depth_env_32x32_%d.jpg"%(self.counter))
+                normalized_depth_image.save("depth_env__%d.jpg"%(self.counter))
 
             # Convert to tensor from numpy
             # Now, we can flatten it to (1, 1024)
-            self.depth_image = depth_im.flatten()
+            transform_norm = transforms.Compose([
+                transforms.Normalize([0.25], [0.25])
+            ])
+            pil_to_tensor = transforms.ToTensor()(depth_im).unsqueeze_(0)
+            d1=transform_norm(pil_to_tensor)
+
+            self.depth_image = pil_to_tensor.flatten()
             # print("self.depth_image:", self.depth_image)
 
         if self.cfg.env.reset_on_collision: #FIXME: not in tier1
@@ -380,8 +410,8 @@ class AerialRobotFinalProjectTier2(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions #FIXME: tier1 added drone_hit_ground_buf
-
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions
+        
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
 
@@ -614,7 +644,7 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
     if counter > -1:
-        ground_threshold = 0.20
+        ground_threshold = 0.15
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:

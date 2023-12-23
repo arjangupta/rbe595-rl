@@ -38,7 +38,7 @@ class DeepQLearningAgent:
         self.EPS_START = 1.0
         self.EPS_END = 0.1
         self.EPS_DECAY = 25.0 # use for 100 num_episodes
-        self.EPS_DECAY = 400.0 # use for 500 num_episodes
+        self.EPS_DECAY = 250.0 # use for 500 num_episodes
         self.TAU = 0.005
         self.LR = 3e-3
 

@@ -27,7 +27,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         num_actions = 4
         env_spacing = 1
         episode_length_s = 1.21e+6 # episode length in seconds (14 days)
-        num_control_steps_per_env_step = 20 # number of physics steps per env step
+        num_control_steps_per_env_step = 50 # number of physics steps per env step
         enable_onboard_cameras = True  # enable onboard cameras
         reset_on_collision = True  # reset environment when contact force on quadrotor is above a threshold
         create_ground_plane = True  # create a ground plane
@@ -42,7 +42,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         lookat = [0, 0, 0]  # [m]
 
     class sim:
-        dt = 0.01
+        dt = 0.02
         substeps = 1
         gravity = [0., 0., -9.81]  # [m/s^2]
         up_axis = 1  # 0 is y, 1 is z

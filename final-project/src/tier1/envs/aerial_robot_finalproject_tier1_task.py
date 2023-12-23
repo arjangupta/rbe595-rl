@@ -198,6 +198,12 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.gym.end_access_image_tensors(self.sim)
         return
     
+    def check_collisions(self):
+        ones = torch.ones((self.num_envs), device=self.device)
+        zeros = torch.zeros((self.num_envs), device=self.device)
+        self.collisions[:] = 0
+        self.collisions = torch.where(torch.norm(self.contact_forces, dim=1) > 0.1, ones, zeros)
+
     def dump_images(self):
         for env_id in range(self.num_envs):
             # the depth values are in -ve z axis, so we need to flip it to positive
@@ -232,6 +238,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.progress_buf += 1
         self.compute_observations()
         self.compute_reward()
+        self.check_collisions()
 
         save_images_every = 500
 
@@ -292,7 +299,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf
+        # return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
