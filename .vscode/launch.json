@@ -5,16 +5,34 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Train: Main File",
+            "name": "Train: Tier1-100",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",
-            "args": ["--train","--task=tier1"],
+            "args": ["--train","--task=tier1","--num_episodes=100"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
         {
-            "name": "Run: Main File",
+            "name": "Train: Tier1-500",
+            "type": "python",
+            "request": "launch",
+            "program": "./final-project/src/tier1/main.py",
+            "args": ["--train","--task=tier1","--num_episodes=500"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Train: Tier1-1000",
+            "type": "python",
+            "request": "launch",
+            "program": "./final-project/src/tier1/main.py",
+            "args": ["--train","--task=tier1","--num_episodes=1000"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Run: Tier1",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",

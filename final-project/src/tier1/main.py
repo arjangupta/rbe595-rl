@@ -109,7 +109,7 @@ class GymInterface:
         near_goal = False
         if self.check_if_near_goal():
             near_goal = True
-            print("Reached goal!")
+            print("Reached goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             print("Final position: ", self.get_current_position())
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
@@ -205,7 +205,7 @@ class GymInterface:
 def main(args):
     env, env_cfg = task_registry.make_env(name=args.task, args=args)
     gym_iface = GymInterface(env,env_cfg,debug=False)
-    dql_agent = DeepQLearningAgent(gym_iface)
+    dql_agent = DeepQLearningAgent(gym_iface,args.num_episodes)
     if args.train:
         dql_agent.train()
     else:

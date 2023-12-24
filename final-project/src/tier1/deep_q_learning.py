@@ -24,7 +24,7 @@ writer = SummaryWriter()
 
 
 class DeepQLearningAgent:
-    def __init__(self, gym_iface):
+    def __init__(self, gym_iface,num_episodes=100):
         self.gym_iface = gym_iface
         # BATCH_SIZE is the number of transitions sampled from the replay buffer
         # GAMMA is the discount factor as mentioned in the previous section
@@ -37,17 +37,21 @@ class DeepQLearningAgent:
         self.GAMMA = 0.5
         self.EPS_START = 1.0
         self.EPS_END = 0.1
-        self.EPS_DECAY = 25.0 # use for 100 num_episodes
-        self.EPS_DECAY = 250.0 # use for 500 num_episodes
         self.TAU = 0.005
         self.LR = 3e-3
 
-        self.num_episodes = 500
-        self.num_time_steps = 10000
-        if torch.cuda.is_available():
-            self.num_episodes = 500
-            self.num_time_steps = 10000
-
+        self.num_episodes = num_episodes
+        self.num_time_steps = 100000
+        self.EPS_DECAY = 0.25
+        if self.num_episodes==100:
+            self.EPS_DECAY = 25.0 # use for 100 num_episodes
+        if self.num_episodes==500:
+            self.EPS_DECAY = 105.0 # use for 500 num_episodes
+        if self.num_episodes==1000:
+            self.EPS_DECAY = 200.0 # use for 1000 num_episodes
+        if self.num_episodes==2000:
+            self.EPS_DECAY = 400.0 # use for 1000 num_episodes
+        
         # writer.add_hparams({"BATCH_SIZE" : self.BATCH_SIZE})
         # writer.add_hparams({"LR" : self.LR})
         # Debug
@@ -212,6 +216,7 @@ class DeepQLearningAgent:
                 relative_position=self.gym_iface.get_current_position().unsqueeze(0)
             )
             episodeReward = 0.0
+            episode_steps=0
             for _ in range(self.num_time_steps):
                 epoch+=1
                 epochs_sincelast_optimize+=1
@@ -237,6 +242,7 @@ class DeepQLearningAgent:
                 # else:
                 print("reward: ", reward)
                 episodeReward = episodeReward + reward
+                episode_steps = episode_steps+1
                 # Store the transition in memory
                 # state.relative_position = state.relative_position.unsqueeze(0)
                 self.memory.push(state, action, next_state, reward)
@@ -264,7 +270,8 @@ class DeepQLearningAgent:
                 self.optimize_model(ep)
                 # Save the model
                 torch.save(self.policy_net.state_dict(), self.MODEL_FILE_NAME)
-            writer.add_scalar("episodeReward", episodeReward, ep)    
+            writer.add_scalar("episodeReward", episodeReward, ep)
+            writer.add_scalar("AverageReward", episodeReward/episode_steps, ep)        
             self.show_action_stats()
         writer.close()
 

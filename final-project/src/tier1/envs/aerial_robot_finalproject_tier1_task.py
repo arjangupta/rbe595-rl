@@ -108,6 +108,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
         self.depth_image = torch.zeros((1, 1024), device=self.device)
+        self.contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
+        self.contact_forces = gymtorch.wrap_tensor(self.contact_force_tensor).view(self.num_envs, bodies_per_env, 3)[:,
+                              0]
+        self.collisions = torch.zeros(self.num_envs, device=self.device)
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
