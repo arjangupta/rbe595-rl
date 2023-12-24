@@ -174,8 +174,6 @@ class AerialRobotFinalProjectTier2(BaseTask):
 
         start_pose = gymapi.Transform()
         # create env instance
-        pos = torch.tensor([0, 0, 0], device=self.device) #FIXME: not here in tier1 - in for loop instead
-        start_pose.p = gymapi.Vec3(*pos) #FIXME: not here in tier1 - in for loop instead
         self.env_spacing = self.cfg.env.env_spacing
         env_lower = gymapi.Vec3(-self.env_spacing, -
         self.env_spacing, -self.env_spacing)
@@ -201,13 +199,15 @@ class AerialRobotFinalProjectTier2(BaseTask):
         # orientation of the camera relative to the body
         local_transform.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
 
-        self.segmentation_counter = 0 #FIXME: not in tier1
+        self.segmentation_counter = 0 #FIXME: not in tier1 
 
         self.evh = None
 
         for i in range(self.num_envs):
             # create environment
             env_handle = self.gym.create_env(self.sim, env_lower, env_upper, int(np.sqrt(self.num_envs)))
+            pos = torch.tensor([0, 0, 0], device=self.device)
+            start_pose.p = gymapi.Vec3(*pos)
             # insert robot asset
             actor_handle = self.gym.create_actor(env_handle, robot_asset, start_pose, "robot", i,
                                                  self.cfg.robot_asset.collision_mask, 0)
@@ -234,8 +234,8 @@ class AerialRobotFinalProjectTier2(BaseTask):
 
             self.prepare_envs(env_handle, i)
 
-            self.envs.append(env_handle)
-            self.actor_handles.append(actor_handle)
+            # self.envs.append(env_handle)
+            # self.actor_handles.append(actor_handle)
 
         #             self.robot_body_props = self.gym.get_actor_rigid_body_properties(
         #                 env_handle, actor_handle) #FIXME this is tier1
@@ -413,54 +413,114 @@ class AerialRobotFinalProjectTier2(BaseTask):
         return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions
         
     def reset_idx(self, env_ids):
+        if 0 in env_ids:
+            print("\n\n\n RESETTING ENV 0 \n\n\n")
         num_resets = len(env_ids)
+        self.root_states[env_ids] = self.initial_root_states[env_ids]
+        self.root_states[env_ids,
+                         0:3] = 2.0*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        self.root_states[env_ids,
+                         7:10] = 0.2*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        self.root_states[env_ids,
+                         10:13] = 0.2*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
 
-        self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id)
+        self.root_states[env_ids, 3:7] = 0
+        self.root_states[env_ids, 6] = 1.0
 
+        self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
+        self.reset_buf[env_ids] = 1
+        self.progress_buf[env_ids] = 0
         self.env_asset_manager.randomize_pose()
-
-        #FIXME: this env asset stuff different than tier1
-
         self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
 
-        euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
-        self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1],
-                                                                          euler_angles[..., 2])
-        self.env_asset_root_states[env_ids, :, 7:13] = 0.0
+        # euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
+        # # TODO: enable check for config that it is zero obstacles
+        # # self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1], euler_angles[..., 2])
+        # # self.env_asset_root_states[env_ids, :, 7:13] = 0.0
 
-        # get environment lower and upper bounds
-        self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)
-        self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
 
-        # FIXME: not in tier1
+        # # get environment lower and upper bounds
+        # self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)+5.25
+        # self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
         # drone_pos_rand_sample = torch.rand((num_resets, 3), device=self.device)
-        #
-        # drone_positions = (self.env_upper_bound[env_ids] - self.env_lower_bound[env_ids] -
-        #                    0.50) * drone_pos_rand_sample + (self.env_lower_bound[env_ids] + 0.25)
 
-        # set drone positions that are sampled within environment bounds
+        # drone_positions = (self.env_upper_bound[env_ids] - self.env_lower_bound[env_ids] -
+        #                    0.50)*drone_pos_rand_sample + (self.env_lower_bound[env_ids]+ 0.25)
+
+
+        # # set drone positions that are sampled within environment bounds
 
         # self.root_states[env_ids,
-        # 0:3] = drone_positions
+        #                  0:3] = drone_positions
+        # self.root_states[env_ids,
+        #                  7:10] = 0.2*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        # self.root_states[env_ids,
+        #                  10:13] = 0.2*torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+
+        # self.root_states[env_ids, 3:6] = 0 # standard orientation, can be randomized
+        # self.root_states[env_ids, 6] = 1
+
+        # self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
+
+        # self.progress_buf[env_ids] = 0
+        # self.reset_buf[env_ids] = 1
+
+        print("\n\nResetting env\n\n")
+
+        self.last_reset_counter = self.counter
+
+
+
+
+
+        # num_resets = len(env_ids)
+
+        # self.env_asset_manager = AssetManager(self.cfg, self.sim_device_id)
+
+        # self.env_asset_manager.randomize_pose()
+
+        # #FIXME: this env asset stuff different than tier1
+
+        # self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
+
+        # euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
+        # self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1],
+        #                                                                   euler_angles[..., 2])
+        # self.env_asset_root_states[env_ids, :, 7:13] = 0.0
+
+        # # get environment lower and upper bounds
+        # self.env_lower_bound[env_ids] = self.env_asset_manager.env_lower_bound.diagonal(dim1=-2, dim2=-1)
+        # self.env_upper_bound[env_ids] = self.env_asset_manager.env_upper_bound.diagonal(dim1=-2, dim2=-1)
+
+        # # FIXME: not in tier1
+        # # drone_pos_rand_sample = torch.rand((num_resets, 3), device=self.device)
+        # #
+        # # drone_positions = (self.env_upper_bound[env_ids] - self.env_lower_bound[env_ids] -
+        # #                    0.50) * drone_pos_rand_sample + (self.env_lower_bound[env_ids] + 0.25)
+
+        # # set drone positions that are sampled within environment bounds
+
+        # # self.root_states[env_ids,
+        # # 0:3] = drone_positions
+        # # self.root_states[env_ids,
+        # # 7:10] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        # # self.root_states[env_ids,
+        # # 10:13] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+
+        # self.root_states[env_ids] = self.initial_root_states[env_ids]
+        # self.root_states[env_ids,
+        # 0:3] = 2.0 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
         # self.root_states[env_ids,
         # 7:10] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
         # self.root_states[env_ids,
         # 10:13] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
 
-        self.root_states[env_ids] = self.initial_root_states[env_ids]
-        self.root_states[env_ids,
-        0:3] = 2.0 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
-        self.root_states[env_ids,
-        7:10] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
-        self.root_states[env_ids,
-        10:13] = 0.2 * torch_rand_float(-1.0, 1.0, (num_resets, 3), self.device)
+        # self.root_states[env_ids, 3:7] = 0  # standard orientation, can be randomized #FIXME: changed from 3:6
+        # self.root_states[env_ids, 6] = 1
 
-        self.root_states[env_ids, 3:7] = 0  # standard orientation, can be randomized #FIXME: changed from 3:6
-        self.root_states[env_ids, 6] = 1
-
-        self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
-        self.progress_buf[env_ids] = 0
-        self.reset_buf[env_ids] = 1
+        # self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
+        # self.progress_buf[env_ids] = 0
+        # self.reset_buf[env_ids] = 1
 
         print("\n\nResetting env\n\n")
 
@@ -472,27 +532,14 @@ class AerialRobotFinalProjectTier2(BaseTask):
     def get_depth_image(self):
         return self.depth_image
 
-    def pre_physics_step(self, _position_increment):
+    def pre_physics_step(self, position):
 
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
         self.counter += 1
 
-        # Move the position_increment to the device
-        position_increment = _position_increment.to(self.device)
-
-        # Clamp the position_increment by looking at the action limits
-        position_increment = tensor_clamp(
-            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
-
-        # Increment the position with current position
-        position_increment = position_increment + self.root_positions[0]
-
-        # Increment the position with fixed coordinate
-        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
-
-        self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
+        self.action_input[:] = torch.cat([position, torch.tensor([0], device=self.device)])
 
         # clear position_increment for reset envs
         self.forces[:] = 0.0
@@ -644,7 +691,7 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
     if counter > -1:
-        ground_threshold = 0.15
+        ground_threshold = 0.20
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:

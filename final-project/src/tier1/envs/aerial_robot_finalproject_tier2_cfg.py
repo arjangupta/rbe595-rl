@@ -27,7 +27,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         num_actions = 4
         env_spacing = 1
         episode_length_s = 1.21e+6 # episode length in seconds (14 days)
-        num_control_steps_per_env_step = 50 # number of physics steps per env step
+        num_control_steps_per_env_step = 100 # number of physics steps per env step
         enable_onboard_cameras = True  # enable onboard cameras
         reset_on_collision = True  # reset environment when contact force on quadrotor is above a threshold
         create_ground_plane = True  # create a ground plane
@@ -117,7 +117,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         color = None
 
     class thin_asset_params(asset_state_params):
-        num_assets = 0
+        num_assets = 10
 
         collision_mask = 1  # objects with the same collision mask will not collide
 
@@ -141,7 +141,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         color = [170, 66, 66]
 
     class tree_asset_params(asset_state_params):
-        num_assets = 0
+        num_assets = 1
 
         collision_mask = 1  # objects with the same collision mask will not collide
 
@@ -165,7 +165,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         color = [70, 200, 100]
 
     class object_asset_params(asset_state_params):
-        num_assets = 1
+        num_assets = 5
 
         max_position_ratio = [0.95, 0.95, 0.95]  # min position as a ratio of the bounds
         min_position_ratio = [0.05, 0.05, 0.05]  # max position as a ratio of the bounds
@@ -314,8 +314,8 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         folder_path = f"{AERIAL_GYM_ROOT_DIR}/resources/models/environment_assets"
 
         include_asset_type = {
-            "thin": False,
-            "trees": False,
+            "thin": True,
+            "trees": True,
             "objects": True
         }
 
@@ -329,5 +329,5 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
 
         env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space
         env_lower_bound_max = [-5.0, -5.0, 0.0]  # lower bound for the environment space
-        env_upper_bound_min = [5.0, 5.0, 5.0]  # upper bound for the environment space
-        env_upper_bound_max = [5.0, 5.0, 5.0]  # upper bound for the environment space
+        env_upper_bound_min = [15.0, 15.0, 15.0]  # upper bound for the environment space
+        env_upper_bound_max = [15.0, 15.0, 15.0]  # upper bound for the environment space
