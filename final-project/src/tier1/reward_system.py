@@ -18,7 +18,7 @@ class QuadRewardSystem:
         self.delta_d_u = 1.0
 
         # Maximum deviation distance
-        self.d_max = 5.0
+        self.d_max = 14.0
 
         # Lower and upper limits on reward
         self.R_l = 0.0
