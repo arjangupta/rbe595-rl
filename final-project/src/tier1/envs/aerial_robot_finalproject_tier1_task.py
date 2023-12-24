@@ -435,12 +435,14 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # resets due to episode length
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
-    reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
-
+    print("reset1",reset)
+    reset = torch.where(torch.norm(root_positions, dim=1) > 35.0, ones, reset) # out of bounds for a norm distance of 20.0
+    print("reset2",reset)
     # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
     if counter > -1:
-        ground_threshold = 0.20
+        ground_threshold = 0.15
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
+        print("reset3",reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:
         drone_hit_ground = torch.zeros_like(reset_buf)

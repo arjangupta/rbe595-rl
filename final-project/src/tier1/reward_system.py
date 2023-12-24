@@ -18,7 +18,7 @@ class QuadRewardSystem:
         self.delta_d_u = 1.0
 
         # Maximum deviation distance
-        self.d_max = 14.0
+        self.d_max = 19.0
 
         # Lower and upper limits on reward
         self.R_l = 0.0
@@ -28,7 +28,7 @@ class QuadRewardSystem:
         self.R_dp = -0.5
 
         # Drastic punishment for collision
-        self.R_cp = -5.0
+        self.R_cp = -1.0
 
         # The drone's position the last time the rewards were evaluated
         self.last_position = None
