@@ -142,6 +142,7 @@ class AerialRobotFinalProjectTier2(BaseTask):
         self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
         self.depth_image = torch.zeros((1, 1024), device=self.device)
+        
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -246,6 +247,7 @@ class AerialRobotFinalProjectTier2(BaseTask):
         print("Total robot mass: ", self.robot_mass)
 
         print("\n\n\n\n\n ENVIRONMENT CREATED \n\n\n\n\n\n")
+
 
     def prepare_envs(self, env_handle, i):
 
@@ -430,9 +432,17 @@ class AerialRobotFinalProjectTier2(BaseTask):
         self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
         self.reset_buf[env_ids] = 1
         self.progress_buf[env_ids] = 0
-        self.env_asset_manager.randomize_pose()
-        self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
 
+
+        if self.counter%128==0:
+            self.env_asset_manager.randomize_pose()
+            self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
+            
+            euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
+            self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1],
+                                                                            euler_angles[..., 2])
+            self.env_asset_root_states[env_ids, :, 7:13] = 0.0
+            self.gym.set_actor_root_state_tensor(self.sim, self.root_tensor)
         # euler_angles = self.env_asset_manager.asset_pose_tensor[env_ids, :, 3:6]
         # # TODO: enable check for config that it is zero obstacles
         # # self.env_asset_root_states[env_ids, :, 3:7] = quat_from_euler_xyz(euler_angles[..., 0], euler_angles[..., 1], euler_angles[..., 2])

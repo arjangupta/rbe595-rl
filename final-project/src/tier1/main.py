@@ -45,6 +45,7 @@ class GymInterface:
         # Moving setpoint time counter
         self.moving_setpoint_time_counter = 0.0
         self.moving_setpoint_time_counter_increment = 0.5
+        self.env.reset_idx([0])
 
     def choose_new_goal_position(self):
         """Chooses a new goal position"""

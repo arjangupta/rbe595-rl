@@ -117,7 +117,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         color = None
 
     class thin_asset_params(asset_state_params):
-        num_assets = 10
+        num_assets = 0
 
         collision_mask = 1  # objects with the same collision mask will not collide
 
@@ -141,7 +141,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         color = [170, 66, 66]
 
     class tree_asset_params(asset_state_params):
-        num_assets = 1
+        num_assets = 0
 
         collision_mask = 1  # objects with the same collision mask will not collide
 
@@ -165,7 +165,7 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
         color = [70, 200, 100]
 
     class object_asset_params(asset_state_params):
-        num_assets = 5
+        num_assets = 10
 
         max_position_ratio = [0.95, 0.95, 0.95]  # min position as a ratio of the bounds
         min_position_ratio = [0.05, 0.05, 0.05]  # max position as a ratio of the bounds
@@ -327,7 +327,11 @@ class AerialRobotCfgFinalProjectTier2(BaseConfig):
             "right_wall": False,
             "bottom_wall": False}
 
+        # env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space
+        # env_lower_bound_max = [-5.0, -5.0, 0.0]  # lower bound for the environment space
+        # env_upper_bound_min = [15.0, 15.0, 5.0]  # upper bound for the environment space
+        # env_upper_bound_max = [15.0, 15.0, 5.0]  # upper bound for the environment space
         env_lower_bound_min = [-5.0, -5.0, 0.0]  # lower bound for the environment space
         env_lower_bound_max = [-5.0, -5.0, 0.0]  # lower bound for the environment space
-        env_upper_bound_min = [15.0, 15.0, 15.0]  # upper bound for the environment space
-        env_upper_bound_max = [15.0, 15.0, 15.0]  # upper bound for the environment space
+        env_upper_bound_min = [20.0, 20.0, 3.0]  # upper bound for the environment space
+        env_upper_bound_max = [20.0, 20.0, 3.0]  # upper bound for the environment space
