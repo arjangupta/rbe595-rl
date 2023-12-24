@@ -50,7 +50,7 @@ class DeepQLearningAgent:
         if self.num_episodes==1000:
             self.EPS_DECAY = 175.0 # use for 1000 num_episodes
         if self.num_episodes==2000:
-            self.EPS_DECAY = 250.0 # use for 1000 num_episodes
+            self.EPS_DECAY = 300.0 # use for 1000 num_episodes
         
         # writer.add_hparams({"BATCH_SIZE" : self.BATCH_SIZE})
         # writer.add_hparams({"LR" : self.LR})
