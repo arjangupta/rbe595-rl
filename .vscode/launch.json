@@ -40,12 +40,40 @@
             "args": ["--task=tier1"],
             "justMyCode": true
         },
+        
         {
-            "name": "Train: Tier2",
+            "name": "Train: Tier2-100",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",
-            "args": ["--train","--task=tier2"],
+            "args": ["--train","--task=tier2","--num_episodes=100"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Train: Tier2-500",
+            "type": "python",
+            "request": "launch",
+            "program": "./final-project/src/tier1/main.py",
+            "args": ["--train","--task=tier2","--num_episodes=500"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Train: Tier2-1000",
+            "type": "python",
+            "request": "launch",
+            "program": "./final-project/src/tier1/main.py",
+            "args": ["--train","--task=tier2","--num_episodes=1000"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Train: Tier2-2000",
+            "type": "python",
+            "request": "launch",
+            "program": "./final-project/src/tier1/main.py",
+            "args": ["--train","--task=tier2","--num_episodes=2000"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
