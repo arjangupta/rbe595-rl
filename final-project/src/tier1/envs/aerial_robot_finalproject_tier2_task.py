@@ -133,7 +133,7 @@ class AerialRobotFinalProjectTier2(BaseTask):
             self.gym.viewer_camera_look_at(self.viewer, None, cam_pos, cam_target)
 
         # To save images
-        self.save_images = False
+        self.save_images = True
 
         # Action display fixed coordinate
         self.action_display_fixed_coordinate = torch.tensor([[5, 5, 5]], device=self.device, dtype=torch.float32)
@@ -347,7 +347,7 @@ class AerialRobotFinalProjectTier2(BaseTask):
         self.compute_observations()
         self.compute_reward()
 
-        save_images_every = 500
+        save_images_every = 5000
 
         # Save depth image to file
         if self.save_images and self.counter % save_images_every == 0:
@@ -434,7 +434,7 @@ class AerialRobotFinalProjectTier2(BaseTask):
         self.progress_buf[env_ids] = 0
 
 
-        if self.counter%128==0:
+        if self.counter%100==0:
             self.env_asset_manager.randomize_pose()
             self.env_asset_root_states[env_ids, :, 0:3] = self.env_asset_manager.asset_pose_tensor[env_ids, :, 0:3]
             
