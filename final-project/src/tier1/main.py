@@ -2,8 +2,6 @@ import isaacgym
 from aerial_gym.envs import *
 from aerial_gym.utils import get_args, task_registry
 import torch
-# from aeriel_robot_cfg_final_project_tier1 import AerialRobotCfgFinalProjectTier1
-# from aerial_robot_finalproject_tier1_task import AerialRobotFinalProjectTier1
 from action_primitives import QuadActionPrimitives
 from deep_q_learning import DeepQLearningAgent, State
 from reward_system import QuadRewardSystem
@@ -15,10 +13,6 @@ class GymInterface:
         self.debug = debug
         # Set trace
         self.trace = False
-        # Declare environment
-        # task_registry.register( "quad_for_final_project", AerialRobotFinalProjectTier1, AerialRobotCfgFinalProjectTier1())
-        # Create environment
-        # self.env, self.env_cfg = task_registry.make_env("quad_for_final_project")
         self.env=env
         self.env_cfg=env_cfg
 

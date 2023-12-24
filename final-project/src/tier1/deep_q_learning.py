@@ -48,9 +48,9 @@ class DeepQLearningAgent:
         if self.num_episodes==500:
             self.EPS_DECAY = 105.0 # use for 500 num_episodes
         if self.num_episodes==1000:
-            self.EPS_DECAY = 200.0 # use for 1000 num_episodes
+            self.EPS_DECAY = 175.0 # use for 1000 num_episodes
         if self.num_episodes==2000:
-            self.EPS_DECAY = 400.0 # use for 1000 num_episodes
+            self.EPS_DECAY = 250.0 # use for 1000 num_episodes
         
         # writer.add_hparams({"BATCH_SIZE" : self.BATCH_SIZE})
         # writer.add_hparams({"LR" : self.LR})
@@ -202,12 +202,12 @@ class DeepQLearningAgent:
         
 
     def train(self):
-        
+        self.gym_iface.choose_new_goal_position()
         epoch = 0
         epochs_sincelast_optimize=0
         for ep in range(self.num_episodes):
-            if ep % 2 == 0:
-                self.gym_iface.choose_new_goal_position()
+            # if ep % 2 == 0:
+            #     self.gym_iface.choose_new_goal_position()
             print(f"\n\n\nDeep-QL Training episode: {ep+1}\n")
             print(f"Goal position: {self.gym_iface.goal_position}\n")
             print(f"Start position: {self.gym_iface.get_current_position()}\n")
@@ -276,6 +276,7 @@ class DeepQLearningAgent:
         writer.close()
 
     def run(self):
+        self.gym_iface.choose_new_goal_position()
         self.no_random_actions=True
         num_episodes = 10
         num_time_steps = 100
@@ -284,8 +285,8 @@ class DeepQLearningAgent:
             num_time_steps = 1000
         epoch = 0
         for ep in range(num_episodes):
-            if ep % 2 == 0:
-                self.gym_iface.choose_new_goal_position()
+            # if ep % 2 == 0:
+            #     self.gym_iface.choose_new_goal_position()
             print(f"\n\n\nDeep-QL Execution episode: {ep+1}\n")
             print(f"Goal position: {self.gym_iface.goal_position}\n")
             state = State(
