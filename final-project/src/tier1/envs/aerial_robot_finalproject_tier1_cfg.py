@@ -20,7 +20,7 @@ class AerialRobotCfgFinalProjectTier1(BaseConfig):
         num_actions = 4
         env_spacing = 1
         episode_length_s = 1.21e+6 # episode length in seconds (14 days)
-        num_control_steps_per_env_step = 50 # number of physics steps per env step
+        num_control_steps_per_env_step = 100 # number of physics steps per env step
         enable_onboard_cameras = True  # enable onboard cameras
 
     class control:

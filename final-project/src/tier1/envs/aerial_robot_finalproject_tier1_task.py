@@ -439,7 +439,7 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
     if counter > -1:
-        ground_threshold = 0.15
+        ground_threshold = 0.20
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:
