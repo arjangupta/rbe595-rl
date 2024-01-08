@@ -20,7 +20,7 @@ class AerialRobotCfgFinalProjectTier1(BaseConfig):
         num_actions = 4
         env_spacing = 1
         episode_length_s = 1.21e+6 # episode length in seconds (14 days)
-        num_control_steps_per_env_step = 1 # number of physics steps per env step
+        num_control_steps_per_env_step = 100 # number of physics steps per env step
         enable_onboard_cameras = True  # enable onboard cameras
 
     class control:
@@ -66,10 +66,10 @@ class AerialRobotCfgFinalProjectTier1(BaseConfig):
     class viewer:
         ref_env = 0
         pos = [-5, -5, 4]  # [m]
-        lookat = [0, 0, 0]  # [m]
+        lookat = [1, 1, 1]  # [m]
 
     class sim:
-        dt =  0.01
+        dt =  0.02
         substeps = 1
         gravity = [0., 0. , -9.81]  # [m/s^2]
         up_axis = 1  # 0 is y, 1 is z
