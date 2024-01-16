@@ -703,6 +703,8 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
     if counter > -1:
         ground_threshold = 0.15
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
+        reset = torch.where(root_positions[:, 0] >= 20.0, ones, reset)
+        reset = torch.where(root_positions[:, 1] >= 20.0, ones, reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:
         drone_hit_ground = torch.zeros_like(reset_buf)
