@@ -53,7 +53,7 @@ class GymInterface:
         # self.goal_position = self.goal_position_options[
         #     torch.randint(0, self.goal_position_options.shape[0], (1,)).item()]
         # Just choose a coordinate along the x-axis
-        self.goal_position = torch.tensor([19.0, 19.0, .2],
+        self.goal_position = torch.tensor([19.0, 0.0, 1],
         # self.goal_position = torch.tensor([13.0, 13.0, 0.2],
                                           dtype=torch.float32, device=self.device)
         if self.debug:
