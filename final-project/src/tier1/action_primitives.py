@@ -30,6 +30,7 @@ class QuadActionPrimitives:
         # Manually generate the upward straight line, then rotate it
         # -45 degrees around the +ve x-axis 7 times
         matrix = np.zeros((8, 3, 2))
+        # Force resulting diagonal lines to reach 1.0
         matrix[0] = np.matrix(
             [[0.0, 0.0],
             [0.0, 0.0],
@@ -44,6 +45,7 @@ class QuadActionPrimitives:
                 print("matrix" + str(i+1))
                 print(matrix[i])
         # Convert to bezier curve
+        # Clip resulting matrices at -1 and +1 to match paper
         matrix[matrix<-1]=-1
         matrix[matrix>1]=1
         self.convert_matrices_to_bezier(matrix, degree=1)
@@ -52,6 +54,7 @@ class QuadActionPrimitives:
         # Manually generate the upward curved line, then rotate it
         # -45 degrees around the +ve x-axis 7 times
         matrix = np.zeros((8, 3, 4))
+        # Force resulting diagonal lines to reach 1.0 and -1.0
         matrix[0] = np.matrix(
             [[0.0, 0.5, 0.5, 1.0],
             [0.0, 0.0, 0.0, 0.0],
@@ -66,6 +69,7 @@ class QuadActionPrimitives:
                 print("matrix" + str(i+10))
                 print(matrix[i])
         # Convert to bezier curve
+        # Clip resulting matrices at -1 and +1 to match paper
         matrix[matrix<-1]=-1
         matrix[matrix>1]=1
         self.convert_matrices_to_bezier(matrix, degree=3)
