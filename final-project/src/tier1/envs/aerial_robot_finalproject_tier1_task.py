@@ -10,6 +10,7 @@ import numpy as np
 import os
 import torch
 import torchvision
+from torchvision.transforms import transforms
 import xml.etree.ElementTree as ET
 
 from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
@@ -17,9 +18,10 @@ from aerial_gym import AERIAL_GYM_ROOT_DIR, AERIAL_GYM_ROOT_DIR
 from isaacgym import gymtorch, gymapi
 from isaacgym.torch_utils import *
 from aerial_gym.envs.base.base_task import BaseTask
-from aeriel_robot_cfg_final_project import AerialRobotCfgFinalProjectTier1 as AerialRobotCfg
+from .aerial_robot_finalproject_tier1_cfg import AerialRobotCfgFinalProjectTier1 as AerialRobotCfg
 from aerial_gym.envs.controllers.controller import Controller
 from aerial_gym.utils.helpers import asset_class_to_AssetOptions
+from PIL import Image as im
 
 class AerialRobotFinalProjectTier1(BaseTask):
 
@@ -106,6 +108,10 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.drone_hit_ground_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
 
         self.depth_image = torch.zeros((1, 1024), device=self.device)
+        self.contact_force_tensor = self.gym.acquire_net_contact_force_tensor(self.sim)
+        self.contact_forces = gymtorch.wrap_tensor(self.contact_force_tensor).view(self.num_envs, bodies_per_env, 3)[:,
+                              0]
+        self.collisions = torch.zeros(self.num_envs, device=self.device)
 
     def create_sim(self):
         self.sim = self.gym.create_sim(
@@ -196,16 +202,35 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.gym.end_access_image_tensors(self.sim)
         return
     
+    def check_collisions(self):
+        ones = torch.ones((self.num_envs), device=self.device)
+        zeros = torch.zeros((self.num_envs), device=self.device)
+        self.collisions[:] = 0
+        self.collisions = torch.where(torch.norm(self.contact_forces, dim=1) > 0.1, ones, zeros)
+
     def dump_images(self):
         for env_id in range(self.num_envs):
             # the depth values are in -ve z axis, so we need to flip it to positive
             self.full_camera_array[env_id] = -self.camera_tensors[env_id]
         return
 
-    def step(self, position_increment):
+    def step(self, _position_increment):
+        position_increment = _position_increment.to(self.device)
+
+        # Clamp the position_increment by looking at the action limits
+        position_increment = tensor_clamp(
+            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
+        
+        # Increment the position with current position
+        new_position = position_increment + self.root_positions[0]
+        new_position.to(self.device)
+        print("new_position",new_position)
+        # Increment the position with fixed coordinate
+        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
+        
         # step physics and render each frame
         for i in range(self.cfg.env.num_control_steps_per_env_step):
-            self.pre_physics_step(position_increment)
+            self.pre_physics_step(new_position)
             self.gym.simulate(self.sim)
             # NOTE: as per the isaacgym docs, self.gym.fetch_results must be called after self.gym.simulate, but not having it here seems to work fine
             # it is called in the render function.
@@ -217,6 +242,7 @@ class AerialRobotFinalProjectTier1(BaseTask):
         self.progress_buf += 1
         self.compute_observations()
         self.compute_reward()
+        self.check_collisions()
 
         save_images_every = 500
 
@@ -234,25 +260,41 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
             # The given depth image has shape (270, 480), but we need (1, 1024)
             # So, first we need to scale it to 32x32 on the GPU
-            depth_im = depth_im.unsqueeze(0).unsqueeze(0)
-            depth_im = torch.nn.functional.interpolate(depth_im, size=(32, 32), mode='bilinear', align_corners=False)
+            depth_im_pytorch = depth_im.unsqueeze(0).unsqueeze(0)
+            depth_im_pytorch = torch.nn.functional.interpolate(depth_im_pytorch, size=(32, 32), mode='bilinear', align_corners=False)
 
             # Now, the issue is that the depth image has many nan values
             # So, we need to replace them with 0.0
-            depth_im = torch.where(torch.isnan(depth_im), torch.zeros_like(depth_im), depth_im)
+            depth_im_pytorch = torch.where(torch.isnan(depth_im_pytorch), torch.zeros_like(depth_im_pytorch), depth_im_pytorch)
 
             # Also, the 0-1 range is flipped, so we need to flip it back
-            depth_im = 1.0 - depth_im
+            depth_im_pytorch = 1.0 - depth_im_pytorch
 
             # print("depth_im:", depth_im)
+            depth_im=depth_im.detach().cpu().numpy()
+            depth_im[depth_im == -np.inf] = 0
+            depth_im[depth_im < -10] = -10
+            normalized_depth = -255.0*(depth_im/np.min(depth_im + 1e-4))
+            normalized_depth_image = im.fromarray(normalized_depth.astype(np.uint8), mode="L")
+            
+            normalized_depth_image_resized = normalized_depth_image.resize((32,32))
+            depth_im=normalized_depth_image_resized
 
             # Save the 32x32 depth image to a file after certain number of iterations
             if self.save_images and self.counter % save_images_every == 0:
-                torchvision.utils.save_image(depth_im, "depth_image_tensor_"+str(self.counter)+".png")
+                torchvision.utils.save_image(depth_im_pytorch, "depth_image_tensor_"+str(self.counter)+".png")
+                depth_im.save("depth_env_32x32_%d.jpg"%(self.counter))
+                normalized_depth_image.save("depth_env__%d.jpg"%(self.counter))
 
             # Convert to tensor from numpy
             # Now, we can flatten it to (1, 1024)
-            self.depth_image = depth_im.flatten()
+            transform_norm = transforms.Compose([
+                transforms.Normalize([0.25], [0.25])
+            ])
+            pil_to_tensor = transforms.ToTensor()(depth_im).unsqueeze_(0)
+            d1=transform_norm(pil_to_tensor)
+
+            self.depth_image = pil_to_tensor.flatten()
             # print("self.depth_image:", self.depth_image)
 
         reset_env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
@@ -261,7 +303,8 @@ class AerialRobotFinalProjectTier1(BaseTask):
 
         self.time_out_buf = self.progress_buf > self.max_episode_length
         self.extras["time_outs"] = self.time_out_buf
-        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf
+        # return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf
+        return self.obs_buf, self.privileged_obs_buf, self.rew_buf, self.reset_buf, self.extras, self.drone_hit_ground_buf, self.collisions
 
     def reset_idx(self, env_ids):
         num_resets = len(env_ids)
@@ -290,26 +333,16 @@ class AerialRobotFinalProjectTier1(BaseTask):
     def get_depth_image(self):
         return self.depth_image
 
-    def pre_physics_step(self, _position_increment):
+    def pre_physics_step(self, position):
         # resets
         if self.counter % 250 == 0:
             print("self.counter:", self.counter)
         self.counter += 1
 
         # Move the position_increment to the device
-        position_increment = _position_increment.to(self.device)
-
-        # Clamp the position_increment by looking at the action limits
-        position_increment = tensor_clamp(
-            position_increment, self.action_lower_limits[:3], self.action_upper_limits[:3])
         
-        # Increment the position with current position
-        position_increment = position_increment + self.root_positions[0]
 
-        # Increment the position with fixed coordinate
-        # position_increment = position_increment + self.action_display_fixed_coordinate[0]
-
-        self.action_input[:] = torch.cat([position_increment, torch.tensor([0], device=self.device)])
+        self.action_input[:] = torch.cat([position, torch.tensor([0], device=self.device)])
 
         # clear position_increment for reset envs
         self.forces[:] = 0.0
@@ -402,12 +435,16 @@ def compute_quadcopter_reward(root_positions, root_quats, root_linvels, root_ang
 
     # resets due to episode length
     reset = torch.where(progress_buf >= max_episode_length - 1, ones, die)
-    reset = torch.where(torch.norm(root_positions, dim=1) > 20.0, ones, reset) # out of bounds for a norm distance of 20.0
-
+    # print("reset1",reset)
+    reset = torch.where(torch.norm(root_positions, dim=1) > 35.0, ones, reset) # out of bounds for a norm distance of 20.0
+    # print("reset2",reset)
     # Above a certain self.counter number, if the z coordinate is too close to ground, then reset
-    if counter > 500:
-        ground_threshold = 0.25
+    if counter > -1:
+        ground_threshold = 0.15
         reset = torch.where(root_positions[:, 2] <= ground_threshold, ones, reset)
+        reset = torch.where(root_positions[:, 0] >= 20.0, ones, reset)
+        reset = torch.where(root_positions[:, 1] >= 20.0, ones, reset)
+        # print("reset3",reset)
         drone_hit_ground = torch.where(root_positions[:, 2] <= ground_threshold, ones, die)
     else:
         drone_hit_ground = torch.zeros_like(reset_buf)

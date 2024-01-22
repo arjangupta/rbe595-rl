@@ -30,10 +30,11 @@ class QuadActionPrimitives:
         # Manually generate the upward straight line, then rotate it
         # -45 degrees around the +ve x-axis 7 times
         matrix = np.zeros((8, 3, 2))
+        # Force resulting diagonal lines to reach 1.0
         matrix[0] = np.matrix(
             [[0.0, 0.0],
             [0.0, 0.0],
-            [0.0, 1.0]]
+            [0.0, 1.425]]
         )
         if self.debug:
             print("matrix1")
@@ -44,16 +45,20 @@ class QuadActionPrimitives:
                 print("matrix" + str(i+1))
                 print(matrix[i])
         # Convert to bezier curve
+        # Clip resulting matrices at -1 and +1 to match paper
+        matrix[matrix<-1]=-1
+        matrix[matrix>1]=1
         self.convert_matrices_to_bezier(matrix, degree=1)
     
     def curved_line_rotations(self):
         # Manually generate the upward curved line, then rotate it
         # -45 degrees around the +ve x-axis 7 times
         matrix = np.zeros((8, 3, 4))
+        # Force resulting diagonal lines to reach 1.0 and -1.0
         matrix[0] = np.matrix(
             [[0.0, 0.5, 0.5, 1.0],
             [0.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 1.0]],
+            [0.0, 0.0, 1.45, 1.45]],
         )
         if self.debug:
             print("matrix10")
@@ -64,6 +69,9 @@ class QuadActionPrimitives:
                 print("matrix" + str(i+10))
                 print(matrix[i])
         # Convert to bezier curve
+        # Clip resulting matrices at -1 and +1 to match paper
+        matrix[matrix<-1]=-1
+        matrix[matrix>1]=1
         self.convert_matrices_to_bezier(matrix, degree=3)
 
     def generate_ninth_action(self):
@@ -114,13 +122,14 @@ if __name__ == "__main__":
     # Test
     qap = QuadActionPrimitives(debug=False)
     # Choose an action at random
-    print("Picking an action at random")
-    action = np.random.randint(0, qap.NUM_ACTIONS)
-    print("action: " + str(action))
-    # Get sampled curve
-    points = qap.get_sampled_curve(action)
-    print("points:")
-    print(points)
-    # Print first column
-    print("points[:,0]")
-    print(points[:,0])
+    for action in range(qap.NUM_ACTIONS):
+        #print("Picking an action at random")
+        #action = np.random.randint(0, qap.NUM_ACTIONS)
+        print("action: " + str(action))
+        # Get sampled curve
+        points = qap.get_sampled_curve(action)
+        print("points:")
+        print(points)
+        # Print last column
+        print("points[:,4]")
+        print(points[:,4])
