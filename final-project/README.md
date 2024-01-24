@@ -24,6 +24,7 @@ Modify the helpers.py file in aerial gym with the following parameters:
 def get_args(additional_parameters=[]):
     custom_parameters = [
         {"name": "--train", "action": "store_true", "default": False, "help": "Used by main()"},
+        {"name": "--debug", "action": "store_true", "default": False, "help": "Used by main to enable graphics and debug prints"},
         {"name": "--num_episodes", "type": int, "default": "10", "help": "Number of episodes for training to run"},
         {"name": "--task", "type": str, "default": "tier1", "help": "Resume training or start testing from a checkpoint. Overrides config file if provided."},
         {"name": "--headless", "action": "store_true", "default": False, "help": "Force display off at all times"},

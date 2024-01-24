@@ -240,7 +240,7 @@ class DeepQLearningAgent:
                 #     print("reward: ", reward)
                 #     print("next_state: ", next_state)
                 # else:
-                print("reward: ", reward)
+                if self.debug: print("reward: ", reward)
                 episodeReward = episodeReward + reward
                 episode_steps = episode_steps+1
                 # Store the transition in memory
@@ -309,7 +309,8 @@ class DeepQLearningAgent:
                 else:
                     next_state = observation
                 
-                print("reward: ", reward)
+                if self.debug:
+                    print("reward: ", reward)
 
                 # Move to the next state
                 state = next_state

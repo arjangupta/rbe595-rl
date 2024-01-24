@@ -56,8 +56,14 @@ class GymInterface:
         self.goal_position = torch.tensor([19.0, 0.0, 1],
         # self.goal_position = torch.tensor([13.0, 13.0, 0.2],
                                           dtype=torch.float32, device=self.device)
+        
         if self.debug:
+            initial_position = isaacgym.gymapi.Vec3(self.initial_position[0], self.initial_position[1], self.initial_position[2])
+            goal_position = isaacgym.gymapi.Vec3(self.goal_position[0], self.goal_position[1], self.goal_position[2])
             print("New goal position: ", self.goal_position)
+            green = isaacgym.gymapi.Vec3(0,1,0)
+            isaacgym.gymutil.draw_line(initial_position, goal_position,green,self.env.gym,self.env.viewer,self.env.envs[0])
+            
 
     def step(self, action):
         
@@ -65,13 +71,20 @@ class GymInterface:
         self.reward_function.dt_start = self.get_distance_from_moving_setpoint()
         if self.debug:
             print("dt_start: ", self.reward_function.dt_start)
-        
-        print("Start Position: ", self.get_current_position())
-        print("action: ", action)
+            print("Start Position: ", self.get_current_position())
+            initial_position = self.get_current_position().clone()
+            initial_position = isaacgym.gymapi.Vec3(initial_position[0], initial_position[1], initial_position[2])
+            print("action: ", action)
         
         # Get action bezier curve as sampled points
         num_samples = 5  # THIS MUST NEVER BE LESS THAN 3 OR THE NN WILL FAIL
         points = self.action_primitives.get_sampled_curve(action, num_samples=5)
+        if self.debug:
+            goal_position = isaacgym.gymapi.Vec3(initial_position.x+points[0, 4], initial_position.y+points[1, 4], initial_position.z+points[2, 4])
+            red = isaacgym.gymapi.Vec3(1,0,0)
+            isaacgym.gymutil.draw_line(initial_position, goal_position,red,self.env.gym,self.env.viewer,self.env.envs[0])
+            # isaacgym.gymutil.line.clear()
+            print("SubGoal Position: ", goal_position)
         # Step through all points
         reset = False
         collision = False
@@ -85,6 +98,7 @@ class GymInterface:
                     print("reset_ret:",reset_ret)
                     reset = True
                     self.moving_setpoint_time_counter = 0
+                    
                     if hit_ground_ret:
                         print("Drone hit ground!")
                         collision = True
@@ -97,7 +111,8 @@ class GymInterface:
                 self.image_set[i_sample - num_samples + 3] = self.env.get_depth_image()
             if reset:
                 break
-        print("End Position: ", self.get_current_position())
+        
+        
         self.moving_setpoint_time_counter += self.moving_setpoint_time_counter_increment
         # Capture ending relative position
         self.reward_function.dt_end = self.get_distance_from_moving_setpoint()
@@ -106,10 +121,12 @@ class GymInterface:
         if self.check_if_near_goal():
             near_goal = True
             print("Reached goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            print("Final position: ", self.get_current_position())
+            if self.debug: print("Final position: ", self.get_current_position())
+        
         if self.debug:
             print("dt_end: ", self.reward_function.dt_end)
             print("Current position: ", self.get_current_position())
+            print("End Position: ", self.get_current_position())
         return self.get_observation(), self.reward_function.determine_reward(collision,
                                                                              self.get_current_position()), reset, near_goal
 
@@ -188,6 +205,7 @@ class GymInterface:
         moving_setpoint[0] = moving_setpoint[0] + self.moving_setpoint_time_counter
         relative_pos = moving_setpoint  - current_position
         if self.debug:
+            print("moving_setpoint", moving_setpoint)
             print("relative_pos: ", relative_pos)
         return relative_pos
 
@@ -200,7 +218,10 @@ class GymInterface:
 
 def main(args):
     env, env_cfg = task_registry.make_env(name=args.task, args=args)
-    gym_iface = GymInterface(env,env_cfg,debug=False)
+    debug=False
+    debug=args.debug
+    gym_iface = GymInterface(env,env_cfg,debug=debug)
+
     dql_agent = DeepQLearningAgent(gym_iface,args.num_episodes)
     if args.train:
         dql_agent.train()

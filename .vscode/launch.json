@@ -40,12 +40,12 @@
             "justMyCode": true
         },
         {
-            "name": "Run: Tier1",
+            "name": "Run: Tier1  DEBUG",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",
             "console": "integratedTerminal",
-            "args": ["--task=tier1"],
+            "args": ["--task=tier1", "--debug"],
             "justMyCode": true
         },
         
@@ -86,12 +86,12 @@
             "justMyCode": true
         },
         {
-            "name": "Run: Tier2",
+            "name": "Run: Tier2 DEBUG",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",
             "console": "integratedTerminal",
-            "args": ["--task=tier2"],
+            "args": ["--task=tier2", "--debug"],
             "justMyCode": true
         },
     ]
