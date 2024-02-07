@@ -40,6 +40,7 @@ from PIL import Image as im
 class AerialRobotFinalProjectTier2(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
+        self.debug = False
         self.cfg = cfg
 
         # Override num envs to 1
@@ -545,8 +546,9 @@ class AerialRobotFinalProjectTier2(BaseTask):
     def pre_physics_step(self, position):
 
         # resets
-        if self.counter % 250 == 0:
-            print("self.counter:", self.counter)
+        if self.debug:
+            if self.counter % 250 == 0:
+                print("self.counter:", self.counter)
         self.counter += 1
 
         self.action_input[:] = torch.cat([position, torch.tensor([0], device=self.device)])

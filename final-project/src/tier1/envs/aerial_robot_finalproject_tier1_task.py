@@ -26,6 +26,7 @@ from PIL import Image as im
 class AerialRobotFinalProjectTier1(BaseTask):
 
     def __init__(self, cfg: AerialRobotCfg, sim_params, physics_engine, sim_device, headless):
+        self.debug = False
         self.cfg = cfg
 
         # Override num_envs to 1
@@ -334,9 +335,11 @@ class AerialRobotFinalProjectTier1(BaseTask):
         return self.depth_image
 
     def pre_physics_step(self, position):
+        
         # resets
-        if self.counter % 250 == 0:
-            print("self.counter:", self.counter)
+        if self.debug:
+            if self.counter % 250 == 0:
+                print("self.counter:", self.counter)
         self.counter += 1
 
         # Move the position_increment to the device

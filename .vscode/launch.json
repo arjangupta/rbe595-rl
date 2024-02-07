@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run No Args-Default-Tier1",
+            "type": "python",
+            "request": "launch",
+            "program": "./final-project/src/tier1/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "Train: Tier1-100",
             "type": "python",
             "request": "launch",
@@ -32,12 +40,12 @@
             "justMyCode": true
         },
         {
-            "name": "Run: Tier1",
+            "name": "Run: Tier1  DEBUG",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",
             "console": "integratedTerminal",
-            "args": ["--task=tier1"],
+            "args": ["--task=tier1", "--debug"],
             "justMyCode": true
         },
         
@@ -78,12 +86,12 @@
             "justMyCode": true
         },
         {
-            "name": "Run: Tier2",
+            "name": "Run: Tier2 DEBUG",
             "type": "python",
             "request": "launch",
             "program": "./final-project/src/tier1/main.py",
             "console": "integratedTerminal",
-            "args": ["--task=tier2"],
+            "args": ["--task=tier2", "--debug"],
             "justMyCode": true
         },
     ]
