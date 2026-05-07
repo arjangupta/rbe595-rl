@@ -50,4 +50,7 @@ slprj/
 
 *.zip
 
+*.pth
+
+runs/
 
